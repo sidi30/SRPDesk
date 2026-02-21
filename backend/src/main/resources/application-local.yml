@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/lexsecura
+    username: lexsecura
+    password: lexsecura
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/lexsecura
+          jwk-set-uri: http://localhost:8180/realms/lexsecura/protocol/openid-connect/certs
+
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+app:
+  cors:
+    allowed-origins: http://localhost:3000,http://localhost:5173
+  s3:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket: evidences
+
+logging:
+  level:
+    com.lexsecura: DEBUG
+    org.springframework.security: DEBUG

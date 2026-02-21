@@ -1,0 +1,1122 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.6.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "serialNumber": "urn:uuid:7f8e9d0c-1b2a-3c4d-5e6f-789012345678",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-02-21T09:30:00Z",
+    "tools": {
+      "components": [
+        {
+          "type": "application",
+          "group": "org.cyclonedx",
+          "name": "cyclonedx-maven-plugin",
+          "version": "2.9.1",
+          "externalReferences": [
+            {
+              "type": "website",
+              "url": "https://github.com/CycloneDX/cyclonedx-maven-plugin"
+            }
+          ]
+        },
+        {
+          "type": "application",
+          "name": "cdxgen",
+          "version": "10.10.7",
+          "publisher": "CycloneDX",
+          "externalReferences": [
+            {
+              "type": "website",
+              "url": "https://github.com/CycloneDX/cdxgen"
+            }
+          ]
+        }
+      ]
+    },
+    "authors": [
+      {
+        "name": "NovaSoft Engineering",
+        "email": "engineering@novasoft.example.com"
+      }
+    ],
+    "component": {
+      "bom-ref": "novasoft-cloudhr",
+      "type": "application",
+      "name": "CloudHR Platform",
+      "version": "2.5.0",
+      "group": "com.novasoft",
+      "description": "Plateforme SaaS de gestion des ressources humaines avec modules paie, recrutement et formation",
+      "purl": "pkg:generic/novasoft/cloudhr-platform@2.5.0",
+      "licenses": [
+        {
+          "license": {
+            "name": "Proprietary - NovaSoft"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "NovaSoft SAS",
+        "url": [
+          "https://www.novasoft.example.com"
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "website",
+          "url": "https://www.novasoft.example.com/cloudhr"
+        },
+        {
+          "type": "documentation",
+          "url": "https://docs.novasoft.example.com/cloudhr/2.5.0"
+        },
+        {
+          "type": "vcs",
+          "url": "https://gitlab.novasoft.example.com/platform/cloudhr"
+        }
+      ]
+    },
+    "manufacturer": {
+      "name": "NovaSoft SAS",
+      "url": [
+        "https://www.novasoft.example.com"
+      ],
+      "contact": [
+        {
+          "name": "Équipe Sécurité Produit",
+          "email": "security@novasoft.example.com",
+          "phone": "+33-1-23-45-67-89"
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "bom-ref": "cloudhr-backend",
+      "type": "application",
+      "name": "cloudhr-backend",
+      "version": "2.5.0",
+      "group": "com.novasoft",
+      "description": "API REST backend Java - Spring Boot",
+      "purl": "pkg:maven/com.novasoft/cloudhr-backend@2.5.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "Proprietary - NovaSoft"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "NovaSoft SAS"
+      }
+    },
+    {
+      "bom-ref": "spring-boot-starter-web",
+      "type": "framework",
+      "name": "spring-boot-starter-web",
+      "version": "3.3.5",
+      "group": "org.springframework.boot",
+      "description": "Starter pour la construction d'applications web avec Spring MVC",
+      "scope": "required",
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-web@3.3.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "VMware, Inc.",
+        "url": [
+          "https://spring.io"
+        ]
+      },
+      "externalReferences": [
+        {
+          "type": "vcs",
+          "url": "https://github.com/spring-projects/spring-boot"
+        }
+      ]
+    },
+    {
+      "bom-ref": "spring-web",
+      "type": "library",
+      "name": "spring-web",
+      "version": "6.1.14",
+      "group": "org.springframework",
+      "scope": "required",
+      "purl": "pkg:maven/org.springframework/spring-web@6.1.14",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "VMware, Inc.",
+        "url": [
+          "https://spring.io"
+        ]
+      }
+    },
+    {
+      "bom-ref": "spring-webmvc",
+      "type": "library",
+      "name": "spring-webmvc",
+      "version": "6.1.14",
+      "group": "org.springframework",
+      "scope": "required",
+      "purl": "pkg:maven/org.springframework/spring-webmvc@6.1.14",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "VMware, Inc."
+      }
+    },
+    {
+      "bom-ref": "spring-boot-starter-data-jpa",
+      "type": "framework",
+      "name": "spring-boot-starter-data-jpa",
+      "version": "3.3.5",
+      "group": "org.springframework.boot",
+      "description": "Starter pour Spring Data JPA avec Hibernate",
+      "scope": "required",
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-data-jpa@3.3.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "VMware, Inc."
+      }
+    },
+    {
+      "bom-ref": "hibernate-core",
+      "type": "library",
+      "name": "hibernate-core",
+      "version": "6.5.3.Final",
+      "group": "org.hibernate.orm",
+      "scope": "required",
+      "purl": "pkg:maven/org.hibernate.orm/hibernate-core@6.5.3.Final",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "LGPL-2.1-only"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Red Hat, Inc.",
+        "url": [
+          "https://hibernate.org"
+        ]
+      }
+    },
+    {
+      "bom-ref": "spring-boot-starter-security",
+      "type": "framework",
+      "name": "spring-boot-starter-security",
+      "version": "3.3.5",
+      "group": "org.springframework.boot",
+      "description": "Starter pour Spring Security",
+      "scope": "required",
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-security@3.3.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "VMware, Inc."
+      }
+    },
+    {
+      "bom-ref": "spring-boot-starter-oauth2-resource-server",
+      "type": "framework",
+      "name": "spring-boot-starter-oauth2-resource-server",
+      "version": "3.3.5",
+      "group": "org.springframework.boot",
+      "scope": "required",
+      "purl": "pkg:maven/org.springframework.boot/spring-boot-starter-oauth2-resource-server@3.3.5",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "VMware, Inc."
+      }
+    },
+    {
+      "bom-ref": "jackson-databind",
+      "type": "library",
+      "name": "jackson-databind",
+      "version": "2.17.2",
+      "group": "com.fasterxml.jackson.core",
+      "description": "Bibliothèque de sérialisation/désérialisation JSON",
+      "scope": "required",
+      "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.17.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "FasterXML, LLC",
+        "url": [
+          "https://github.com/FasterXML"
+        ]
+      }
+    },
+    {
+      "bom-ref": "jackson-core",
+      "type": "library",
+      "name": "jackson-core",
+      "version": "2.17.2",
+      "group": "com.fasterxml.jackson.core",
+      "scope": "required",
+      "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-core@2.17.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "FasterXML, LLC"
+      }
+    },
+    {
+      "bom-ref": "jackson-annotations",
+      "type": "library",
+      "name": "jackson-annotations",
+      "version": "2.17.2",
+      "group": "com.fasterxml.jackson.core",
+      "scope": "required",
+      "purl": "pkg:maven/com.fasterxml.jackson.core/jackson-annotations@2.17.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "FasterXML, LLC"
+      }
+    },
+    {
+      "bom-ref": "postgresql-jdbc",
+      "type": "library",
+      "name": "postgresql",
+      "version": "42.7.4",
+      "group": "org.postgresql",
+      "description": "Pilote JDBC PostgreSQL",
+      "scope": "required",
+      "purl": "pkg:maven/org.postgresql/postgresql@42.7.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "PostgreSQL"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "PostgreSQL Global Development Group",
+        "url": [
+          "https://jdbc.postgresql.org"
+        ]
+      }
+    },
+    {
+      "bom-ref": "flyway-core",
+      "type": "library",
+      "name": "flyway-core",
+      "version": "10.20.1",
+      "group": "org.flywaydb",
+      "description": "Migration de schéma de base de données",
+      "scope": "required",
+      "purl": "pkg:maven/org.flywaydb/flyway-core@10.20.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Redgate Software Ltd",
+        "url": [
+          "https://flywaydb.org"
+        ]
+      }
+    },
+    {
+      "bom-ref": "aws-sdk-s3",
+      "type": "library",
+      "name": "s3",
+      "version": "2.29.1",
+      "group": "software.amazon.awssdk",
+      "description": "AWS SDK pour S3 - stockage d'objets",
+      "scope": "required",
+      "purl": "pkg:maven/software.amazon.awssdk/s3@2.29.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Amazon Web Services",
+        "url": [
+          "https://aws.amazon.com/sdk-for-java/"
+        ]
+      }
+    },
+    {
+      "bom-ref": "pdfbox",
+      "type": "library",
+      "name": "pdfbox",
+      "version": "3.0.3",
+      "group": "org.apache.pdfbox",
+      "description": "Bibliothèque de manipulation de documents PDF",
+      "scope": "required",
+      "purl": "pkg:maven/org.apache.pdfbox/pdfbox@3.0.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "The Apache Software Foundation",
+        "url": [
+          "https://pdfbox.apache.org"
+        ]
+      }
+    },
+    {
+      "bom-ref": "logback-classic",
+      "type": "library",
+      "name": "logback-classic",
+      "version": "1.4.14",
+      "group": "ch.qos.logback",
+      "description": "Framework de journalisation",
+      "scope": "required",
+      "purl": "pkg:maven/ch.qos.logback/logback-classic@1.4.14",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "EPL-1.0"
+          }
+        },
+        {
+          "license": {
+            "id": "LGPL-2.1-only"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "QOS.ch Sarl",
+        "url": [
+          "https://logback.qos.ch"
+        ]
+      }
+    },
+    {
+      "bom-ref": "micrometer-prometheus",
+      "type": "library",
+      "name": "micrometer-registry-prometheus",
+      "version": "1.13.6",
+      "group": "io.micrometer",
+      "description": "Export de métriques au format Prometheus",
+      "scope": "required",
+      "purl": "pkg:maven/io.micrometer/micrometer-registry-prometheus@1.13.6",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "VMware, Inc."
+      }
+    },
+    {
+      "bom-ref": "springdoc-openapi",
+      "type": "library",
+      "name": "springdoc-openapi-starter-webmvc-ui",
+      "version": "2.6.0",
+      "group": "org.springdoc",
+      "description": "Documentation OpenAPI/Swagger automatique",
+      "scope": "required",
+      "purl": "pkg:maven/org.springdoc/springdoc-openapi-starter-webmvc-ui@2.6.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "springdoc.org"
+      }
+    },
+    {
+      "bom-ref": "bucket4j-core",
+      "type": "library",
+      "name": "bucket4j-core",
+      "version": "8.10.1",
+      "group": "com.bucket4j",
+      "description": "Rate limiting basé sur l'algorithme token bucket",
+      "scope": "required",
+      "purl": "pkg:maven/com.bucket4j/bucket4j-core@8.10.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a9b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "bucket4j Contributors",
+        "url": [
+          "https://github.com/bucket4j/bucket4j"
+        ]
+      }
+    },
+    {
+      "bom-ref": "cloudhr-frontend",
+      "type": "application",
+      "name": "cloudhr-frontend",
+      "version": "2.5.0",
+      "group": "com.novasoft",
+      "description": "Application web React - interface utilisateur",
+      "purl": "pkg:npm/cloudhr-frontend@2.5.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b0c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "name": "Proprietary - NovaSoft"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "NovaSoft SAS"
+      }
+    },
+    {
+      "bom-ref": "react",
+      "type": "framework",
+      "name": "react",
+      "version": "18.3.1",
+      "description": "Bibliothèque JavaScript pour la construction d'interfaces utilisateur",
+      "scope": "required",
+      "purl": "pkg:npm/react@18.3.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c1d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Meta Platforms, Inc.",
+        "url": [
+          "https://react.dev"
+        ]
+      }
+    },
+    {
+      "bom-ref": "react-dom",
+      "type": "library",
+      "name": "react-dom",
+      "version": "18.3.1",
+      "scope": "required",
+      "purl": "pkg:npm/react-dom@18.3.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d2e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Meta Platforms, Inc."
+      }
+    },
+    {
+      "bom-ref": "react-router-dom",
+      "type": "library",
+      "name": "react-router-dom",
+      "version": "6.28.0",
+      "description": "Routage déclaratif pour applications React",
+      "scope": "required",
+      "purl": "pkg:npm/react-router-dom@6.28.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e3f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Remix Software, Inc.",
+        "url": [
+          "https://reactrouter.com"
+        ]
+      }
+    },
+    {
+      "bom-ref": "tanstack-react-query",
+      "type": "library",
+      "name": "@tanstack/react-query",
+      "version": "5.62.0",
+      "description": "Gestion asynchrone de l'état serveur pour React",
+      "scope": "required",
+      "purl": "pkg:npm/%40tanstack/react-query@5.62.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f4a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "TanStack",
+        "url": [
+          "https://tanstack.com/query"
+        ]
+      }
+    },
+    {
+      "bom-ref": "axios",
+      "type": "library",
+      "name": "axios",
+      "version": "1.7.9",
+      "description": "Client HTTP basé sur les promesses",
+      "scope": "required",
+      "purl": "pkg:npm/axios@1.7.9",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a5b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "axios Contributors",
+        "url": [
+          "https://axios-http.com"
+        ]
+      }
+    },
+    {
+      "bom-ref": "keycloak-js",
+      "type": "library",
+      "name": "keycloak-js",
+      "version": "26.0.0",
+      "description": "Adaptateur JavaScript pour Keycloak OIDC",
+      "scope": "required",
+      "purl": "pkg:npm/keycloak-js@26.0.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "b6c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Red Hat, Inc.",
+        "url": [
+          "https://www.keycloak.org"
+        ]
+      }
+    },
+    {
+      "bom-ref": "headlessui-react",
+      "type": "library",
+      "name": "@headlessui/react",
+      "version": "2.2.0",
+      "description": "Composants UI accessibles et non stylisés pour React",
+      "scope": "required",
+      "purl": "pkg:npm/%40headlessui/react@2.2.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "c7d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Tailwind Labs, Inc."
+      }
+    },
+    {
+      "bom-ref": "tailwindcss",
+      "type": "library",
+      "name": "tailwindcss",
+      "version": "3.4.16",
+      "description": "Framework CSS utilitaire",
+      "scope": "optional",
+      "purl": "pkg:npm/tailwindcss@3.4.16",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "d8e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Tailwind Labs, Inc.",
+        "url": [
+          "https://tailwindcss.com"
+        ]
+      }
+    },
+    {
+      "bom-ref": "typescript",
+      "type": "library",
+      "name": "typescript",
+      "version": "5.7.2",
+      "description": "Langage TypeScript - surensemble typé de JavaScript",
+      "scope": "optional",
+      "purl": "pkg:npm/typescript@5.7.2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e9f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "Apache-2.0"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Microsoft Corporation",
+        "url": [
+          "https://www.typescriptlang.org"
+        ]
+      }
+    },
+    {
+      "bom-ref": "vite",
+      "type": "library",
+      "name": "vite",
+      "version": "5.4.11",
+      "description": "Outil de build frontend de nouvelle génération",
+      "scope": "optional",
+      "purl": "pkg:npm/vite@5.4.11",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "f0a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0"
+        }
+      ],
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "supplier": {
+        "name": "Vite Contributors",
+        "url": [
+          "https://vitejs.dev"
+        ]
+      }
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "novasoft-cloudhr",
+      "dependsOn": [
+        "cloudhr-backend",
+        "cloudhr-frontend"
+      ]
+    },
+    {
+      "ref": "cloudhr-backend",
+      "dependsOn": [
+        "spring-boot-starter-web",
+        "spring-boot-starter-data-jpa",
+        "spring-boot-starter-security",
+        "spring-boot-starter-oauth2-resource-server",
+        "jackson-databind",
+        "postgresql-jdbc",
+        "flyway-core",
+        "aws-sdk-s3",
+        "pdfbox",
+        "logback-classic",
+        "micrometer-prometheus",
+        "springdoc-openapi",
+        "bucket4j-core"
+      ]
+    },
+    {
+      "ref": "cloudhr-frontend",
+      "dependsOn": [
+        "react",
+        "react-dom",
+        "react-router-dom",
+        "tanstack-react-query",
+        "axios",
+        "keycloak-js",
+        "headlessui-react",
+        "tailwindcss",
+        "typescript",
+        "vite"
+      ]
+    },
+    {
+      "ref": "spring-boot-starter-web",
+      "dependsOn": [
+        "spring-web",
+        "spring-webmvc",
+        "jackson-databind"
+      ]
+    },
+    {
+      "ref": "spring-boot-starter-data-jpa",
+      "dependsOn": [
+        "hibernate-core"
+      ]
+    },
+    {
+      "ref": "spring-boot-starter-security",
+      "dependsOn": []
+    },
+    {
+      "ref": "spring-boot-starter-oauth2-resource-server",
+      "dependsOn": [
+        "spring-boot-starter-security"
+      ]
+    },
+    {
+      "ref": "jackson-databind",
+      "dependsOn": [
+        "jackson-core",
+        "jackson-annotations"
+      ]
+    },
+    {
+      "ref": "jackson-core",
+      "dependsOn": []
+    },
+    {
+      "ref": "jackson-annotations",
+      "dependsOn": []
+    },
+    {
+      "ref": "spring-web",
+      "dependsOn": []
+    },
+    {
+      "ref": "spring-webmvc",
+      "dependsOn": [
+        "spring-web"
+      ]
+    },
+    {
+      "ref": "hibernate-core",
+      "dependsOn": []
+    },
+    {
+      "ref": "postgresql-jdbc",
+      "dependsOn": []
+    },
+    {
+      "ref": "flyway-core",
+      "dependsOn": []
+    },
+    {
+      "ref": "aws-sdk-s3",
+      "dependsOn": []
+    },
+    {
+      "ref": "pdfbox",
+      "dependsOn": []
+    },
+    {
+      "ref": "logback-classic",
+      "dependsOn": []
+    },
+    {
+      "ref": "micrometer-prometheus",
+      "dependsOn": []
+    },
+    {
+      "ref": "springdoc-openapi",
+      "dependsOn": []
+    },
+    {
+      "ref": "bucket4j-core",
+      "dependsOn": []
+    },
+    {
+      "ref": "react",
+      "dependsOn": []
+    },
+    {
+      "ref": "react-dom",
+      "dependsOn": [
+        "react"
+      ]
+    },
+    {
+      "ref": "react-router-dom",
+      "dependsOn": [
+        "react",
+        "react-dom"
+      ]
+    },
+    {
+      "ref": "tanstack-react-query",
+      "dependsOn": []
+    },
+    {
+      "ref": "axios",
+      "dependsOn": []
+    },
+    {
+      "ref": "keycloak-js",
+      "dependsOn": []
+    },
+    {
+      "ref": "headlessui-react",
+      "dependsOn": [
+        "react",
+        "react-dom"
+      ]
+    },
+    {
+      "ref": "tailwindcss",
+      "dependsOn": []
+    },
+    {
+      "ref": "typescript",
+      "dependsOn": []
+    },
+    {
+      "ref": "vite",
+      "dependsOn": []
+    }
+  ],
+  "compositions": [
+    {
+      "aggregate": "complete",
+      "assemblies": [
+        "novasoft-cloudhr",
+        "cloudhr-backend",
+        "cloudhr-frontend"
+      ]
+    },
+    {
+      "aggregate": "incomplete",
+      "dependencies": [
+        "cloudhr-backend",
+        "cloudhr-frontend"
+      ]
+    },
+    {
+      "aggregate": "unknown",
+      "dependencies": [
+        "spring-boot-starter-web",
+        "spring-boot-starter-data-jpa",
+        "hibernate-core",
+        "react-dom"
+      ]
+    }
+  ]
+}
