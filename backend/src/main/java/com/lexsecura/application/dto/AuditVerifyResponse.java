@@ -2,7 +2,7 @@ package com.lexsecura.application.dto;
 
 public record AuditVerifyResponse(
         boolean valid,
-        int totalEvents,
+        long totalEvents,
         int verifiedEvents,
         String message
 ) {}

@@ -14,5 +14,5 @@ public interface EvidenceRepository {
 
     List<Evidence> findAllByReleaseIdAndOrgId(UUID releaseId, UUID orgId);
 
-    void deleteById(UUID id);
+    void deleteByIdAndOrgId(UUID id, UUID orgId);
 }

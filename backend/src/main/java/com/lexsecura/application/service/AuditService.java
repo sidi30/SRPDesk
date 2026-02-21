@@ -75,47 +75,59 @@ public class AuditService {
 
     @Transactional(readOnly = true)
     public AuditVerifyResponse verify(UUID orgId) {
-        List<AuditEvent> events = auditEventRepository.findAllByOrgIdOrderByCreatedAt(orgId);
+        long totalEvents = auditEventRepository.countByOrgId(orgId);
 
-        if (events.isEmpty()) {
+        if (totalEvents == 0) {
             return new AuditVerifyResponse(true, 0, 0, "No audit events found");
         }
 
         int verified = 0;
-        for (int i = 0; i < events.size(); i++) {
-            AuditEvent event = events.get(i);
-            String expectedPrevHash = (i == 0) ? null : events.get(i - 1).getHash();
+        int batchSize = 500;
+        int page = 0;
+        String expectedPrevHash = null;
+        boolean isFirstEvent = true;
 
-            // Verify prev_hash chain linkage
-            if (i == 0) {
-                if (event.getPrevHash() != null) {
-                    return new AuditVerifyResponse(false, events.size(), verified,
-                            "First event has non-null prev_hash at event " + event.getId());
+        while (true) {
+            List<AuditEvent> batch = auditEventRepository.findByOrgIdOrderByCreatedAtAsc(orgId, page, batchSize);
+            if (batch.isEmpty()) break;
+
+            for (AuditEvent event : batch) {
+                // Verify prev_hash chain linkage
+                if (isFirstEvent) {
+                    if (event.getPrevHash() != null) {
+                        return new AuditVerifyResponse(false, totalEvents, verified,
+                                "First event has non-null prev_hash at event " + event.getId());
+                    }
+                    isFirstEvent = false;
+                } else {
+                    if (!java.util.Objects.equals(expectedPrevHash, event.getPrevHash())) {
+                        return new AuditVerifyResponse(false, totalEvents, verified,
+                                "Chain broken at event " + event.getId() + ": expected prev_hash="
+                                        + expectedPrevHash + " but found=" + event.getPrevHash());
+                    }
                 }
-            } else {
-                if (!expectedPrevHash.equals(event.getPrevHash())) {
-                    return new AuditVerifyResponse(false, events.size(), verified,
-                            "Chain broken at event " + event.getId() + ": expected prev_hash="
-                                    + expectedPrevHash + " but found=" + event.getPrevHash());
+
+                // Recompute and verify hash
+                String recomputedHash = computeHash(
+                        event.getPrevHash(), event.getPayloadJson(),
+                        event.getEntityType(), event.getEntityId(),
+                        event.getAction(), event.getActor(), event.getCreatedAt());
+
+                if (!recomputedHash.equals(event.getHash())) {
+                    return new AuditVerifyResponse(false, totalEvents, verified,
+                            "Hash mismatch at event " + event.getId() + ": expected="
+                                    + recomputedHash + " but found=" + event.getHash());
                 }
+
+                expectedPrevHash = event.getHash();
+                verified++;
             }
 
-            // Recompute and verify hash
-            String recomputedHash = computeHash(
-                    event.getPrevHash(), event.getPayloadJson(),
-                    event.getEntityType(), event.getEntityId(),
-                    event.getAction(), event.getActor(), event.getCreatedAt());
-
-            if (!recomputedHash.equals(event.getHash())) {
-                return new AuditVerifyResponse(false, events.size(), verified,
-                        "Hash mismatch at event " + event.getId() + ": expected="
-                                + recomputedHash + " but found=" + event.getHash());
-            }
-
-            verified++;
+            if (batch.size() < batchSize) break;
+            page++;
         }
 
-        return new AuditVerifyResponse(true, events.size(), verified, "All events verified successfully");
+        return new AuditVerifyResponse(true, totalEvents, verified, "All events verified successfully");
     }
 
     @Transactional(readOnly = true)

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import { Layout } from './components/Layout';
+import { ProtectedRoute } from './auth/ProtectedRoute';
 import { DashboardPage } from './pages/DashboardPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
@@ -17,17 +18,17 @@ export function AppRoutes() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<DashboardPage />} />
-        <Route path="/products" element={<ProductsPage />} />
-        <Route path="/products/:id" element={<ProductDetailPage />} />
-        <Route path="/releases/:id" element={<ReleaseDetailPage />} />
-        <Route path="/findings" element={<FindingsPage />} />
-        <Route path="/cra-events" element={<CraEventsPage />} />
-        <Route path="/cra-events/:id" element={<CraEventDetailPage />} />
-        <Route path="/audit" element={<AuditTrailPage />} />
-        <Route path="/ai/srp-draft" element={<AiSrpDraftPage />} />
-        <Route path="/ai/comm-pack" element={<AiCommPackPage />} />
-        <Route path="/ai/questionnaire" element={<AiQuestionnairePage />} />
+        <Route path="/" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+        <Route path="/products" element={<ProtectedRoute><ProductsPage /></ProtectedRoute>} />
+        <Route path="/products/:id" element={<ProtectedRoute><ProductDetailPage /></ProtectedRoute>} />
+        <Route path="/releases/:id" element={<ProtectedRoute><ReleaseDetailPage /></ProtectedRoute>} />
+        <Route path="/findings" element={<ProtectedRoute><FindingsPage /></ProtectedRoute>} />
+        <Route path="/cra-events" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><CraEventsPage /></ProtectedRoute>} />
+        <Route path="/cra-events/:id" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><CraEventDetailPage /></ProtectedRoute>} />
+        <Route path="/audit" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AuditTrailPage /></ProtectedRoute>} />
+        <Route path="/ai/srp-draft" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AiSrpDraftPage /></ProtectedRoute>} />
+        <Route path="/ai/comm-pack" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AiCommPackPage /></ProtectedRoute>} />
+        <Route path="/ai/questionnaire" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AiQuestionnairePage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

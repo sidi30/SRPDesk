@@ -123,7 +123,7 @@ public class EvidenceService {
                 .orElseThrow(() -> new EntityNotFoundException("Evidence not found: " + id));
 
         storagePort.delete(evidence.getStorageUri());
-        evidenceRepository.deleteById(id);
+        evidenceRepository.deleteByIdAndOrgId(id, orgId);
         log.info("Evidence deleted: id={}", id);
 
         auditService.record(orgId, "EVIDENCE", id, "DELETE", userId,

@@ -51,6 +51,7 @@ public class PersistenceMapper {
         Release r = new Release();
         r.setId(entity.getId());
         r.setProductId(entity.getProductId());
+        r.setOrgId(entity.getOrgId());
         r.setVersion(entity.getVersion());
         r.setGitRef(entity.getGitRef());
         r.setBuildId(entity.getBuildId());
@@ -66,6 +67,7 @@ public class PersistenceMapper {
         ReleaseEntity e = new ReleaseEntity();
         e.setId(domain.getId());
         e.setProductId(domain.getProductId());
+        e.setOrgId(domain.getOrgId());
         e.setVersion(domain.getVersion());
         e.setGitRef(domain.getGitRef());
         e.setBuildId(domain.getBuildId());

@@ -6,6 +6,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { ConfirmDialog } from '../components/ConfirmDialog';
 import { useAuth } from '../auth/AuthProvider';
 import type { Product, ProductCreateRequest } from '../types';
+import { getErrorMessage } from '../types';
 
 const PRODUCT_TYPES = ['DEFAULT', 'CLASS_I', 'CLASS_II', 'IMPORTANT_CLASS_I', 'IMPORTANT_CLASS_II', 'CRITICAL'] as const;
 const CRITICALITY_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
@@ -33,8 +34,8 @@ export function ProductsPage() {
         setShowCreate(false);
         setForm({ name: '', type: 'DEFAULT', criticality: 'MEDIUM' });
       },
-      onError: (err: any) => {
-        setError(err.response?.data?.detail || err.message || 'Failed to create product');
+      onError: (err: unknown) => {
+        setError(getErrorMessage(err, 'Failed to create product'));
       },
     });
   };
@@ -112,9 +113,9 @@ export function ProductsPage() {
 
       {/* Create Product Modal */}
       {showCreate && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="create-product-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">New Product</h2>
+            <h2 id="create-product-title" className="text-lg font-semibold mb-4">New Product</h2>
 
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -130,6 +131,7 @@ export function ProductsPage() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   placeholder="e.g. IoT Gateway v2"
+                  aria-label="Nom du produit"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -138,6 +140,7 @@ export function ProductsPage() {
                 <select
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
+                  aria-label="Type de produit"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {PRODUCT_TYPES.map((t) => (
@@ -152,6 +155,7 @@ export function ProductsPage() {
                 <select
                   value={form.criticality}
                   onChange={(e) => setForm({ ...form, criticality: e.target.value })}
+                  aria-label="Niveau de criticité"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {CRITICALITY_LEVELS.map((c) => (

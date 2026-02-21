@@ -8,6 +8,7 @@ import {
 import { StatusBadge } from '../components/StatusBadge';
 import { SlaCountdown } from '../components/SlaCountdown';
 import type { CraEventUpdateRequest, SrpSubmission, SubmissionType, MarkSubmittedRequest } from '../types';
+import { getErrorMessage } from '../types';
 
 const SUBMISSION_TYPES: SubmissionType[] = ['EARLY_WARNING', 'NOTIFICATION', 'FINAL_REPORT'];
 
@@ -43,7 +44,7 @@ export function CraEventDetailPage() {
       { id: eventId, data: editForm },
       {
         onSuccess: () => setEditing(false),
-        onError: (err: any) => setError(err.response?.data?.detail || err.message),
+        onError: (err: unknown) => setError(getErrorMessage(err)),
       }
     );
   };
@@ -52,7 +53,7 @@ export function CraEventDetailPage() {
     setError(null);
     createSubmission.mutate(
       { eventId, data: { submissionType: type } },
-      { onError: (err: any) => setError(err.response?.data?.detail || err.message) }
+      { onError: (err: unknown) => setError(getErrorMessage(err)) }
     );
   };
 
@@ -64,7 +65,7 @@ export function CraEventDetailPage() {
       { eventId, subId: submitForm.subId, data },
       {
         onSuccess: () => setSubmitForm(null),
-        onError: (err: any) => setError(err.response?.data?.detail || err.message),
+        onError: (err: unknown) => setError(getErrorMessage(err)),
       }
     );
   };
@@ -283,7 +284,7 @@ export function CraEventDetailPage() {
                           </button>
                           <button
                             onClick={() => markReady.mutate({ eventId, subId: sub.id }, {
-                              onError: (err: any) => setError(err.response?.data?.detail || err.message),
+                              onError: (err: unknown) => setError(getErrorMessage(err)),
                             })}
                             className="px-2 py-1 text-xs text-green-600 border border-green-300 rounded hover:bg-green-50"
                           >

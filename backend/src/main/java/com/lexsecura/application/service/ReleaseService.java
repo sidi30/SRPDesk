@@ -36,6 +36,7 @@ public class ReleaseService {
                 .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
 
         Release release = new Release(productId, request.version());
+        release.setOrgId(orgId);
         release.setGitRef(request.gitRef());
         release.setBuildId(request.buildId());
         release.setReleasedAt(request.releasedAt());
@@ -62,13 +63,15 @@ public class ReleaseService {
 
     @Transactional(readOnly = true)
     public ReleaseResponse findById(UUID id) {
-        Release release = releaseRepository.findById(id)
+        UUID orgId = TenantContext.getOrgId();
+        Release release = releaseRepository.findByIdAndOrgId(id, orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Release not found: " + id));
         return toResponse(release);
     }
 
     public Release getRelease(UUID id) {
-        return releaseRepository.findById(id)
+        UUID orgId = TenantContext.getOrgId();
+        return releaseRepository.findByIdAndOrgId(id, orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Release not found: " + id));
     }
 

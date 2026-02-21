@@ -27,7 +27,7 @@ export function ConfirmDialog({
 
   return (
     <Transition show={isOpen} as={Fragment}>
-      <Dialog onClose={onClose} className="relative z-50">
+      <Dialog onClose={onClose} className="relative z-50" role="alertdialog" aria-describedby="confirm-dialog-message">
         <TransitionChild
           as={Fragment}
           enter="ease-out duration-300"
@@ -52,7 +52,7 @@ export function ConfirmDialog({
           >
             <DialogPanel className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
               <DialogTitle className="text-lg font-semibold text-gray-900">{title}</DialogTitle>
-              <p className="mt-2 text-sm text-gray-600">{message}</p>
+              <p id="confirm-dialog-message" className="mt-2 text-sm text-gray-600">{message}</p>
               <div className="mt-6 flex justify-end gap-3">
                 <button
                   onClick={onClose}

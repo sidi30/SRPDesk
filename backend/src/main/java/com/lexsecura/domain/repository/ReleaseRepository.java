@@ -12,6 +12,8 @@ public interface ReleaseRepository {
 
     Optional<Release> findById(UUID id);
 
+    Optional<Release> findByIdAndOrgId(UUID id, UUID orgId);
+
     List<Release> findAllByProductId(UUID productId);
 
     void deleteById(UUID id);

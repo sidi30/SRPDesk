@@ -11,9 +11,10 @@ interface DataTableProps<T> {
   data: T[];
   onRowClick?: (row: T) => void;
   emptyMessage?: string;
+  ariaLabel?: string;
 }
 
-export function DataTable<T>({ columns, data, onRowClick, emptyMessage = 'No data found' }: DataTableProps<T>) {
+export function DataTable<T>({ columns, data, onRowClick, emptyMessage = 'No data found', ariaLabel }: DataTableProps<T>) {
   if (data.length === 0) {
     return (
       <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
@@ -24,12 +25,13 @@ export function DataTable<T>({ columns, data, onRowClick, emptyMessage = 'No dat
 
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
-      <table className="min-w-full divide-y divide-gray-200">
+      <table className="min-w-full divide-y divide-gray-200" role="table" aria-label={ariaLabel}>
         <thead className="bg-gray-50">
           <tr>
             {columns.map((col, i) => (
               <th
                 key={i}
+                scope="col"
                 className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${col.className || ''}`}
               >
                 {col.header}
@@ -42,6 +44,9 @@ export function DataTable<T>({ columns, data, onRowClick, emptyMessage = 'No dat
             <tr
               key={rowIndex}
               onClick={() => onRowClick?.(row)}
+              role={onRowClick ? 'row' : undefined}
+              tabIndex={onRowClick ? 0 : undefined}
+              onKeyDown={onRowClick ? (e) => { if (e.key === 'Enter') onRowClick(row); } : undefined}
               className={onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
             >
               {columns.map((col, colIndex) => (

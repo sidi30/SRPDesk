@@ -43,7 +43,9 @@
       "WebFetch(domain:www.cybeats.com)",
       "Bash(mvn test-compile:*)",
       "Bash(grep:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(tail:*)",
+      "Bash(find C:\\\\Users\\\\ramzi\\\\Desktop\\\\devs\\\\lexsecura\\\\backend\\\\src\\\\main\\\\java\\\\com\\\\lexsecura\\\\api\\\\controller:*)"
     ]
   }
 }

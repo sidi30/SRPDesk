@@ -45,4 +45,15 @@ public class AuditEventRepositoryAdapter implements AuditEventRepository {
     public Optional<AuditEvent> findTopByOrgIdOrderByCreatedAtDesc(UUID orgId) {
         return jpa.findTopByOrgIdOrderByCreatedAtDesc(orgId).map(mapper::toDomain);
     }
+
+    @Override
+    public long countByOrgId(UUID orgId) {
+        return jpa.countByOrgId(orgId);
+    }
+
+    @Override
+    public List<AuditEvent> findByOrgIdOrderByCreatedAtAsc(UUID orgId, int page, int size) {
+        return jpa.findByOrgIdPaged(orgId, org.springframework.data.domain.PageRequest.of(page, size)).stream()
+                .map(mapper::toDomain).collect(Collectors.toList());
+    }
 }

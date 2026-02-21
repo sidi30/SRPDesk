@@ -7,6 +7,7 @@ public class Release {
 
     private UUID id;
     private UUID productId;
+    private UUID orgId;
     private String version;
     private String gitRef;
     private String buildId;
@@ -32,6 +33,9 @@ public class Release {
 
     public UUID getProductId() { return productId; }
     public void setProductId(UUID productId) { this.productId = productId; }
+
+    public UUID getOrgId() { return orgId; }
+    public void setOrgId(UUID orgId) { this.orgId = orgId; }
 
     public String getVersion() { return version; }
     public void setVersion(String version) { this.version = version; }

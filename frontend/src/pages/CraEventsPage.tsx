@@ -4,6 +4,7 @@ import { useCraEvents, useCreateCraEvent } from '../hooks/useCraEvents';
 import { useProducts } from '../hooks/useProducts';
 import { StatusBadge } from '../components/StatusBadge';
 import type { CraEvent, CraEventCreateRequest, CraEventType } from '../types';
+import { getErrorMessage } from '../types';
 
 const EVENT_STATUSES = ['', 'DRAFT', 'IN_REVIEW', 'SUBMITTED', 'CLOSED'] as const;
 const EVENT_TYPES: CraEventType[] = ['EXPLOITED_VULNERABILITY', 'SEVERE_INCIDENT'];
@@ -40,7 +41,7 @@ export function CraEventsPage() {
           setForm({ productId: '', eventType: 'EXPLOITED_VULNERABILITY', title: '', detectedAt: new Date().toISOString().slice(0, 16) });
           navigate(`/cra-events/${ev.id}`);
         },
-        onError: (err: any) => setError(err.response?.data?.detail || err.message || 'Failed to create event'),
+        onError: (err: unknown) => setError(getErrorMessage(err, 'Failed to create event')),
       }
     );
   };

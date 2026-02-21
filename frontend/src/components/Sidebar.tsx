@@ -20,12 +20,12 @@ export function Sidebar() {
   const { userName, roles, logout } = useAuth();
 
   return (
-    <div className="flex flex-col w-64 bg-gray-900 text-white">
+    <div className="flex flex-col w-64 bg-gray-900 text-white" role="navigation" aria-label="Navigation principale">
       <div className="flex items-center h-16 px-6 border-b border-gray-800">
         <h1 className="text-xl font-bold text-primary-400">LexSecura</h1>
       </div>
 
-      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto" role="list">
         {navigation.map((item) => {
           const isActive = location.pathname === item.href ||
             (item.href !== '/' && location.pathname.startsWith(item.href));
@@ -33,6 +33,7 @@ export function Sidebar() {
             <Link
               key={item.name}
               to={item.href}
+              aria-current={isActive ? 'page' : undefined}
               className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                 isActive
                   ? 'bg-primary-600 text-white'
@@ -56,6 +57,7 @@ export function Sidebar() {
               <Link
                 key={item.name}
                 to={item.href}
+                aria-current={isActive ? 'page' : undefined}
                 className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? 'bg-primary-600 text-white'
@@ -77,6 +79,7 @@ export function Sidebar() {
         <div className="text-xs text-gray-500 mb-3">{roles.filter(r => ['ADMIN', 'COMPLIANCE_MANAGER', 'CONTRIBUTOR'].includes(r)).join(', ')}</div>
         <button
           onClick={logout}
+          aria-label="Se déconnecter"
           className="w-full px-3 py-2 text-sm text-gray-300 bg-gray-800 rounded-lg hover:bg-gray-700 transition-colors"
         >
           Sign out

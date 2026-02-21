@@ -9,6 +9,7 @@ import { FileUpload } from '../components/FileUpload';
 import { FindingsTable } from '../components/FindingsTable';
 import { FR } from '../i18n/fr';
 import type { Evidence, ComponentItem, Finding, EvidenceType, FindingDecisionRequest } from '../types';
+import { getErrorMessage } from '../types';
 
 const EVIDENCE_TYPES: EvidenceType[] = [
   'SBOM',
@@ -58,8 +59,8 @@ export function ReleaseDetailPage() {
     uploadEvidence.mutate(
       { file, type: uploadType },
       {
-        onError: (err: any) => {
-          setError(err.response?.data?.detail || err.message || 'Upload failed');
+        onError: (err: unknown) => {
+          setError(getErrorMessage(err, 'Upload failed'));
         },
       }
     );
@@ -67,8 +68,8 @@ export function ReleaseDetailPage() {
 
   const handleSbomUpload = (file: File) => {
     uploadSbom.mutate(file, {
-      onError: (err: any) => {
-        setError(err.response?.data?.detail || err.message || 'SBOM upload failed');
+      onError: (err: unknown) => {
+        setError(getErrorMessage(err, 'SBOM upload failed'));
       },
     });
   };
@@ -87,8 +88,8 @@ export function ReleaseDetailPage() {
           setDecisionFindingId(null);
           setDecisionForm({ decisionType: 'NOT_AFFECTED', rationale: '' });
         },
-        onError: (err: any) => {
-          setError(err.response?.data?.detail || err.message || 'Failed to add decision');
+        onError: (err: unknown) => {
+          setError(getErrorMessage(err, 'Failed to add decision'));
         },
       }
     );
@@ -97,8 +98,8 @@ export function ReleaseDetailPage() {
   const handleTriggerScan = () => {
     setError(null);
     triggerScan.mutate(undefined, {
-      onError: (err: any) => {
-        setError(err.response?.data?.detail || err.message || 'Scan failed');
+      onError: (err: unknown) => {
+        setError(getErrorMessage(err, 'Scan failed'));
       },
     });
   };

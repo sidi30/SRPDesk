@@ -145,6 +145,14 @@ export interface ProblemDetail {
   instance?: string;
 }
 
+export function getErrorMessage(err: unknown, fallback = 'Une erreur est survenue'): string {
+  if (err && typeof err === 'object') {
+    const axiosErr = err as { response?: { data?: ProblemDetail }; message?: string };
+    return axiosErr.response?.data?.detail || axiosErr.message || fallback;
+  }
+  return fallback;
+}
+
 // ── CRA War Room ────────────────────────────────────────
 
 export type CraEventType = 'EXPLOITED_VULNERABILITY' | 'SEVERE_INCIDENT';

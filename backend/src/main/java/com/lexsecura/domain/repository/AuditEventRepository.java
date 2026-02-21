@@ -15,4 +15,8 @@ public interface AuditEventRepository {
     List<AuditEvent> findAllByEntityTypeAndEntityIdOrderByCreatedAt(String entityType, UUID entityId);
 
     Optional<AuditEvent> findTopByOrgIdOrderByCreatedAtDesc(UUID orgId);
+
+    long countByOrgId(UUID orgId);
+
+    List<AuditEvent> findByOrgIdOrderByCreatedAtAsc(UUID orgId, int page, int size);
 }

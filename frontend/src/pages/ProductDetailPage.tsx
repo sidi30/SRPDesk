@@ -6,6 +6,7 @@ import { useProductFindings } from '../hooks/useFindings';
 import { StatusBadge } from '../components/StatusBadge';
 import { useAuth } from '../auth/AuthProvider';
 import type { ReleaseCreateRequest, ProductUpdateRequest, Release, Finding } from '../types';
+import { getErrorMessage } from '../types';
 
 const PRODUCT_TYPES = ['DEFAULT', 'CLASS_I', 'CLASS_II', 'IMPORTANT_CLASS_I', 'IMPORTANT_CLASS_II', 'CRITICAL'] as const;
 const CRITICALITY_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
@@ -40,8 +41,8 @@ export function ProductDetailPage() {
         setShowCreateRelease(false);
         setReleaseForm({ version: '', gitRef: '' });
       },
-      onError: (err: any) => {
-        setError(err.response?.data?.detail || err.message || 'Failed to create release');
+      onError: (err: unknown) => {
+        setError(getErrorMessage(err, 'Failed to create release'));
       },
     });
   };
@@ -52,8 +53,8 @@ export function ProductDetailPage() {
       { id: id!, data: editForm },
       {
         onSuccess: () => setShowEditProduct(false),
-        onError: (err: any) => {
-          setError(err.response?.data?.detail || err.message || 'Failed to update product');
+        onError: (err: unknown) => {
+          setError(getErrorMessage(err, 'Failed to update product'));
         },
       }
     );

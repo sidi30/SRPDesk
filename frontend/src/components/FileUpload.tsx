@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 interface FileUploadProps {
   onUpload: (file: File) => void;
@@ -8,6 +8,7 @@ interface FileUploadProps {
 
 export function FileUpload({ onUpload, isLoading, accept }: FileUploadProps) {
   const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -34,6 +35,10 @@ export function FileUpload({ onUpload, isLoading, accept }: FileUploadProps) {
       className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
         dragActive ? 'border-primary-500 bg-primary-50' : 'border-gray-300 hover:border-gray-400'
       }`}
+      aria-label="Zone de téléversement de fichier"
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
       onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
       onDragLeave={() => setDragActive(false)}
       onDrop={handleDrop}
@@ -49,7 +54,7 @@ export function FileUpload({ onUpload, isLoading, accept }: FileUploadProps) {
             Drag and drop a file, or{' '}
             <label className="text-primary-600 hover:text-primary-500 cursor-pointer font-medium">
               browse
-              <input type="file" className="hidden" onChange={handleChange} accept={accept} />
+              <input ref={fileInputRef} type="file" className="hidden" onChange={handleChange} accept={accept} />
             </label>
           </p>
           <p className="mt-1 text-xs text-gray-500">Max 50MB</p>

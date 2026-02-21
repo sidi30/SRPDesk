@@ -9,4 +9,5 @@ import java.util.UUID;
 public interface JpaEvidenceRepository extends JpaRepository<EvidenceEntity, UUID> {
     List<EvidenceEntity> findAllByReleaseIdAndOrgId(UUID releaseId, UUID orgId);
     Optional<EvidenceEntity> findByIdAndOrgId(UUID id, UUID orgId);
+    void deleteByIdAndOrgId(UUID id, UUID orgId);
 }

@@ -41,7 +41,7 @@ public class EvidenceRepositoryAdapter implements EvidenceRepository {
     }
 
     @Override
-    public void deleteById(UUID id) {
-        jpa.deleteById(id);
+    public void deleteByIdAndOrgId(UUID id, UUID orgId) {
+        jpa.deleteByIdAndOrgId(id, orgId);
     }
 }

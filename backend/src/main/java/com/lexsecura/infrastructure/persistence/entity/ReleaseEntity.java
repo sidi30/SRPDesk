@@ -15,6 +15,9 @@ public class ReleaseEntity {
     @Column(name = "product_id", nullable = false)
     private UUID productId;
 
+    @Column(name = "org_id", nullable = false)
+    private UUID orgId;
+
     @Column(nullable = false, length = 100)
     private String version;
 
@@ -43,6 +46,8 @@ public class ReleaseEntity {
     public void setId(UUID id) { this.id = id; }
     public UUID getProductId() { return productId; }
     public void setProductId(UUID productId) { this.productId = productId; }
+    public UUID getOrgId() { return orgId; }
+    public void setOrgId(UUID orgId) { this.orgId = orgId; }
     public String getVersion() { return version; }
     public void setVersion(String version) { this.version = version; }
     public String getGitRef() { return gitRef; }

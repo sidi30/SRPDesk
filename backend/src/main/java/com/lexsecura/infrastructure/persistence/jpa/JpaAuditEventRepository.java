@@ -13,4 +13,9 @@ public interface JpaAuditEventRepository extends JpaRepository<AuditEventEntity,
     List<AuditEventEntity> findAllByEntityTypeAndEntityIdOrderByCreatedAtAsc(String entityType, UUID entityId);
 
     Optional<AuditEventEntity> findTopByOrgIdOrderByCreatedAtDesc(UUID orgId);
+
+    long countByOrgId(UUID orgId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT e FROM AuditEventEntity e WHERE e.orgId = :orgId ORDER BY e.createdAt ASC")
+    List<AuditEventEntity> findByOrgIdPaged(@org.springframework.data.repository.query.Param("orgId") UUID orgId, org.springframework.data.domain.Pageable pageable);
 }
