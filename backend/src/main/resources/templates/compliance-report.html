@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 25mm 15mm;
+            @bottom-center {
+                content: "Page " counter(page) " / " counter(pages);
+                font-size: 8pt;
+                color: #6b7280;
+                font-family: sans-serif;
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: sans-serif;
+            font-size: 10pt;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+        .header {
+            background-color: #1e3a5f;
+            color: #ffffff;
+            padding: 20px 25px;
+            margin: -20mm -15mm 20px -15mm;
+            padding-top: 30px;
+        }
+        .header h1 {
+            font-size: 20pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .header .subtitle {
+            font-size: 10pt;
+            color: #93c5fd;
+        }
+        .header .date {
+            font-size: 9pt;
+            color: #bfdbfe;
+            margin-top: 6px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            color: #1e3a5f;
+            border-bottom: 2px solid #1e3a5f;
+            padding-bottom: 4px;
+            margin: 20px 0 10px 0;
+        }
+
+        /* Summary cards */
+        .summary-cards {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .card {
+            flex: 1;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 14px;
+            text-align: center;
+        }
+        .card .value {
+            font-size: 22pt;
+            font-weight: bold;
+        }
+        .card .label {
+            font-size: 8pt;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .card-total .value { color: #1e3a5f; }
+        .card-open .value { color: #dc2626; }
+        .card-critical .value { color: #ea580c; }
+
+        /* Info block */
+        .info-block {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .info-block .row {
+            display: flex;
+            margin-bottom: 3px;
+        }
+        .info-block .lbl {
+            font-weight: bold;
+            width: 120px;
+            color: #475569;
+            font-size: 9pt;
+        }
+        .info-block .val {
+            color: #1e293b;
+            font-size: 9pt;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+            font-size: 8.5pt;
+        }
+        thead th {
+            background-color: #f1f5f9;
+            color: #334155;
+            font-weight: 600;
+            text-align: left;
+            padding: 7px 8px;
+            border-bottom: 2px solid #cbd5e1;
+            font-size: 8pt;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        tbody td {
+            padding: 6px 8px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+
+        /* Severity badges */
+        .severity {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 7.5pt;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        .sev-CRITICAL { background-color: #fecaca; color: #991b1b; }
+        .sev-HIGH { background-color: #fed7aa; color: #9a3412; }
+        .sev-MEDIUM { background-color: #fef08a; color: #854d0e; }
+        .sev-LOW { background-color: #dbeafe; color: #1e40af; }
+        .sev-UNKNOWN { background-color: #e5e7eb; color: #374151; }
+
+        /* Status badges */
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 7.5pt;
+            font-weight: 600;
+        }
+        .st-OPEN { background-color: #fecaca; color: #991b1b; }
+        .st-NOT_AFFECTED { background-color: #e5e7eb; color: #374151; }
+        .st-PATCH_PLANNED { background-color: #fef08a; color: #854d0e; }
+        .st-MITIGATED { background-color: #dbeafe; color: #1e40af; }
+        .st-FIXED { background-color: #bbf7d0; color: #166534; }
+
+        /* Decision sub-rows */
+        .decision-row td {
+            background-color: #f0f9ff;
+            font-size: 8pt;
+            padding-left: 24px;
+            color: #475569;
+            border-bottom: 1px solid #e0f2fe;
+        }
+
+        .mono {
+            font-family: monospace;
+            font-size: 7.5pt;
+            color: #64748b;
+        }
+
+        .audit-footer {
+            margin-top: 20px;
+            padding: 10px 14px;
+            background-color: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 8pt;
+        }
+        .audit-footer .lbl {
+            font-weight: bold;
+            color: #334155;
+        }
+        .audit-footer .hash {
+            font-family: monospace;
+            font-size: 7pt;
+            color: #64748b;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Rapport de Conformit&#233; CRA</h1>
+    <div class="subtitle">Cyber Resilience Act (UE) 2024/2847</div>
+    <div class="date">G&#233;n&#233;r&#233; le {{generatedAt}}</div>
+</div>
+
+<!-- Executive summary -->
+<h2>R&#233;sum&#233; ex&#233;cutif</h2>
+<div class="summary-cards">
+    <div class="card card-total">
+        <div class="value">{{totalFindings}}</div>
+        <div class="label">Total vuln&#233;rabilit&#233;s</div>
+    </div>
+    <div class="card card-open">
+        <div class="value">{{openFindings}}</div>
+        <div class="label">Ouvertes</div>
+    </div>
+    <div class="card card-critical">
+        <div class="value">{{criticalHighFindings}}</div>
+        <div class="label">Critiques / Hautes</div>
+    </div>
+</div>
+
+<!-- Product -->
+<h2>Produit</h2>
+<div class="info-block">
+    <div class="row"><span class="lbl">Nom</span><span class="val">{{productName}}</span></div>
+    <div class="row"><span class="lbl">Type</span><span class="val">{{productType}}</span></div>
+    <div class="row"><span class="lbl">Criticit&#233;</span><span class="val">{{productCriticality}}</span></div>
+</div>
+
+<!-- Release -->
+<h2>Version</h2>
+<div class="info-block">
+    <div class="row"><span class="lbl">Version</span><span class="val">{{releaseVersion}}</span></div>
+    <div class="row"><span class="lbl">Statut</span><span class="val">{{releaseStatus}}</span></div>
+    <div class="row"><span class="lbl">R&#233;f. Git</span><span class="val">{{releaseGitRef}}</span></div>
+</div>
+
+<!-- Evidences -->
+<h2>Preuves ({{evidenceCount}})</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Type</th>
+            <th>Fichier</th>
+            <th>SHA-256</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{evidenceRows}}
+    </tbody>
+</table>
+
+<!-- Components -->
+<h2>Composants SBOM ({{componentCount}})</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Version</th>
+            <th>Type</th>
+            <th>PURL</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{componentRows}}
+    </tbody>
+</table>
+
+<!-- Findings -->
+<h2>Vuln&#233;rabilit&#233;s ({{totalFindings}})</h2>
+<table>
+    <thead>
+        <tr>
+            <th style="width:80px">S&#233;v&#233;rit&#233;</th>
+            <th>Identifiant</th>
+            <th>R&#233;sum&#233;</th>
+            <th style="width:80px">Statut</th>
+            <th style="width:60px">Source</th>
+            <th style="width:75px">D&#233;tect&#233;e</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{findingRows}}
+    </tbody>
+</table>
+
+<!-- Audit -->
+<div class="audit-footer">
+    <span class="lbl">Piste d'audit &#8212; Hash de t&#234;te :</span><br/>
+    <span class="hash">{{auditHashHead}}</span>
+</div>
+
+</body>
+</html>

@@ -44,14 +44,15 @@ const statusColors: Record<string, string> = {
 
 interface StatusBadgeProps {
   status: string;
+  label?: string;
   className?: string;
 }
 
-export function StatusBadge({ status, className = '' }: StatusBadgeProps) {
+export function StatusBadge({ status, label, className = '' }: StatusBadgeProps) {
   const colors = statusColors[status] || 'bg-gray-100 text-gray-800';
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors} ${className}`}>
-      {status.replace(/_/g, ' ')}
+      {label ?? status.replace(/_/g, ' ')}
     </span>
   );
 }

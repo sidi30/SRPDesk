@@ -5,19 +5,16 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.lexsecura.application.dto.AuditVerifyResponse;
 import com.lexsecura.domain.model.CraEvent;
 import com.lexsecura.domain.model.SrpSubmission;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.pdmodel.PDPage;
-import org.apache.pdfbox.pdmodel.PDPageContentStream;
-import org.apache.pdfbox.pdmodel.common.PDRectangle;
-import org.apache.pdfbox.pdmodel.font.PDType1Font;
-import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
+import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -29,12 +26,13 @@ import java.util.zip.ZipOutputStream;
 public class SrpExportService {
 
     private static final Logger log = LoggerFactory.getLogger(SrpExportService.class);
-    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+    private static final DateTimeFormatter FMT = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
             .withZone(ZoneId.of("Europe/Paris"));
 
     private final ObjectMapper objectMapper;
     private final AuditService auditService;
     private final CraEventService craEventService;
+    private final String srpTemplate;
 
     public SrpExportService(ObjectMapper objectMapper,
                             AuditService auditService,
@@ -43,12 +41,9 @@ public class SrpExportService {
                 .enable(SerializationFeature.INDENT_OUTPUT);
         this.auditService = auditService;
         this.craEventService = craEventService;
+        this.srpTemplate = loadTemplate("templates/srp-report.html");
     }
 
-    /**
-     * Stream a ZIP bundle to the given OutputStream.
-     * Content: submission.json, audit/chain_summary.json, human_readable.pdf
-     */
     public void exportBundle(SrpSubmission submission, CraEvent event, OutputStream out) throws IOException {
         try (ZipOutputStream zos = new ZipOutputStream(out)) {
 
@@ -89,107 +84,88 @@ public class SrpExportService {
     }
 
     private byte[] generatePdf(SrpSubmission submission, CraEvent event) throws IOException {
-        try (PDDocument doc = new PDDocument();
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-
-            PDPage page = new PDPage(PDRectangle.A4);
-            doc.addPage(page);
-
-            PDType1Font fontBold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);
-            PDType1Font fontNormal = new PDType1Font(Standard14Fonts.FontName.HELVETICA);
-
-            float margin = 50;
-            float yStart = page.getMediaBox().getHeight() - margin;
-            float width = page.getMediaBox().getWidth() - 2 * margin;
-
-            try (PDPageContentStream cs = new PDPageContentStream(doc, page)) {
-                float y = yStart;
-
-                // Title
-                y = drawText(cs, fontBold, 16, margin, y,
-                        "CRA " + formatType(submission.getSubmissionType()));
-                y -= 10;
-
-                // Event info
-                y = drawText(cs, fontBold, 11, margin, y, "Event: " + event.getTitle());
-                y = drawText(cs, fontNormal, 10, margin, y,
-                        "Type: " + event.getEventType().replace('_', ' '));
-                y = drawText(cs, fontNormal, 10, margin, y,
-                        "Status: " + event.getStatus());
-                y = drawText(cs, fontNormal, 10, margin, y,
-                        "Detected: " + FMT.format(event.getDetectedAt()));
-                if (event.getPatchAvailableAt() != null) {
-                    y = drawText(cs, fontNormal, 10, margin, y,
-                            "Patch available: " + FMT.format(event.getPatchAvailableAt()));
-                }
-                if (event.getResolvedAt() != null) {
-                    y = drawText(cs, fontNormal, 10, margin, y,
-                            "Resolved: " + FMT.format(event.getResolvedAt()));
-                }
-                y -= 15;
-
-                // Submission meta
-                y = drawText(cs, fontBold, 11, margin, y, "Submission Details");
-                y = drawText(cs, fontNormal, 10, margin, y,
-                        "ID: " + submission.getId());
-                y = drawText(cs, fontNormal, 10, margin, y,
-                        "Schema version: " + submission.getSchemaVersion());
-                y = drawText(cs, fontNormal, 10, margin, y,
-                        "Generated: " + FMT.format(submission.getGeneratedAt()));
-                if (submission.getSubmittedAt() != null) {
-                    y = drawText(cs, fontNormal, 10, margin, y,
-                            "Submitted: " + FMT.format(submission.getSubmittedAt()));
-                }
-                if (submission.getSubmittedReference() != null) {
-                    y = drawText(cs, fontNormal, 10, margin, y,
-                            "Reference: " + submission.getSubmittedReference());
-                }
-                y -= 15;
-
-                // Content summary (truncated for PDF)
-                y = drawText(cs, fontBold, 11, margin, y, "Content Summary");
-                String contentStr = objectMapper.writerWithDefaultPrettyPrinter()
-                        .writeValueAsString(objectMapper.readTree(submission.getContentJson()));
-                String[] lines = contentStr.split("\n");
-                for (int i = 0; i < Math.min(lines.length, 40) && y > margin + 30; i++) {
-                    String line = lines[i];
-                    if (line.length() > 90) line = line.substring(0, 87) + "...";
-                    y = drawText(cs, fontNormal, 8, margin, y, line);
-                }
-                if (lines.length > 40) {
-                    y = drawText(cs, fontNormal, 8, margin, y, "... (truncated, see submission.json)");
-                }
-
-                y -= 20;
-                // Footer
-                drawText(cs, fontNormal, 8, margin, Math.max(y, margin),
-                        "Generated by LexSecura - " + FMT.format(Instant.now()));
+        String contentJson = objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(objectMapper.readTree(submission.getContentJson()));
+        // Truncate for PDF readability
+        String[] lines = contentJson.split("\n");
+        if (lines.length > 80) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < 80; i++) {
+                sb.append(esc(lines[i])).append("\n");
             }
-
-            doc.save(baos);
-            return baos.toByteArray();
+            sb.append("... (tronqu\u00e9, voir submission.json)");
+            contentJson = sb.toString();
+        } else {
+            contentJson = esc(contentJson);
         }
-    }
 
-    private float drawText(PDPageContentStream cs, PDType1Font font, float size,
-                           float x, float y, String text) throws IOException {
-        // Strip control characters that are invalid in WinAnsiEncoding
-        String clean = text.replaceAll("[\\r\\t]", " ")
-                          .replaceAll("[^\\x20-\\x7E\\xA0-\\xFF]", "");
-        cs.beginText();
-        cs.setFont(font, size);
-        cs.newLineAtOffset(x, y);
-        cs.showText(clean);
-        cs.endText();
-        return y - size - 4;
+        String patchRow = event.getPatchAvailableAt() != null
+                ? "<div class=\"row\"><span class=\"lbl\">Correctif disponible</span><span class=\"val\">" + FMT.format(event.getPatchAvailableAt()) + "</span></div>"
+                : "";
+        String resolvedRow = event.getResolvedAt() != null
+                ? "<div class=\"row\"><span class=\"lbl\">R\u00e9solu le</span><span class=\"val\">" + FMT.format(event.getResolvedAt()) + "</span></div>"
+                : "";
+        String submittedAtRow = submission.getSubmittedAt() != null
+                ? "<div class=\"row\"><span class=\"lbl\">Soumis le</span><span class=\"val\">" + FMT.format(submission.getSubmittedAt()) + "</span></div>"
+                : "";
+        String referenceRow = submission.getSubmittedReference() != null
+                ? "<div class=\"row\"><span class=\"lbl\">R\u00e9f\u00e9rence</span><span class=\"val\">" + esc(submission.getSubmittedReference()) + "</span></div>"
+                : "";
+
+        String html = srpTemplate
+                .replace("{{reportTypeLabel}}", formatType(submission.getSubmissionType()))
+                .replace("{{generatedAt}}", FMT.format(Instant.now()))
+                .replace("{{eventTitle}}", esc(event.getTitle()))
+                .replace("{{eventType}}", esc(event.getEventType().replace('_', ' ')))
+                .replace("{{eventStatus}}", esc(event.getStatus()))
+                .replace("{{detectedAt}}", FMT.format(event.getDetectedAt()))
+                .replace("{{patchRow}}", patchRow)
+                .replace("{{resolvedRow}}", resolvedRow)
+                .replace("{{submissionId}}", submission.getId().toString())
+                .replace("{{schemaVersion}}", esc(submission.getSchemaVersion()))
+                .replace("{{submissionGeneratedAt}}", FMT.format(submission.getGeneratedAt()))
+                .replace("{{submittedAtRow}}", submittedAtRow)
+                .replace("{{referenceRow}}", referenceRow)
+                .replace("{{contentJson}}", contentJson);
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            PdfRendererBuilder builder = new PdfRendererBuilder();
+            builder.useFastMode();
+            builder.withHtmlContent(html, null);
+            builder.toStream(baos);
+            builder.run();
+            return baos.toByteArray();
+        } catch (Exception e) {
+            log.error("Failed to render SRP PDF", e);
+            throw new IOException("SRP PDF generation failed", e);
+        }
     }
 
     private String formatType(String type) {
         return switch (type) {
-            case "EARLY_WARNING" -> "Early Warning Report";
-            case "NOTIFICATION" -> "Notification Report";
-            case "FINAL_REPORT" -> "Final Report";
+            case "EARLY_WARNING" -> "Alerte Pr\u00e9coce";
+            case "NOTIFICATION" -> "Notification";
+            case "FINAL_REPORT" -> "Rapport Final";
             default -> type;
         };
+    }
+
+    private static String esc(String text) {
+        if (text == null) return "";
+        return text.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;");
+    }
+
+    private String loadTemplate(String path) {
+        try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
+            if (is == null) {
+                throw new IllegalStateException("Template not found: " + path);
+            }
+            return new String(is.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            throw new IllegalStateException("Failed to load template: " + path, e);
+        }
     }
 }

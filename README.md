@@ -63,6 +63,7 @@ Résultat : au lieu de gérer ça avec Excel + mails + panique, l’entreprise a
 | **SRP Autopilot** | Generation automatique des soumissions SRP (Early Warning, Notification, Final Report) avec autofill depuis les donnees existantes |
 | **Export Bundle SRP** | ZIP exportable (submission.json + chaine d'audit + PDF lisible) pret pour la Single Reporting Platform (ENISA) |
 | **Connecteur SRP** | Interface preparee pour la future API ENISA (stub en place, extensible) |
+| **Assistant IA local** | Generation de brouillons SRP, communication packs et pre-remplissage de questionnaires via LLM local (Ollama/Phi-3.5). Redaction PII, validation JSON Schema, fallback deterministe, piste d'audit IA |
 
 ---
 
@@ -95,10 +96,11 @@ Résultat : au lieu de gérer ça avec Excel + mails + panique, l’entreprise a
 |-----------|-------------|
 | Backend | Java 21, Spring Boot 3.3, Maven, Architecture Hexagonale |
 | Frontend | React 18, TypeScript, Vite 5, Tailwind CSS, TanStack Query |
-| Base de donnees | PostgreSQL 16, Flyway (migrations V001-V015) |
+| Base de donnees | PostgreSQL 16, Flyway (migrations V001-V016) |
 | Authentification | Keycloak 24 (OIDC + PKCE) |
 | Stockage fichiers | S3 (MinIO en local) |
 | API | REST, OpenAPI 3.1, Problem+JSON (RFC 9457) |
+| IA locale | Ollama (Phi-3.5-mini-instruct), redaction PII, validation JSON Schema |
 | Observabilite | Micrometer, Prometheus, OpenTelemetry |
 
 ---
@@ -410,6 +412,16 @@ Tous les endpoints necessitent un JWT valide sauf indication contraire.
 | `GET` | `.../{subId}/export` | ADMIN, CM | Telecharger le bundle ZIP |
 | `POST` | `.../{subId}/mark-submitted` | ADMIN, CM | Enregistrer la reference de soumission |
 
+### Assistant IA (`/api/v1/ai`)
+
+| Methode | Path | Role requis | Description |
+|---------|------|-------------|-------------|
+| `POST` | `/api/v1/ai/srp-draft` | ADMIN, CM | Generer un brouillon SRP via IA |
+| `POST` | `/api/v1/ai/comm-pack` | ADMIN, CM | Generer un pack de communication client |
+| `POST` | `/api/v1/ai/questionnaire/parse` | ADMIN, CM | Parser un fichier questionnaire (xlsx, docx, txt, csv) |
+| `POST` | `/api/v1/ai/questionnaire/fill` | ADMIN, CM | Pre-remplir un questionnaire via IA |
+| `GET` | `/api/v1/ai/jobs/{id}` | ADMIN, CM | Consulter un job IA et ses artefacts |
+
 ### IAM (Identity & Access Management)
 
 | Methode | Path | Role requis | Description |
@@ -462,6 +474,10 @@ Tous les endpoints necessitent un JWT valide sauf indication contraire.
 | Creer/valider une soumission SRP | Oui | Oui | Non |
 | Exporter un bundle SRP | Oui | Oui | Non |
 | Marquer une soumission comme soumise | Oui | Oui | Non |
+| Generer un brouillon SRP via IA | Oui | Oui | Non |
+| Generer un communication pack via IA | Oui | Oui | Non |
+| Parser/remplir un questionnaire via IA | Oui | Oui | Non |
+| Consulter un job IA | Oui | Oui | Non |
 
 ---
 
@@ -480,11 +496,13 @@ lexsecura/
 │   │   │   └── service/             #   ProductService, ReleaseService, EvidenceService,
 │   │   │                            #   CraEventService, SlaService, SrpSubmissionService,
 │   │   │                            #   SrpExportService, CraNotificationService
+│   │   ├── ai/                 #   AiService (orchestrateur IA), AiDtos
 │   │   ├── infrastructure/          # Adaptateurs (implementations)
 │   │   │   ├── persistence/         #   JPA entities, Spring Data repositories
 │   │   │   ├── security/            #   SecurityConfig, JwtTenantFilter, RateLimitFilter
 │   │   │   ├── storage/             #   S3StorageAdapter (MinIO)
 │   │   │   ├── osv/                 #   OsvApiClient (scan de vulnerabilites)
+│   │   │   ├── ai/                  #   OllamaClient, AiRedactor, AiSchemaValidator, QuestionnaireParser
 │   │   │   └── srp/                 #   StubSrpConnector (futur connecteur ENISA)
 │   │   └── api/                     # Couche presentation
 │   │       ├── controller/          #   REST controllers
@@ -642,6 +660,7 @@ Les migrations Flyway sont appliquees automatiquement au demarrage du backend.
 | `V013__create_vulnerabilities.sql` | Tables `vulnerabilities` et `finding_decisions` |
 | `V014__create_organizations_and_members.sql` | Tables `organizations` et `org_members` |
 | `V015__create_cra_module.sql` | Module CRA : `org_sla_settings`, `cra_events`, `cra_event_participants`, `cra_event_links`, `srp_submissions` |
+| `V016__ai_tables.sql` | Module IA : `ai_jobs` (jobs IA avec audit), `ai_artifacts` (artefacts generes) |
 
 ---
 
@@ -657,6 +676,89 @@ cd frontend && npx tsc --noEmit
 # Tous les tests
 make test
 ```
+
+---
+
+## Assistant IA local (Ollama)
+
+L'assistant IA utilise un LLM local via **Ollama** pour generer des brouillons sans envoyer de donnees a l'exterieur.
+
+### Installation d'Ollama
+
+```bash
+# Linux
+curl -fsSL https://ollama.com/install.sh | sh
+
+# macOS
+brew install ollama
+
+# Windows
+# Telecharger depuis https://ollama.com/download
+```
+
+### Telecharger le modele et demarrer
+
+```bash
+# Telecharger le modele recommande
+ollama pull phi3.5
+
+# Demarrer le serveur (si pas deja en service systemd)
+ollama serve
+```
+
+### Variables d'environnement
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | URL du serveur Ollama |
+| `OLLAMA_MODEL` | `phi3.5` | Modele a utiliser |
+| `OLLAMA_TEMPERATURE` | `0.2` | Temperature (0.0-1.0, plus bas = plus deterministe) |
+| `OLLAMA_TOP_P` | `0.9` | Top-p sampling |
+| `OLLAMA_NUM_CTX` | `4096` | Taille du contexte (tokens) |
+| `OLLAMA_TIMEOUT_SECONDS` | `120` | Timeout par requete |
+| `AI_RATE_LIMIT_RPM` | `10` | Requetes IA par minute (rate limit) |
+
+### Configuration dans application.yml
+
+```yaml
+app:
+  ai:
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      model: ${OLLAMA_MODEL:phi3.5}
+      temperature: ${OLLAMA_TEMPERATURE:0.2}
+      top-p: ${OLLAMA_TOP_P:0.9}
+      num-ctx: ${OLLAMA_NUM_CTX:4096}
+      timeout-seconds: ${OLLAMA_TIMEOUT_SECONDS:120}
+    rate-limit:
+      requests-per-minute: ${AI_RATE_LIMIT_RPM:10}
+```
+
+### Fonctionnalites IA
+
+| Fonctionnalite | Description |
+|----------------|-------------|
+| **Brouillon SRP** | Genere un brouillon de soumission SRP (Early Warning, Notification, Rapport Final) a partir des donnees evenement/produit/findings |
+| **Communication Pack** | Genere un advisory securite, un email client et des release notes a partir d'un evenement CRA |
+| **Questionnaire Autopilot** | Parse un questionnaire (xlsx/docx/txt/csv) et pre-remplit les reponses a partir des donnees organisation |
+
+### Securite IA
+
+- **Redaction PII** : emails, adresses IP, JWT, cles API et tokens sont automatiquement masques avant envoi au LLM
+- **Validation JSON Schema** : chaque sortie IA est validee contre un schema strict (networknt/json-schema-validator)
+- **Fallback deterministe** : si la validation echoue apres 3 tentatives, un brouillon par defaut est genere
+- **Piste d'audit** : chaque job IA est enregistre avec hash SHA-256 de l'entree et de la sortie
+- **Multi-tenant** : les jobs IA sont isoles par organisation (org_id)
+- **Aucun appel externe** : le LLM tourne localement, aucune donnee ne quitte l'infrastructure
+
+### Metriques Prometheus
+
+| Metrique | Description |
+|----------|-------------|
+| `ai_jobs_total` | Nombre total de jobs IA crees |
+| `ai_job_latency` | Latence de generation Ollama |
+| `ai_failures_total` | Nombre d'echecs de generation |
+| `ai_retries_total` | Nombre de retries effectues |
 
 ---
 

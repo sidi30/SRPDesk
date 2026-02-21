@@ -161,7 +161,7 @@ class CompliancePackServiceTest {
         when(auditEventRepository.findTopByOrgIdOrderByCreatedAtDesc(orgId))
                 .thenReturn(Optional.of(auditEvent));
         when(pdfGenerator.generate(eq(product), eq(release), eq(List.of(evidence)),
-                eq(List.of(component)), eq(List.of(finding)), any(), eq("b".repeat(64))))
+                eq(List.of(component)), any(), eq("b".repeat(64))))
                 .thenReturn("PDF-CONTENT-BYTES".getBytes());
 
         // Execute

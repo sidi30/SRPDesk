@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["advisory_markdown", "email_subject", "email_body", "release_notes_markdown", "references"],
+  "properties": {
+    "advisory_markdown": { "type": "string", "minLength": 10 },
+    "email_subject": { "type": "string", "minLength": 5 },
+    "email_body": { "type": "string", "minLength": 10 },
+    "release_notes_markdown": { "type": "string", "minLength": 10 },
+    "references": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "id"],
+        "properties": {
+          "type": { "type": "string", "enum": ["release", "finding", "evidence", "audit_event", "product"] },
+          "id": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

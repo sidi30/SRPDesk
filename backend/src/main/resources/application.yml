@@ -74,3 +74,14 @@ app:
     base-url: ${OSV_BASE_URL:https://api.osv.dev}
     batch-size: ${OSV_BATCH_SIZE:100}
     rate-limit-ms: ${OSV_RATE_LIMIT_MS:1000}
+  ai:
+    enabled: ${AI_ENABLED:true}
+    ollama:
+      base-url: ${OLLAMA_BASE_URL:http://localhost:11434}
+      model: ${OLLAMA_MODEL:phi3.5}
+      temperature: ${OLLAMA_TEMPERATURE:0.2}
+      top-p: ${OLLAMA_TOP_P:0.9}
+      num-ctx: ${OLLAMA_NUM_CTX:4096}
+      timeout-seconds: ${OLLAMA_TIMEOUT:120}
+    rate-limit:
+      requests-per-minute: ${AI_RATE_LIMIT_RPM:10}

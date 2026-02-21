@@ -41,7 +41,9 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:fossa.com)",
       "WebFetch(domain:www.cybeats.com)",
-      "Bash(mvn test-compile:*)"
+      "Bash(mvn test-compile:*)",
+      "Bash(grep:*)",
+      "Bash(ls:*)"
     ]
   }
 }

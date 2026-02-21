@@ -241,3 +241,23 @@ export interface SrpSubmissionCreateRequest {
 export interface MarkSubmittedRequest {
   reference: string;
 }
+
+// ── AI Module ──────────────────────────────────────────────
+
+export interface AiJobResponse {
+  id: string;
+  jobType: string;
+  status: string;
+  model: string;
+  error: string | null;
+  createdAt: string;
+  completedAt: string | null;
+  artifacts: AiArtifactResponse[];
+}
+
+export interface AiArtifactResponse {
+  id: string;
+  kind: string;
+  contentJson: unknown;
+  createdAt: string;
+}

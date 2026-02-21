@@ -8,6 +8,9 @@ import { FindingsPage } from './pages/FindingsPage';
 import { CraEventsPage } from './pages/CraEventsPage';
 import { CraEventDetailPage } from './pages/CraEventDetailPage';
 import { AuditTrailPage } from './pages/AuditTrailPage';
+import { AiSrpDraftPage } from './pages/AiSrpDraftPage';
+import { AiCommPackPage } from './pages/AiCommPackPage';
+import { AiQuestionnairePage } from './pages/AiQuestionnairePage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export function AppRoutes() {
@@ -22,6 +25,9 @@ export function AppRoutes() {
         <Route path="/cra-events" element={<CraEventsPage />} />
         <Route path="/cra-events/:id" element={<CraEventDetailPage />} />
         <Route path="/audit" element={<AuditTrailPage />} />
+        <Route path="/ai/srp-draft" element={<AiSrpDraftPage />} />
+        <Route path="/ai/comm-pack" element={<AiCommPackPage />} />
+        <Route path="/ai/questionnaire" element={<AiQuestionnairePage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

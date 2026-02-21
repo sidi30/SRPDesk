@@ -67,17 +67,32 @@ public class CompliancePackService {
         List<Evidence> evidences = evidenceRepository.findAllByReleaseIdAndOrgId(releaseId, orgId);
         List<Component> components = componentRepository.findAllByReleaseId(releaseId);
         List<Finding> findings = findingRepository.findAllByReleaseId(releaseId);
-        Map<UUID, List<FindingDecision>> decisionsByFinding = new HashMap<>();
-        for (Finding f : findings) {
-            decisionsByFinding.put(f.getId(), decisionRepository.findAllByFindingId(f.getId()));
-        }
+
+        // Enrich findings with vulnerability data + decisions
+        List<PdfReportGenerator.EnrichedFinding> enrichedFindings = findings.stream().map(f -> {
+            Vulnerability vuln = vulnerabilityRepository.findById(f.getVulnerabilityId()).orElse(null);
+            List<FindingDecision> decisions = decisionRepository.findAllByFindingId(f.getId());
+            return new PdfReportGenerator.EnrichedFinding(
+                    f,
+                    vuln != null ? vuln.getOsvId() : null,
+                    vuln != null ? vuln.getSummary() : null,
+                    vuln != null ? vuln.getSeverity() : null,
+                    decisions
+            );
+        }).toList();
+
+        Map<UUID, List<FindingDecision>> decisionsByFinding = enrichedFindings.stream()
+                .collect(Collectors.toMap(
+                        ef -> ef.finding().getId(),
+                        PdfReportGenerator.EnrichedFinding::decisions
+                ));
 
         String auditHashHead = auditEventRepository.findTopByOrgIdOrderByCreatedAtDesc(orgId)
                 .map(AuditEvent::getHash).orElse(null);
 
         // Build report data
         Map<String, Object> reportData = buildReportData(product, release, evidences,
-                components, findings, decisionsByFinding, auditHashHead);
+                components, enrichedFindings, auditHashHead);
 
         // Stream ZIP
         try (ZipOutputStream zip = new ZipOutputStream(outputStream)) {
@@ -89,7 +104,7 @@ public class CompliancePackService {
             // report.pdf
             zip.putNextEntry(new ZipEntry("report.pdf"));
             byte[] pdfBytes = pdfGenerator.generate(product, release, evidences,
-                    components, findings, decisionsByFinding, auditHashHead);
+                    components, enrichedFindings, auditHashHead);
             zip.write(pdfBytes);
             zip.closeEntry();
         }
@@ -97,8 +112,7 @@ public class CompliancePackService {
 
     private Map<String, Object> buildReportData(
             Product product, Release release, List<Evidence> evidences,
-            List<Component> components, List<Finding> findings,
-            Map<UUID, List<FindingDecision>> decisionsByFinding,
+            List<Component> components, List<PdfReportGenerator.EnrichedFinding> enrichedFindings,
             String auditHashHead) {
 
         Map<String, Object> data = new LinkedHashMap<>();
@@ -139,22 +153,18 @@ public class CompliancePackService {
         )).collect(Collectors.toList()));
 
         // Findings
-        data.put("findings", findings.stream().map(f -> {
+        data.put("findings", enrichedFindings.stream().map(ef -> {
+            Finding f = ef.finding();
             Map<String, Object> fm = new LinkedHashMap<>();
             fm.put("id", f.getId().toString());
             fm.put("status", f.getStatus());
             fm.put("source", f.getSource());
             fm.put("detectedAt", f.getDetectedAt().toString());
+            if (ef.osvId() != null) fm.put("osvId", ef.osvId());
+            if (ef.summary() != null) fm.put("summary", ef.summary());
+            if (ef.severity() != null) fm.put("severity", ef.severity());
 
-            Vulnerability vuln = vulnerabilityRepository.findById(f.getVulnerabilityId()).orElse(null);
-            if (vuln != null) {
-                fm.put("osvId", vuln.getOsvId());
-                fm.put("summary", vuln.getSummary());
-                fm.put("severity", vuln.getSeverity());
-            }
-
-            List<FindingDecision> decisions = decisionsByFinding.getOrDefault(f.getId(), List.of());
-            fm.put("decisions", decisions.stream().map(d -> Map.of(
+            fm.put("decisions", ef.decisions().stream().map(d -> Map.of(
                     "type", d.getDecisionType(),
                     "rationale", d.getRationale(),
                     "decidedBy", d.getDecidedBy().toString(),

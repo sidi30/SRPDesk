@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @page {
+            size: A4;
+            margin: 20mm 15mm 25mm 15mm;
+            @bottom-center {
+                content: "Page " counter(page) " / " counter(pages);
+                font-size: 8pt;
+                color: #6b7280;
+                font-family: sans-serif;
+            }
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: sans-serif;
+            font-size: 10pt;
+            color: #1f2937;
+            line-height: 1.5;
+        }
+        .header {
+            background-color: #1e3a5f;
+            color: #ffffff;
+            padding: 20px 25px;
+            margin: -20mm -15mm 20px -15mm;
+            padding-top: 30px;
+        }
+        .header h1 {
+            font-size: 18pt;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .header .subtitle {
+            font-size: 10pt;
+            color: #93c5fd;
+        }
+        .header .date {
+            font-size: 9pt;
+            color: #bfdbfe;
+            margin-top: 6px;
+        }
+
+        h2 {
+            font-size: 13pt;
+            color: #1e3a5f;
+            border-bottom: 2px solid #1e3a5f;
+            padding-bottom: 4px;
+            margin: 20px 0 10px 0;
+        }
+
+        .info-block {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+        }
+        .info-block .row {
+            display: flex;
+            margin-bottom: 3px;
+        }
+        .info-block .lbl {
+            font-weight: bold;
+            width: 140px;
+            color: #475569;
+            font-size: 9pt;
+        }
+        .info-block .val {
+            color: #1e293b;
+            font-size: 9pt;
+        }
+
+        .content-block {
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 12px 14px;
+            font-family: monospace;
+            font-size: 7.5pt;
+            color: #374151;
+            white-space: pre-wrap;
+            word-break: break-all;
+            line-height: 1.4;
+            max-height: none;
+        }
+
+        .footer {
+            margin-top: 30px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 8pt;
+            color: #9ca3af;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>CRA &#8212; {{reportTypeLabel}}</h1>
+    <div class="subtitle">Soumission au Point de Contact Unique (SRP)</div>
+    <div class="date">G&#233;n&#233;r&#233; le {{generatedAt}}</div>
+</div>
+
+<!-- Event -->
+<h2>&#201;v&#233;nement</h2>
+<div class="info-block">
+    <div class="row"><span class="lbl">Titre</span><span class="val">{{eventTitle}}</span></div>
+    <div class="row"><span class="lbl">Type</span><span class="val">{{eventType}}</span></div>
+    <div class="row"><span class="lbl">Statut</span><span class="val">{{eventStatus}}</span></div>
+    <div class="row"><span class="lbl">D&#233;tect&#233; le</span><span class="val">{{detectedAt}}</span></div>
+    {{patchRow}}
+    {{resolvedRow}}
+</div>
+
+<!-- Submission -->
+<h2>D&#233;tails de la soumission</h2>
+<div class="info-block">
+    <div class="row"><span class="lbl">Identifiant</span><span class="val">{{submissionId}}</span></div>
+    <div class="row"><span class="lbl">Version du sch&#233;ma</span><span class="val">{{schemaVersion}}</span></div>
+    <div class="row"><span class="lbl">G&#233;n&#233;r&#233; le</span><span class="val">{{submissionGeneratedAt}}</span></div>
+    {{submittedAtRow}}
+    {{referenceRow}}
+</div>
+
+<!-- Content -->
+<h2>Contenu</h2>
+<div class="content-block">{{contentJson}}</div>
+
+<div class="footer">
+    G&#233;n&#233;r&#233; par LexSecura &#8212; {{generatedAt}}
+</div>
+
+</body>
+</html>

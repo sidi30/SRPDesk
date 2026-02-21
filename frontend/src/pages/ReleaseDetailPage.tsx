@@ -6,7 +6,8 @@ import { useExportPack } from '../hooks/useReleases';
 import { evidencesApi } from '../api/evidences';
 import { StatusBadge } from '../components/StatusBadge';
 import { FileUpload } from '../components/FileUpload';
-import { FindingCard } from '../components/FindingCard';
+import { FindingsTable } from '../components/FindingsTable';
+import { FR } from '../i18n/fr';
 import type { Evidence, ComponentItem, Finding, EvidenceType, FindingDecisionRequest } from '../types';
 
 const EVIDENCE_TYPES: EvidenceType[] = [
@@ -103,9 +104,9 @@ export function ReleaseDetailPage() {
   };
 
   const tabs: { id: TabId; label: string; count?: number }[] = [
-    { id: 'evidences', label: 'Evidences', count: evidences?.length },
-    { id: 'components', label: 'Components', count: components?.length },
-    { id: 'findings', label: 'Findings', count: findings?.length },
+    { id: 'evidences', label: 'Preuves', count: evidences?.length },
+    { id: 'components', label: 'Composants', count: components?.length },
+    { id: 'findings', label: 'Vuln\u00e9rabilit\u00e9s', count: findings?.length },
   ];
 
   const formatBytes = (bytes: number): string => {
@@ -396,7 +397,7 @@ export function ReleaseDetailPage() {
             >
               {FINDING_STATUSES.map((s) => (
                 <option key={s} value={s}>
-                  {s || 'All Statuses'}
+                  {s ? (FR.findingStatus[s] || s) : 'Tous les statuts'}
                 </option>
               ))}
             </select>
@@ -425,23 +426,20 @@ export function ReleaseDetailPage() {
             </div>
           )}
 
-          <div className="bg-white rounded-lg shadow p-6">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
             {findingsLoading ? (
-              <div className="text-gray-500 text-sm">Loading...</div>
+              <div className="text-gray-500 text-sm p-6">Chargement...</div>
             ) : !findings || findings.length === 0 ? (
-              <div className="text-gray-400 text-sm py-4">
-                No findings found{findingStatusFilter ? ` with status ${findingStatusFilter}` : ''}. Upload an SBOM and trigger a scan to check for vulnerabilities.
+              <div className="text-gray-400 text-sm py-4 p-6">
+                {findingStatusFilter
+                  ? `Aucune vuln\u00e9rabilit\u00e9 avec le statut ${FR.findingStatus[findingStatusFilter] || findingStatusFilter}`
+                  : 'Aucune vuln\u00e9rabilit\u00e9 trouv\u00e9e. T\u00e9l\u00e9versez un SBOM et lancez un scan.'}
               </div>
             ) : (
-              <div className="space-y-4">
-                {findings.map((f: Finding) => (
-                  <FindingCard
-                    key={f.id}
-                    finding={f}
-                    onAddDecision={setDecisionFindingId}
-                  />
-                ))}
-              </div>
+              <FindingsTable
+                findings={findings}
+                onAddDecision={setDecisionFindingId}
+              />
             )}
           </div>
         </div>
@@ -451,7 +449,7 @@ export function ReleaseDetailPage() {
       {decisionFindingId && (
         <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Add Decision</h2>
+            <h2 className="text-lg font-semibold mb-4">{FR.decisionModal.title}</h2>
 
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -461,31 +459,31 @@ export function ReleaseDetailPage() {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Decision Type *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{FR.decisionModal.type}</label>
                 <select
                   value={decisionForm.decisionType}
                   onChange={(e) => setDecisionForm({ ...decisionForm, decisionType: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
-                  {DECISION_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t.replace(/_/g, ' ')}
+                  {DECISION_TYPES.map((dt) => (
+                    <option key={dt} value={dt}>
+                      {FR.decisionType[dt] || dt}
                     </option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Rationale *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{FR.decisionModal.rationale}</label>
                 <textarea
                   value={decisionForm.rationale}
                   onChange={(e) => setDecisionForm({ ...decisionForm, rationale: e.target.value })}
                   rows={3}
-                  placeholder="Explain why this decision was made..."
+                  placeholder={FR.decisionModal.rationalePlaceholder}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Due Date (optional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">{FR.decisionModal.dueDate}</label>
                 <input
                   type="date"
                   value={decisionForm.dueDate || ''}
@@ -502,14 +500,14 @@ export function ReleaseDetailPage() {
                 }}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
               >
-                Cancel
+                {FR.decisionModal.cancel}
               </button>
               <button
                 onClick={handleAddDecision}
                 disabled={!decisionForm.rationale || addDecision.isPending}
                 className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
               >
-                {addDecision.isPending ? 'Saving...' : 'Save Decision'}
+                {addDecision.isPending ? FR.decisionModal.saving : FR.decisionModal.save}
               </button>
             </div>
           </div>
