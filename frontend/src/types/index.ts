@@ -144,3 +144,100 @@ export interface ProblemDetail {
   detail?: string;
   instance?: string;
 }
+
+// ── CRA War Room ────────────────────────────────────────
+
+export type CraEventType = 'EXPLOITED_VULNERABILITY' | 'SEVERE_INCIDENT';
+export type CraEventStatus = 'DRAFT' | 'IN_REVIEW' | 'SUBMITTED' | 'CLOSED';
+export type ParticipantRole = 'OWNER' | 'APPROVER' | 'VIEWER';
+export type SubmissionType = 'EARLY_WARNING' | 'NOTIFICATION' | 'FINAL_REPORT';
+export type SubmissionStatus = 'DRAFT' | 'READY' | 'EXPORTED' | 'SUBMITTED';
+
+export interface CraEvent {
+  id: string;
+  orgId: string;
+  productId: string;
+  productName?: string;
+  eventType: CraEventType;
+  title: string;
+  description?: string;
+  status: CraEventStatus;
+  startedAt?: string;
+  detectedAt: string;
+  patchAvailableAt?: string;
+  resolvedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  participants: CraEventParticipant[];
+  links: CraEventLink[];
+}
+
+export interface CraEventParticipant {
+  id: string;
+  userId: string;
+  role: ParticipantRole;
+  createdAt: string;
+}
+
+export interface CraEventLink {
+  id: string;
+  linkType: 'RELEASE' | 'FINDING' | 'EVIDENCE';
+  targetId: string;
+  createdAt: string;
+}
+
+export interface CraEventCreateRequest {
+  productId: string;
+  eventType: CraEventType;
+  title: string;
+  description?: string;
+  startedAt?: string;
+  detectedAt: string;
+}
+
+export interface CraEventUpdateRequest {
+  title?: string;
+  description?: string;
+  status?: CraEventStatus;
+  startedAt?: string;
+  detectedAt?: string;
+  patchAvailableAt?: string;
+  resolvedAt?: string;
+}
+
+export interface SlaResponse {
+  earlyWarning: SlaDeadline;
+  notification: SlaDeadline;
+  finalReport: SlaDeadline | null;
+}
+
+export interface SlaDeadline {
+  dueAt: string;
+  remainingSeconds: number;
+  overdue: boolean;
+}
+
+export interface SrpSubmission {
+  id: string;
+  craEventId: string;
+  submissionType: SubmissionType;
+  status: SubmissionStatus;
+  contentJson: unknown;
+  schemaVersion: string;
+  validationErrors: string[] | null;
+  submittedReference?: string;
+  submittedAt?: string;
+  acknowledgmentEvidenceId?: string;
+  generatedBy: string;
+  generatedAt: string;
+  updatedAt: string;
+}
+
+export interface SrpSubmissionCreateRequest {
+  submissionType: SubmissionType;
+}
+
+export interface MarkSubmittedRequest {
+  reference: string;
+}

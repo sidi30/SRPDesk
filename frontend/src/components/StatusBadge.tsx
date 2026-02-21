@@ -26,6 +26,20 @@ const statusColors: Record<string, string> = {
   CLASS_II: 'bg-purple-100 text-purple-800',
   IMPORTANT_CLASS_I: 'bg-orange-100 text-orange-800',
   IMPORTANT_CLASS_II: 'bg-red-100 text-red-800',
+  // CRA Event statuses
+  IN_REVIEW: 'bg-yellow-100 text-yellow-800',
+  SUBMITTED: 'bg-blue-100 text-blue-800',
+  CLOSED: 'bg-gray-100 text-gray-800',
+  // CRA Event types
+  EXPLOITED_VULNERABILITY: 'bg-red-100 text-red-800',
+  SEVERE_INCIDENT: 'bg-orange-100 text-orange-800',
+  // SRP Submission statuses
+  READY: 'bg-green-100 text-green-800',
+  EXPORTED: 'bg-indigo-100 text-indigo-800',
+  // SRP Submission types
+  EARLY_WARNING: 'bg-orange-100 text-orange-800',
+  NOTIFICATION: 'bg-yellow-100 text-yellow-800',
+  FINAL_REPORT: 'bg-blue-100 text-blue-800',
 };
 
 interface StatusBadgeProps {

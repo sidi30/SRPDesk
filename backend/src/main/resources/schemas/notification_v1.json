@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "submissionType": "NOTIFICATION",
+  "required": ["product", "event", "timeline"],
+  "nestedRequired": {
+    "product": ["name", "type"],
+    "event": ["type", "title", "detectedAt", "description"],
+    "timeline": ["detectedAt"]
+  }
+}

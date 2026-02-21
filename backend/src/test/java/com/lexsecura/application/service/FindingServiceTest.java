@@ -58,7 +58,8 @@ class FindingServiceTest {
                 vulnerabilityRepository,
                 componentRepository,
                 releaseRepository,
-                auditService);
+                auditService,
+                new com.fasterxml.jackson.databind.ObjectMapper());
         TenantContext.setOrgId(orgId);
         TenantContext.setUserId(userId);
     }

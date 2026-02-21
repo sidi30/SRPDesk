@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "submissionType": "FINAL_REPORT",
+  "required": ["product", "event", "timeline", "vulnerabilities"],
+  "nestedRequired": {
+    "product": ["name", "type"],
+    "event": ["type", "title", "detectedAt", "description"],
+    "timeline": ["detectedAt"]
+  }
+}

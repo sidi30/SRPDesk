@@ -1,4 +1,22 @@
-# LexSecura - CRA Compliance & Evidence Manager
+# SRPDesk - CRA Compliance & Evidence Manager
+
+SRPDesk (ton projet) est un cockpit de conformité CRA qui aide les éditeurs logiciels / fabricants IoT à réagir vite quand une vulnérabilité exploitée ou un incident sévère touche leur produit.
+
+En bref, il fait 3 choses :
+
+Centralise les preuves par version (release)
+
+SBOM, artefacts de build, rapports de CI, décisions de correction, hashes, audit trail.
+
+Organise la “war room” CRA quand il se passe quelque chose
+
+création d’un événement (vuln exploitée / incident), affectation des responsables, suivi des actions, compte à rebours des échéances (24h/72h/rapport final).
+
+Génère un “bundle” de déclaration prêt à soumettre
+
+export ZIP (JSON + PDF + pièces justificatives) pour la Single Reporting Platform (ENISA), plus communication client (advisory / release note sécurité) si tu l’actives.
+
+Résultat : au lieu de gérer ça avec Excel + mails + panique, l’entreprise a un process guidé, traçable, et des dossiers prêts en 1 clic.
 
 > SaaS B2B pour la gestion de conformite au **EU Cyber Resilience Act** (Reglement 2024/2847).
 > Permet aux organisations de : enregistrer leurs produits numeriques, gerer les releases, collecter les preuves de conformite, scanner les vulnerabilites, et exporter des packs de conformite pour les auditeurs.
@@ -40,6 +58,11 @@
 | **Piste d'audit** | Chaine de hash append-only (SHA-256) avec detection de falsification et verification |
 | **Multi-tenant** | Isolation des donnees par organisation via contexte JWT (org_id) |
 | **RBAC** | 3 roles via Keycloak OIDC : Admin, Compliance Manager, Contributor |
+| **CRA War Room** | Gestion des evenements CRA (vulnerabilites exploitees, incidents severes), workflow par roles, liens vers releases/findings/evidences |
+| **SLA Timers** | Comptes a rebours configurables par organisation : Early Warning (24h), Notification (72h), Rapport Final (14j/30j) |
+| **SRP Autopilot** | Generation automatique des soumissions SRP (Early Warning, Notification, Final Report) avec autofill depuis les donnees existantes |
+| **Export Bundle SRP** | ZIP exportable (submission.json + chaine d'audit + PDF lisible) pret pour la Single Reporting Platform (ENISA) |
+| **Connecteur SRP** | Interface preparee pour la future API ENISA (stub en place, extensible) |
 
 ---
 
@@ -72,7 +95,7 @@
 |-----------|-------------|
 | Backend | Java 21, Spring Boot 3.3, Maven, Architecture Hexagonale |
 | Frontend | React 18, TypeScript, Vite 5, Tailwind CSS, TanStack Query |
-| Base de donnees | PostgreSQL 16, Flyway (migrations V001-V014) |
+| Base de donnees | PostgreSQL 16, Flyway (migrations V001-V015) |
 | Authentification | Keycloak 24 (OIDC + PKCE) |
 | Stockage fichiers | S3 (MinIO en local) |
 | API | REST, OpenAPI 3.1, Problem+JSON (RFC 9457) |
@@ -280,6 +303,32 @@ L'audit fonctionne comme une **blockchain simplifiee** :
 - Si un enregistrement est modifie en base, la chaine est rompue
 - L'endpoint `GET /api/v1/audit/verify` verifie toute la chaine
 
+### Flux CRA War Room & SRP
+
+Quand une vulnerabilite exploitee ou un incident severe touche un produit :
+
+```
+1. Creer un Evenement CRA
+       |
+2. Lier les releases, findings et evidences concernes
+       |
+3. Ajouter les participants (Owner, Approver, Viewer)
+       |
+4. Suivre les SLA en temps reel (Early Warning 24h, Notification 72h)
+       |
+5. Generer une soumission SRP (Early Warning / Notification / Final Report)
+       |  → Autofill depuis les donnees produit, releases, findings, evidences
+       |
+6. Valider la soumission contre le schema JSON
+       |
+7. Marquer "Ready" puis exporter le bundle ZIP
+       |  → submission.json + audit/chain_summary.json + human_readable.pdf
+       |
+8. Soumettre a la Single Reporting Platform (ENISA)
+       |
+9. Enregistrer la reference de soumission + preuve d'acquittement
+```
+
 ---
 
 ## Endpoints API complets
@@ -336,6 +385,31 @@ Tous les endpoints necessitent un JWT valide sauf indication contraire.
 | `GET` | `/api/v1/audit/verify` | ADMIN, CM | Verifier l'integrite de la piste d'audit |
 | `GET` | `/api/v1/audit/events` | ADMIN, CM | Consulter les evenements d'audit |
 
+### CRA Events (`/api/v1/cra-events`)
+
+| Methode | Path | Role requis | Description |
+|---------|------|-------------|-------------|
+| `POST` | `/api/v1/cra-events` | ADMIN, CM | Creer un evenement CRA |
+| `GET` | `/api/v1/cra-events` | Tout role | Lister les evenements (filtres: productId, status) |
+| `GET` | `/api/v1/cra-events/{id}` | Tout role | Detail d'un evenement |
+| `PATCH` | `/api/v1/cra-events/{id}` | ADMIN, CM | Modifier un evenement |
+| `POST` | `/api/v1/cra-events/{id}/links` | ADMIN, CM | Lier releases, findings, evidences |
+| `POST` | `/api/v1/cra-events/{id}/participants` | ADMIN, CM | Ajouter/modifier un participant |
+| `POST` | `/api/v1/cra-events/{id}/close` | ADMIN, CM | Cloturer un evenement |
+| `GET` | `/api/v1/cra-events/{id}/sla` | Tout role | Obtenir les SLA (deadlines, countdown) |
+
+### SRP Submissions (`/api/v1/cra-events/{id}/submissions`)
+
+| Methode | Path | Role requis | Description |
+|---------|------|-------------|-------------|
+| `POST` | `/api/v1/cra-events/{id}/submissions` | ADMIN, CM | Creer une soumission SRP (autofill) |
+| `GET` | `/api/v1/cra-events/{id}/submissions` | Tout role | Lister les soumissions d'un evenement |
+| `GET` | `/api/v1/cra-events/{id}/submissions/{subId}` | Tout role | Detail d'une soumission |
+| `POST` | `.../{subId}/validate` | ADMIN, CM | Valider contre le schema JSON |
+| `POST` | `.../{subId}/mark-ready` | ADMIN, CM | Marquer pret a soumettre |
+| `GET` | `.../{subId}/export` | ADMIN, CM | Telecharger le bundle ZIP |
+| `POST` | `.../{subId}/mark-submitted` | ADMIN, CM | Enregistrer la reference de soumission |
+
 ### IAM (Identity & Access Management)
 
 | Methode | Path | Role requis | Description |
@@ -380,6 +454,14 @@ Tous les endpoints necessitent un JWT valide sauf indication contraire.
 | Creer une organisation | Oui | Non | Non |
 | Ajouter un membre | Oui | Non | Non |
 | Supprimer une preuve | Oui | Oui | Non |
+| Creer/modifier un evenement CRA | Oui | Oui | Non |
+| Cloturer un evenement CRA | Oui | Oui | Non |
+| Lier des elements a un evenement CRA | Oui | Oui | Non |
+| Ajouter des participants CRA | Oui | Oui | Non |
+| Consulter les SLA | Oui | Oui | Oui |
+| Creer/valider une soumission SRP | Oui | Oui | Non |
+| Exporter un bundle SRP | Oui | Oui | Non |
+| Marquer une soumission comme soumise | Oui | Oui | Non |
 
 ---
 
@@ -390,16 +472,20 @@ lexsecura/
 ├── backend/                         # API Spring Boot (Architecture Hexagonale)
 │   ├── src/main/java/com/lexsecura/
 │   │   ├── domain/                  # Modeles, ports (interfaces repo), services domaine
-│   │   │   ├── model/               #   Product, Release, Evidence, Component, Finding, AuditEvent, etc.
+│   │   │   ├── model/               #   Product, Release, Evidence, Component, Finding, AuditEvent,
+│   │   │   │                        #   CraEvent, CraEventParticipant, CraEventLink, SrpSubmission, OrgSlaSettings
 │   │   │   └── repository/          #   Interfaces des repositories (ports)
 │   │   ├── application/             # DTOs, services applicatifs, ports applicatifs
 │   │   │   ├── dto/                 #   Request/Response DTOs
-│   │   │   └── service/             #   ProductService, ReleaseService, EvidenceService, etc.
+│   │   │   └── service/             #   ProductService, ReleaseService, EvidenceService,
+│   │   │                            #   CraEventService, SlaService, SrpSubmissionService,
+│   │   │                            #   SrpExportService, CraNotificationService
 │   │   ├── infrastructure/          # Adaptateurs (implementations)
 │   │   │   ├── persistence/         #   JPA entities, Spring Data repositories
 │   │   │   ├── security/            #   SecurityConfig, JwtTenantFilter, RateLimitFilter
 │   │   │   ├── storage/             #   S3StorageAdapter (MinIO)
-│   │   │   └── osv/                 #   OsvApiClient (scan de vulnerabilites)
+│   │   │   ├── osv/                 #   OsvApiClient (scan de vulnerabilites)
+│   │   │   └── srp/                 #   StubSrpConnector (futur connecteur ENISA)
 │   │   └── api/                     # Couche presentation
 │   │       ├── controller/          #   REST controllers
 │   │       └── error/               #   GlobalExceptionHandler (Problem+JSON)
@@ -407,15 +493,18 @@ lexsecura/
 │       ├── application.yml          # Config principale
 │       ├── application-local.yml    # Config dev local (port 5433)
 │       ├── application-docker.yml   # Config Docker
-│       └── db/migration/            # Migrations Flyway (V001-V014)
+│       ├── db/migration/            # Migrations Flyway (V001-V015)
+│       └── schemas/                 # Schemas de validation SRP (early_warning, notification, final_report)
 │
 ├── frontend/                        # SPA React 18
 │   └── src/
-│       ├── api/                     # Clients API (axios) : products, releases, evidences, audit, findings
+│       ├── api/                     # Clients API (axios) : products, releases, evidences, audit, findings, craEvents
 │       ├── auth/                    # Keycloak config + AuthProvider
-│       ├── hooks/                   # TanStack Query hooks (useProducts, useReleases, etc.)
-│       ├── pages/                   # Pages : Dashboard, Products, ProductDetail, ReleaseDetail, Findings
-│       ├── components/              # Composants partages : DataTable, StatusBadge, FileUpload, etc.
+│       ├── hooks/                   # TanStack Query hooks (useProducts, useReleases, useCraEvents, etc.)
+│       ├── pages/                   # Pages : Dashboard, Products, ProductDetail, ReleaseDetail, Findings,
+│       │                            #   CraEventsPage, CraEventDetailPage
+│       ├── components/              # Composants partages : DataTable, StatusBadge, FileUpload, FindingCard,
+│       │                            #   SlaCountdown, etc.
 │       └── types/                   # Types TypeScript
 │
 ├── infra/                           # Infrastructure
@@ -431,7 +520,8 @@ lexsecura/
 │       ├── 001-hexagonal-architecture.md
 │       ├── 002-multi-tenant-by-column.md
 │       ├── 003-s3-storage-sha256.md
-│       └── 004-no-itext-license.md
+│       ├── 004-no-itext-license.md
+│       └── 005-export-bundle-vs-submit-api.md
 │
 ├── .github/workflows/               # Pipeline CI (GitHub Actions)
 ├── Makefile                         # Commandes de dev
@@ -511,6 +601,7 @@ cd infra && docker compose logs -f backend  # Logs backend
 | `GITLAB_WEBHOOK_SECRET` | *(vide)* | Secret pour le webhook GitLab |
 | `OSV_BASE_URL` | `https://api.osv.dev` | URL de l'API OSV |
 | `OSV_BATCH_SIZE` | `100` | Taille des batches OSV |
+| `APP_CRA_NOTIFICATION_CHECK_MS` | `900000` | Intervalle de verification des deadlines CRA (15 min par defaut) |
 
 ### Variables d'environnement (Frontend)
 
@@ -550,6 +641,7 @@ Les migrations Flyway sont appliquees automatiquement au demarrage du backend.
 | `V012__create_components.sql` | Table `components` (composants SBOM) |
 | `V013__create_vulnerabilities.sql` | Tables `vulnerabilities` et `finding_decisions` |
 | `V014__create_organizations_and_members.sql` | Tables `organizations` et `org_members` |
+| `V015__create_cra_module.sql` | Module CRA : `org_sla_settings`, `cra_events`, `cra_event_participants`, `cra_event_links`, `srp_submissions` |
 
 ---
 

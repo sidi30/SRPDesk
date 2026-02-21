@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "submissionType": "EARLY_WARNING",
+  "required": ["product", "event"],
+  "nestedRequired": {
+    "product": ["name", "type"],
+    "event": ["type", "title", "detectedAt"]
+  }
+}
