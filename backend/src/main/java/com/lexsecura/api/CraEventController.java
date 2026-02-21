@@ -127,6 +127,7 @@ public class CraEventController {
     }
 
     @PostMapping("/{id}/submissions/{subId}/validate")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_MANAGER')")
     @Operation(summary = "Validate a submission against its schema")
     public ResponseEntity<SrpSubmissionResponse> validateSubmission(
             @PathVariable UUID id, @PathVariable UUID subId) {
@@ -142,6 +143,7 @@ public class CraEventController {
     }
 
     @GetMapping("/{id}/submissions/{subId}/export")
+    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_MANAGER')")
     @Operation(summary = "Export submission bundle as ZIP")
     public void exportBundle(@PathVariable UUID id, @PathVariable UUID subId,
                              HttpServletResponse response) throws IOException {

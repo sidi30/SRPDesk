@@ -100,16 +100,16 @@ public class SrpExportService {
         }
 
         String patchRow = event.getPatchAvailableAt() != null
-                ? "<div class=\"row\"><span class=\"lbl\">Correctif disponible</span><span class=\"val\">" + FMT.format(event.getPatchAvailableAt()) + "</span></div>"
+                ? "<div class=\"row\"><span class=\"lbl\">Correctif disponible :</span><span class=\"val\">" + FMT.format(event.getPatchAvailableAt()) + "</span></div>"
                 : "";
         String resolvedRow = event.getResolvedAt() != null
-                ? "<div class=\"row\"><span class=\"lbl\">R\u00e9solu le</span><span class=\"val\">" + FMT.format(event.getResolvedAt()) + "</span></div>"
+                ? "<div class=\"row\"><span class=\"lbl\">R\u00e9solu le :</span><span class=\"val\">" + FMT.format(event.getResolvedAt()) + "</span></div>"
                 : "";
         String submittedAtRow = submission.getSubmittedAt() != null
-                ? "<div class=\"row\"><span class=\"lbl\">Soumis le</span><span class=\"val\">" + FMT.format(submission.getSubmittedAt()) + "</span></div>"
+                ? "<div class=\"row\"><span class=\"lbl\">Soumis le :</span><span class=\"val\">" + FMT.format(submission.getSubmittedAt()) + "</span></div>"
                 : "";
         String referenceRow = submission.getSubmittedReference() != null
-                ? "<div class=\"row\"><span class=\"lbl\">R\u00e9f\u00e9rence</span><span class=\"val\">" + esc(submission.getSubmittedReference()) + "</span></div>"
+                ? "<div class=\"row\"><span class=\"lbl\">R\u00e9f\u00e9rence :</span><span class=\"val\">" + esc(submission.getSubmittedReference()) + "</span></div>"
                 : "";
 
         String html = srpTemplate

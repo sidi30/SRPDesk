@@ -4,6 +4,7 @@ import { useParseQuestionnaire, useFillQuestionnaire } from '../hooks/useAi';
 import { FileUpload } from '../components/FileUpload';
 import { FR } from '../i18n/fr';
 import type { AiJobResponse } from '../types';
+import { getErrorMessage } from '../types';
 
 export function AiQuestionnairePage() {
   const { data: products } = useProducts();
@@ -21,7 +22,7 @@ export function AiQuestionnairePage() {
     setResult(null);
     parseQuestionnaire.mutate(file, {
       onSuccess: (text) => setParsedText(text),
-      onError: (err: any) => setError(err.response?.data?.detail || err.message || t.error),
+      onError: (err: unknown) => setError(getErrorMessage(err, t.error)),
     });
   };
 
@@ -33,7 +34,7 @@ export function AiQuestionnairePage() {
       { questionnaireText: parsedText, productId: selectedProduct || undefined },
       {
         onSuccess: (data) => setResult(data),
-        onError: (err: any) => setError(err.response?.data?.detail || err.message || t.error),
+        onError: (err: unknown) => setError(getErrorMessage(err, t.error)),
       }
     );
   };

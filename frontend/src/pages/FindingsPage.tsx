@@ -3,6 +3,7 @@ import { useProducts } from '../hooks/useProducts';
 import { useProductFindings, useAddDecision } from '../hooks/useFindings';
 import { FindingsTable } from '../components/FindingsTable';
 import { FR } from '../i18n/fr';
+import { getErrorMessage } from '../types';
 import type { FindingDecisionRequest } from '../types';
 
 const FINDING_STATUSES = ['', 'OPEN', 'NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
@@ -43,8 +44,8 @@ export function FindingsPage() {
           setDecisionFindingId(null);
           setDecisionForm({ decisionType: 'NOT_AFFECTED', rationale: '' });
         },
-        onError: (err: any) => {
-          setError(err.response?.data?.detail || err.message || 'Failed to add decision');
+        onError: (err: unknown) => {
+          setError(getErrorMessage(err, 'Failed to add decision'));
         },
       }
     );

@@ -45,7 +45,8 @@
       "Bash(grep:*)",
       "Bash(ls:*)",
       "Bash(tail:*)",
-      "Bash(find C:\\\\Users\\\\ramzi\\\\Desktop\\\\devs\\\\lexsecura\\\\backend\\\\src\\\\main\\\\java\\\\com\\\\lexsecura\\\\api\\\\controller:*)"
+      "Bash(find C:\\\\Users\\\\ramzi\\\\Desktop\\\\devs\\\\lexsecura\\\\backend\\\\src\\\\main\\\\java\\\\com\\\\lexsecura\\\\api\\\\controller:*)",
+      "Bash(head:*)"
     ]
   }
 }

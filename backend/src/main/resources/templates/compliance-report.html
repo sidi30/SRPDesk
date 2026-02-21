@@ -46,8 +46,9 @@
             font-size: 13pt;
             color: #1e3a5f;
             border-bottom: 2px solid #1e3a5f;
-            padding-bottom: 4px;
-            margin: 20px 0 10px 0;
+            padding-bottom: 5px;
+            margin: 24px 0 12px 0;
+            letter-spacing: 0.3px;
         }
 
         /* Summary cards */
@@ -87,11 +88,13 @@
         }
         .info-block .row {
             display: flex;
-            margin-bottom: 3px;
+            margin-bottom: 4px;
+            gap: 6px;
         }
         .info-block .lbl {
             font-weight: bold;
-            width: 120px;
+            min-width: 130px;
+            flex-shrink: 0;
             color: #475569;
             font-size: 9pt;
         }
@@ -220,17 +223,17 @@
 <!-- Product -->
 <h2>Produit</h2>
 <div class="info-block">
-    <div class="row"><span class="lbl">Nom</span><span class="val">{{productName}}</span></div>
-    <div class="row"><span class="lbl">Type</span><span class="val">{{productType}}</span></div>
-    <div class="row"><span class="lbl">Criticit&#233;</span><span class="val">{{productCriticality}}</span></div>
+    <div class="row"><span class="lbl">Nom :</span><span class="val">{{productName}}</span></div>
+    <div class="row"><span class="lbl">Type :</span><span class="val">{{productType}}</span></div>
+    <div class="row"><span class="lbl">Criticit&#233; :</span><span class="val">{{productCriticality}}</span></div>
 </div>
 
 <!-- Release -->
 <h2>Version</h2>
 <div class="info-block">
-    <div class="row"><span class="lbl">Version</span><span class="val">{{releaseVersion}}</span></div>
-    <div class="row"><span class="lbl">Statut</span><span class="val">{{releaseStatus}}</span></div>
-    <div class="row"><span class="lbl">R&#233;f. Git</span><span class="val">{{releaseGitRef}}</span></div>
+    <div class="row"><span class="lbl">Version :</span><span class="val">{{releaseVersion}}</span></div>
+    <div class="row"><span class="lbl">Statut :</span><span class="val">{{releaseStatus}}</span></div>
+    <div class="row"><span class="lbl">R&#233;f. Git :</span><span class="val">{{releaseGitRef}}</span></div>
 </div>
 
 <!-- Evidences -->

@@ -7,7 +7,7 @@ import {
 } from '../hooks/useCraEvents';
 import { StatusBadge } from '../components/StatusBadge';
 import { SlaCountdown } from '../components/SlaCountdown';
-import type { CraEventUpdateRequest, SrpSubmission, SubmissionType, MarkSubmittedRequest } from '../types';
+import type { CraEventUpdateRequest, CraEventStatus, SrpSubmission, SubmissionType, MarkSubmittedRequest } from '../types';
 import { getErrorMessage } from '../types';
 
 const SUBMISSION_TYPES: SubmissionType[] = ['EARLY_WARNING', 'NOTIFICATION', 'FINAL_REPORT'];
@@ -375,7 +375,7 @@ export function CraEventDetailPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
                 <select
                   value={editForm.status ?? event.status}
-                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value as any })}
+                  onChange={(e) => setEditForm({ ...editForm, status: e.target.value as CraEventStatus })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   <option value="DRAFT">DRAFT</option>

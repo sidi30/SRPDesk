@@ -60,7 +60,7 @@ public class SbomService {
             throw new IllegalArgumentException("SBOM file exceeds maximum size of 10MB");
         }
 
-        Release release = releaseRepository.findById(releaseId)
+        Release release = releaseRepository.findByIdAndOrgId(releaseId, orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Release not found: " + releaseId));
 
         try {

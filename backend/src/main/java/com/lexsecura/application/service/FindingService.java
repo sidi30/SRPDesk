@@ -78,6 +78,10 @@ public class FindingService {
         Finding finding = findingRepository.findById(findingId)
                 .orElseThrow(() -> new EntityNotFoundException("Finding not found: " + findingId));
 
+        // Verify finding belongs to org via its release
+        releaseRepository.findByIdAndOrgId(finding.getReleaseId(), orgId)
+                .orElseThrow(() -> new EntityNotFoundException("Finding not found: " + findingId));
+
         Set<String> validTypes = Set.of("NOT_AFFECTED", "PATCH_PLANNED", "MITIGATED", "FIXED");
         if (!validTypes.contains(request.decisionType())) {
             throw new IllegalArgumentException("Invalid decision type: " + request.decisionType()

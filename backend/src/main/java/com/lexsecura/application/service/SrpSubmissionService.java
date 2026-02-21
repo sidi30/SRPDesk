@@ -231,7 +231,7 @@ public class SrpSubmissionService {
             if (!releaseLinks.isEmpty()) {
                 ArrayNode releases = content.putArray("affectedReleases");
                 for (CraEventLink link : releaseLinks) {
-                    releaseRepository.findById(link.getTargetId()).ifPresent(r -> {
+                    releaseRepository.findByIdAndOrgId(link.getTargetId(), orgId).ifPresent(r -> {
                         ObjectNode rn = releases.addObject();
                         rn.put("version", r.getVersion());
                         rn.put("status", r.getStatus().name());

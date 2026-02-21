@@ -3,6 +3,7 @@ import { useCraEvents } from '../hooks/useCraEvents';
 import { useGenerateSrpDraft } from '../hooks/useAi';
 import { FR } from '../i18n/fr';
 import type { AiJobResponse } from '../types';
+import { getErrorMessage } from '../types';
 
 const SUBMISSION_TYPES = ['EARLY_WARNING', 'NOTIFICATION', 'FINAL_REPORT'] as const;
 const TYPE_LABELS: Record<string, string> = {
@@ -28,7 +29,7 @@ export function AiSrpDraftPage() {
       { craEventId: selectedEvent, submissionType },
       {
         onSuccess: (data) => setResult(data),
-        onError: (err: any) => setError(err.response?.data?.detail || err.message || t.error),
+        onError: (err: unknown) => setError(getErrorMessage(err, t.error)),
       }
     );
   };

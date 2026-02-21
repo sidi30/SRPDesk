@@ -58,7 +58,7 @@ public class CompliancePackService {
     public void generatePack(UUID releaseId, OutputStream outputStream) throws IOException {
         UUID orgId = TenantContext.getOrgId();
 
-        Release release = releaseRepository.findById(releaseId)
+        Release release = releaseRepository.findByIdAndOrgId(releaseId, orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Release not found: " + releaseId));
 
         Product product = productRepository.findByIdAndOrgId(release.getProductId(), orgId)

@@ -3,6 +3,7 @@ import { useCraEvents } from '../hooks/useCraEvents';
 import { useGenerateCommPack } from '../hooks/useAi';
 import { FR } from '../i18n/fr';
 import type { AiJobResponse } from '../types';
+import { getErrorMessage } from '../types';
 
 export function AiCommPackPage() {
   const { data: events, isLoading: eventsLoading } = useCraEvents();
@@ -19,7 +20,7 @@ export function AiCommPackPage() {
     setResult(null);
     generateCommPack.mutate(selectedEvent, {
       onSuccess: (data) => setResult(data),
-      onError: (err: any) => setError(err.response?.data?.detail || err.message || t.error),
+      onError: (err: unknown) => setError(getErrorMessage(err, t.error)),
     });
   };
 

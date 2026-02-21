@@ -116,7 +116,7 @@ public class AiService {
             saveArtifact(job.getId(), "SRP_DRAFT", result);
         }
 
-        return aiJobRepository.findById(job.getId()).orElse(job);
+        return aiJobRepository.findByIdAndOrgId(job.getId(), orgId).orElse(job);
     }
 
     // ── Communication Pack ─────────────────────────────────
@@ -149,7 +149,7 @@ public class AiService {
             saveArtifact(job.getId(), "ADVISORY", result);
         }
 
-        return aiJobRepository.findById(job.getId()).orElse(job);
+        return aiJobRepository.findByIdAndOrgId(job.getId(), orgId).orElse(job);
     }
 
     // ── Questionnaire Fill ─────────────────────────────────
@@ -179,7 +179,7 @@ public class AiService {
             saveArtifact(job.getId(), "QUESTIONNAIRE_ANSWERS", result);
         }
 
-        return aiJobRepository.findById(job.getId()).orElse(job);
+        return aiJobRepository.findByIdAndOrgId(job.getId(), orgId).orElse(job);
     }
 
     // ── Get Job ────────────────────────────────────────────
