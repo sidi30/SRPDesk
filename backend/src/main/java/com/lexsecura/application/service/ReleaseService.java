@@ -56,7 +56,7 @@ public class ReleaseService {
         productRepository.findByIdAndOrgId(productId, orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found: " + productId));
 
-        return releaseRepository.findAllByProductId(productId).stream()
+        return releaseRepository.findAllByProductIdAndOrgId(productId, orgId).stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }

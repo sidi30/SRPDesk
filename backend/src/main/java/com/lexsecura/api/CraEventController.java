@@ -47,6 +47,7 @@ public class CraEventController {
     }
 
     @GetMapping
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List CRA events (filterable by productId, status)")
     public ResponseEntity<List<CraEventResponse>> list(
             @RequestParam(required = false) UUID productId,
@@ -55,6 +56,7 @@ public class CraEventController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get CRA event details")
     public ResponseEntity<CraEventResponse> findById(@PathVariable UUID id) {
         return ResponseEntity.ok(craEventService.findById(id));
@@ -72,7 +74,7 @@ public class CraEventController {
     @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_MANAGER')")
     @Operation(summary = "Add links (releases, findings, evidences) to a CRA event")
     public ResponseEntity<Void> addLinks(@PathVariable UUID id,
-                                         @RequestBody CraEventLinkRequest request) {
+                                         @Valid @RequestBody CraEventLinkRequest request) {
         craEventService.addLinks(id, request);
         return ResponseEntity.noContent().build();
     }
@@ -96,6 +98,7 @@ public class CraEventController {
     // ── SLA ─────────────────────────────────────────────────
 
     @GetMapping("/{id}/sla")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get SLA deadlines and remaining time for a CRA event")
     public ResponseEntity<SlaResponse> getSla(@PathVariable UUID id) {
         CraEvent event = craEventService.getEvent(id);
@@ -114,12 +117,14 @@ public class CraEventController {
     }
 
     @GetMapping("/{id}/submissions")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "List all submissions for a CRA event")
     public ResponseEntity<List<SrpSubmissionResponse>> listSubmissions(@PathVariable UUID id) {
         return ResponseEntity.ok(submissionService.findAll(id));
     }
 
     @GetMapping("/{id}/submissions/{subId}")
+    @PreAuthorize("isAuthenticated()")
     @Operation(summary = "Get a specific submission")
     public ResponseEntity<SrpSubmissionResponse> getSubmission(
             @PathVariable UUID id, @PathVariable UUID subId) {

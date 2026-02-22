@@ -53,7 +53,7 @@ public class EvidenceService {
         UUID orgId = TenantContext.getOrgId();
         UUID userId = TenantContext.getUserId();
 
-        releaseRepository.findById(releaseId)
+        releaseRepository.findByIdAndOrgId(releaseId, orgId)
                 .orElseThrow(() -> new EntityNotFoundException("Release not found: " + releaseId));
 
         EvidenceType type = EvidenceType.valueOf(evidenceType);

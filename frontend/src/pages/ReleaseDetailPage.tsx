@@ -148,9 +148,9 @@ export function ReleaseDetailPage() {
 
       {/* Error Display */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex justify-between items-center">
+        <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex justify-between items-center">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-2">
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-2" aria-label="Fermer le message d'erreur">
             &times;
           </button>
         </div>
@@ -192,6 +192,7 @@ export function ReleaseDetailPage() {
                 <select
                   value={uploadType}
                   onChange={(e) => setUploadType(e.target.value as EvidenceType)}
+                  aria-label="Type de preuve"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {EVIDENCE_TYPES.map((t) => (
@@ -394,6 +395,7 @@ export function ReleaseDetailPage() {
             <select
               value={findingStatusFilter}
               onChange={(e) => setFindingStatusFilter(e.target.value)}
+              aria-label="Filtrer les vulnérabilités par statut"
               className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-primary-500 focus:border-primary-500"
             >
               {FINDING_STATUSES.map((s) => (
@@ -448,12 +450,12 @@ export function ReleaseDetailPage() {
 
       {/* Decision Modal */}
       {decisionFindingId && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="release-decision-modal-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">{FR.decisionModal.title}</h2>
+            <h2 id="release-decision-modal-title" className="text-lg font-semibold mb-4">{FR.decisionModal.title}</h2>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div id="release-decision-error-msg" role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -464,6 +466,8 @@ export function ReleaseDetailPage() {
                 <select
                   value={decisionForm.decisionType}
                   onChange={(e) => setDecisionForm({ ...decisionForm, decisionType: e.target.value })}
+                  aria-label="Type de décision"
+                  aria-required="true"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {DECISION_TYPES.map((dt) => (
@@ -480,6 +484,9 @@ export function ReleaseDetailPage() {
                   onChange={(e) => setDecisionForm({ ...decisionForm, rationale: e.target.value })}
                   rows={3}
                   placeholder={FR.decisionModal.rationalePlaceholder}
+                  aria-label="Justification de la décision"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'release-decision-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -489,6 +496,7 @@ export function ReleaseDetailPage() {
                   type="date"
                   value={decisionForm.dueDate || ''}
                   onChange={(e) => setDecisionForm({ ...decisionForm, dueDate: e.target.value || undefined })}
+                  aria-label="Date d'échéance"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>

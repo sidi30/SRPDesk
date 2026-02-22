@@ -65,6 +65,9 @@ public class CompliancePackService {
                 .orElseThrow(() -> new EntityNotFoundException("Product not found"));
 
         List<Evidence> evidences = evidenceRepository.findAllByReleaseIdAndOrgId(releaseId, orgId);
+        // Chain of trust: components and findings are scoped to a releaseId that was already
+        // validated against orgId above (findByIdAndOrgId). Since components and findings belong
+        // to a release, and the release ownership is verified, these are implicitly tenant-safe.
         List<Component> components = componentRepository.findAllByReleaseId(releaseId);
         List<Finding> findings = findingRepository.findAllByReleaseId(releaseId);
 

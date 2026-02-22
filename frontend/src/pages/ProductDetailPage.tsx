@@ -198,6 +198,7 @@ export function ProductDetailPage() {
           <select
             value={findingStatusFilter}
             onChange={(e) => setFindingStatusFilter(e.target.value)}
+            aria-label="Filtrer les vulnérabilités par statut"
             className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-primary-500 focus:border-primary-500"
           >
             {FINDING_STATUSES.map((s) => (
@@ -254,12 +255,12 @@ export function ProductDetailPage() {
 
       {/* Create Release Modal */}
       {showCreateRelease && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="create-release-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">New Release</h2>
+            <h2 id="create-release-title" className="text-lg font-semibold mb-4">New Release</h2>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div id="release-error-msg" role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -272,6 +273,9 @@ export function ProductDetailPage() {
                   value={releaseForm.version}
                   onChange={(e) => setReleaseForm({ ...releaseForm, version: e.target.value })}
                   placeholder="e.g. 1.0.0"
+                  aria-label="Version de la release"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'release-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -282,6 +286,7 @@ export function ProductDetailPage() {
                   value={releaseForm.gitRef || ''}
                   onChange={(e) => setReleaseForm({ ...releaseForm, gitRef: e.target.value })}
                   placeholder="e.g. abc1234 or v1.0.0"
+                  aria-label="Référence Git"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm font-mono focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -292,6 +297,7 @@ export function ProductDetailPage() {
                   value={releaseForm.buildId || ''}
                   onChange={(e) => setReleaseForm({ ...releaseForm, buildId: e.target.value })}
                   placeholder="e.g. build-42"
+                  aria-label="Identifiant de build"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -320,12 +326,12 @@ export function ProductDetailPage() {
 
       {/* Edit Product Modal */}
       {showEditProduct && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="edit-product-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Edit Product</h2>
+            <h2 id="edit-product-title" className="text-lg font-semibold mb-4">Edit Product</h2>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div id="edit-product-error-msg" role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -337,6 +343,9 @@ export function ProductDetailPage() {
                   type="text"
                   value={editForm.name}
                   onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                  aria-label="Nom du produit"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'edit-product-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -345,6 +354,7 @@ export function ProductDetailPage() {
                 <select
                   value={editForm.type}
                   onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
+                  aria-label="Type de produit"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {PRODUCT_TYPES.map((t) => (
@@ -359,6 +369,7 @@ export function ProductDetailPage() {
                 <select
                   value={editForm.criticality}
                   onChange={(e) => setEditForm({ ...editForm, criticality: e.target.value })}
+                  aria-label="Niveau de criticité"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {CRITICALITY_LEVELS.map((c) => (

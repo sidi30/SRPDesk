@@ -109,7 +109,7 @@ export function AiQuestionnairePage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+        <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
       )}
 
       {/* Step 2: Preview + Generate */}
@@ -129,6 +129,7 @@ export function AiQuestionnairePage() {
               <select
                 value={selectedProduct}
                 onChange={(e) => setSelectedProduct(e.target.value)}
+                aria-label="Sélectionner un produit"
                 className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
               >
                 <option value="">-- Tous --</option>
@@ -140,6 +141,7 @@ export function AiQuestionnairePage() {
             <button
               onClick={handleFill}
               disabled={fillQuestionnaire.isPending}
+              aria-label="Remplir les réponses du questionnaire"
               className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
             >
               {fillQuestionnaire.isPending ? t.generating : t.fillAnswers}
@@ -156,12 +158,14 @@ export function AiQuestionnairePage() {
             <div className="flex gap-2">
               <button
                 onClick={handleExportJson}
+                aria-label="Exporter les réponses en JSON"
                 className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
               >
                 {t.export} JSON
               </button>
               <button
                 onClick={handleExportCsv}
+                aria-label="Exporter les réponses en CSV"
                 className="px-3 py-1.5 text-xs font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-100"
               >
                 {t.export} CSV

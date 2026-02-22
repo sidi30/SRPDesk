@@ -55,6 +55,7 @@ export function AiCommPackPage() {
             <select
               value={selectedEvent}
               onChange={(e) => setSelectedEvent(e.target.value)}
+              aria-label="Sélectionner un événement CRA"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="">--</option>
@@ -66,6 +67,7 @@ export function AiCommPackPage() {
           <button
             onClick={handleGenerate}
             disabled={!selectedEvent || generateCommPack.isPending}
+            aria-label="Générer le pack de communication"
             className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
           >
             {generateCommPack.isPending ? t.generating : t.generate}
@@ -74,7 +76,7 @@ export function AiCommPackPage() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+        <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
       )}
 
       {/* Results — 3 tabs */}

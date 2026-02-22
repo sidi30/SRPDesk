@@ -5,6 +5,7 @@ import { useProducts } from '../hooks/useProducts';
 import { StatusBadge } from '../components/StatusBadge';
 import type { CraEvent, CraEventCreateRequest, CraEventType } from '../types';
 import { getErrorMessage } from '../types';
+import { validate, craEventCreateSchema } from '../validation/schemas';
 
 const EVENT_STATUSES = ['', 'DRAFT', 'IN_REVIEW', 'SUBMITTED', 'CLOSED'] as const;
 const EVENT_TYPES: CraEventType[] = ['EXPLOITED_VULNERABILITY', 'SEVERE_INCIDENT'];
@@ -31,8 +32,12 @@ export function CraEventsPage() {
   });
 
   const handleCreate = () => {
-    if (!form.productId || !form.title) return;
     setError(null);
+    const result = validate(craEventCreateSchema, form);
+    if (!result.success) {
+      setError(Object.values(result.errors).join(', '));
+      return;
+    }
     createEvent.mutate(
       { ...form, detectedAt: new Date(form.detectedAt).toISOString() },
       {
@@ -102,6 +107,7 @@ export function CraEventsPage() {
           <select
             value={productFilter}
             onChange={(e) => setProductFilter(e.target.value)}
+            aria-label="Filtrer par produit"
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500 min-w-[200px]"
           >
             <option value="">All Products</option>
@@ -115,6 +121,7 @@ export function CraEventsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label="Filtrer par statut"
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500 min-w-[160px]"
           >
             {EVENT_STATUSES.map((s) => (
@@ -173,11 +180,11 @@ export function CraEventsPage() {
 
       {/* Create Modal */}
       {showCreate && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="create-event-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">New CRA Event</h2>
+            <h2 id="create-event-title" className="text-lg font-semibold mb-4">New CRA Event</h2>
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+              <div id="event-error-msg" role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
             )}
             <div className="space-y-4">
               <div>
@@ -185,6 +192,9 @@ export function CraEventsPage() {
                 <select
                   value={form.productId}
                   onChange={(e) => setForm({ ...form, productId: e.target.value })}
+                  aria-label="Produit"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'event-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   <option value="">Select a product</option>
@@ -198,6 +208,9 @@ export function CraEventsPage() {
                 <select
                   value={form.eventType}
                   onChange={(e) => setForm({ ...form, eventType: e.target.value as CraEventType })}
+                  aria-label="Type d'événement"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'event-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {EVENT_TYPES.map((t) => (
@@ -212,6 +225,9 @@ export function CraEventsPage() {
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="e.g. Log4Shell exploitation detected"
+                  aria-label="Titre de l'événement"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'event-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -221,6 +237,7 @@ export function CraEventsPage() {
                   value={form.description || ''}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                   rows={3}
+                  aria-label="Description de l'événement"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -230,6 +247,9 @@ export function CraEventsPage() {
                   type="datetime-local"
                   value={form.detectedAt}
                   onChange={(e) => setForm({ ...form, detectedAt: e.target.value })}
+                  aria-label="Date de détection"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'event-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>

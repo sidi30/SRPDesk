@@ -46,7 +46,8 @@ public class FindingService {
 
     @Transactional(readOnly = true)
     public List<FindingResponse> findByProductId(UUID productId, String status) {
-        List<Release> releases = releaseRepository.findAllByProductId(productId);
+        UUID orgId = TenantContext.getOrgId();
+        List<Release> releases = releaseRepository.findAllByProductIdAndOrgId(productId, orgId);
         List<FindingResponse> results = new ArrayList<>();
 
         for (Release release : releases) {

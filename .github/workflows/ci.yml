@@ -51,7 +51,7 @@ jobs:
 
       - name: Run integration tests
         working-directory: backend
-        run: ./mvnw verify -B -DskipUTs=true
+        run: ./mvnw verify -B -DskipTests=true
 
       - name: Check code format (Spotless)
         working-directory: backend

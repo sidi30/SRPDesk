@@ -63,7 +63,7 @@ export function AuditTrailPage() {
 
       {/* Verification Banner */}
       {auditResult && (
-        <div className={`mb-6 p-4 rounded-lg border ${auditResult.valid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+        <div role={auditResult.valid ? undefined : 'alert'} className={`mb-6 p-4 rounded-lg border ${auditResult.valid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
           <div className="flex items-center">
             <div className={`w-3 h-3 rounded-full mr-3 ${auditResult.valid ? 'bg-green-500' : 'bg-red-500'}`} />
             <div>

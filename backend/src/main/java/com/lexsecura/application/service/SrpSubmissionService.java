@@ -240,6 +240,10 @@ public class SrpSubmissionService {
             }
 
             // Linked findings
+            // Chain of trust: findings are accessed via CraEventLink which belongs to a CraEvent
+            // already validated against orgId. The linked finding, its vulnerability, and its
+            // component are org-scoped through this validated event chain. Vulnerabilities and
+            // components are global reference data without org_id columns, so findById is correct.
             List<CraEventLink> findingLinks = linkRepository.findAllByCraEventIdAndLinkType(event.getId(), "FINDING");
             if (!findingLinks.isEmpty()) {
                 ArrayNode findings = content.putArray("vulnerabilities");

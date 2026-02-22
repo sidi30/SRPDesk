@@ -8,5 +8,6 @@ import java.util.UUID;
 
 public interface JpaReleaseRepository extends JpaRepository<ReleaseEntity, UUID> {
     List<ReleaseEntity> findAllByProductId(UUID productId);
+    List<ReleaseEntity> findAllByProductIdAndOrgId(UUID productId, UUID orgId);
     Optional<ReleaseEntity> findByIdAndOrgId(UUID id, UUID orgId);
 }

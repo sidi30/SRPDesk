@@ -46,7 +46,14 @@
       "Bash(ls:*)",
       "Bash(tail:*)",
       "Bash(find C:\\\\Users\\\\ramzi\\\\Desktop\\\\devs\\\\lexsecura\\\\backend\\\\src\\\\main\\\\java\\\\com\\\\lexsecura\\\\api\\\\controller:*)",
-      "Bash(head:*)"
+      "Bash(head:*)",
+      "Bash(cd:*)",
+      "Bash(echo BUILD: OK:*)",
+      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/frontend && npm ls zod 2>&1)",
+      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/frontend && npx vitest run 2>&1)",
+      "Bash(echo TESTS: OK:*)",
+      "Bash(echo LINT: OK:*)",
+      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/frontend && npm run test 2>&1)"
     ]
   }
 }

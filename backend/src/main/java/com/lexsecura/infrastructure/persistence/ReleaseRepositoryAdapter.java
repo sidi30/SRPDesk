@@ -46,6 +46,12 @@ public class ReleaseRepositoryAdapter implements ReleaseRepository {
     }
 
     @Override
+    public List<Release> findAllByProductIdAndOrgId(UUID productId, UUID orgId) {
+        return jpa.findAllByProductIdAndOrgId(productId, orgId).stream()
+                .map(mapper::toDomain).collect(Collectors.toList());
+    }
+
+    @Override
     public void deleteById(UUID id) {
         jpa.deleteById(id);
     }

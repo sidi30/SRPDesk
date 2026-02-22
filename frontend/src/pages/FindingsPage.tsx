@@ -5,6 +5,7 @@ import { FindingsTable } from '../components/FindingsTable';
 import { FR } from '../i18n/fr';
 import { getErrorMessage } from '../types';
 import type { FindingDecisionRequest } from '../types';
+import { validate, findingDecisionSchema } from '../validation/schemas';
 
 const FINDING_STATUSES = ['', 'OPEN', 'NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
 const DECISION_TYPES = ['NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
@@ -35,8 +36,13 @@ export function FindingsPage() {
   );
 
   const handleAddDecision = () => {
-    if (!decisionFindingId || !decisionForm.rationale) return;
+    if (!decisionFindingId) return;
     setError(null);
+    const result = validate(findingDecisionSchema, decisionForm);
+    if (!result.success) {
+      setError(Object.values(result.errors).join(', '));
+      return;
+    }
     addDecision.mutate(
       { findingId: decisionFindingId, data: decisionForm },
       {
@@ -70,6 +76,7 @@ export function FindingsPage() {
           <select
             value={activeProductId}
             onChange={(e) => setSelectedProduct(e.target.value)}
+            aria-label="Filtrer par produit"
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500 min-w-[200px]"
           >
             {(!products || products.length === 0) && (
@@ -87,6 +94,7 @@ export function FindingsPage() {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
+            aria-label="Filtrer par statut"
             className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500 min-w-[160px]"
           >
             {FINDING_STATUSES.map((s) => (
@@ -138,12 +146,12 @@ export function FindingsPage() {
 
       {/* Decision Modal */}
       {decisionFindingId && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="decision-modal-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">{tm.title}</h2>
+            <h2 id="decision-modal-title" className="text-lg font-semibold mb-4">{tm.title}</h2>
 
             {error && (
-              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+              <div id="decision-error-msg" role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
                 {error}
               </div>
             )}
@@ -154,6 +162,8 @@ export function FindingsPage() {
                 <select
                   value={decisionForm.decisionType}
                   onChange={(e) => setDecisionForm({ ...decisionForm, decisionType: e.target.value })}
+                  aria-label="Type de décision"
+                  aria-required="true"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   {DECISION_TYPES.map((dt) => (
@@ -170,6 +180,9 @@ export function FindingsPage() {
                   onChange={(e) => setDecisionForm({ ...decisionForm, rationale: e.target.value })}
                   rows={3}
                   placeholder={tm.rationalePlaceholder}
+                  aria-label="Justification de la décision"
+                  aria-required="true"
+                  {...(error ? { 'aria-invalid': true, 'aria-describedby': 'decision-error-msg' } : {})}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -179,6 +192,7 @@ export function FindingsPage() {
                   type="date"
                   value={decisionForm.dueDate || ''}
                   onChange={(e) => setDecisionForm({ ...decisionForm, dueDate: e.target.value || undefined })}
+                  aria-label="Date d'échéance"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>

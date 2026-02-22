@@ -59,6 +59,7 @@ export function AiSrpDraftPage() {
             <select
               value={selectedEvent}
               onChange={(e) => setSelectedEvent(e.target.value)}
+              aria-label="Sélectionner un événement CRA"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
             >
               <option value="">--</option>
@@ -74,6 +75,7 @@ export function AiSrpDraftPage() {
             <select
               value={submissionType}
               onChange={(e) => setSubmissionType(e.target.value)}
+              aria-label="Type de soumission"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
             >
               {SUBMISSION_TYPES.map((st) => (
@@ -85,6 +87,7 @@ export function AiSrpDraftPage() {
             <button
               onClick={handleGenerate}
               disabled={!selectedEvent || generateDraft.isPending}
+              aria-label="Générer le brouillon SRP"
               className="w-full px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
             >
               {generateDraft.isPending ? t.generating : t.generate}
@@ -95,7 +98,7 @@ export function AiSrpDraftPage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+        <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
           {error}
         </div>
       )}
@@ -124,7 +127,7 @@ export function AiSrpDraftPage() {
           ))}
 
           {result.error && (
-            <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+            <div role="alert" className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
               {result.error}
             </div>
           )}

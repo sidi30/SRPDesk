@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/lexsecura_test
+    username: test
+    password: test
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+
+  flyway:
+    enabled: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://mock-issuer.test/realms/lexsecura
+          jwk-set-uri: https://mock-issuer.test/realms/lexsecura/protocol/openid-connect/certs
+
+app:
+  s3:
+    endpoint: http://localhost:9000
+    access-key: minioadmin
+    secret-key: minioadmin
+    bucket: evidences-test
+    region: us-east-1
+  rate-limit:
+    enabled: false
+    requests-per-minute: 9999
+  ai:
+    enabled: false
+
+logging:
+  level:
+    com.lexsecura: DEBUG

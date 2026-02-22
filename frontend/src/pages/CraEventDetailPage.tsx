@@ -121,9 +121,9 @@ export function CraEventDetailPage() {
 
       {/* Error */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex justify-between">
+        <div role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex justify-between">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-2">&times;</button>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-2" aria-label="Fermer le message d'erreur">&times;</button>
         </div>
       )}
 
@@ -316,7 +316,7 @@ export function CraEventDetailPage() {
                     const errors = sub.validationErrors;
                     if (!Array.isArray(errors) || errors.length === 0) return null;
                     return (
-                      <div className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+                      <div role="alert" className="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
                         <p className="text-xs font-medium text-red-700 mb-1">Validation Errors:</p>
                         <ul className="text-xs text-red-600 list-disc pl-4 space-y-0.5">
                           {errors.map((err: string, i: number) => (
@@ -349,9 +349,9 @@ export function CraEventDetailPage() {
 
       {/* Edit Modal */}
       {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="edit-event-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Edit Event</h2>
+            <h2 id="edit-event-title" className="text-lg font-semibold mb-4">Edit Event</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -359,6 +359,8 @@ export function CraEventDetailPage() {
                   type="text"
                   value={editForm.title ?? event.title}
                   onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  aria-label="Titre de l'événement"
+                  aria-required="true"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -368,6 +370,7 @@ export function CraEventDetailPage() {
                   value={editForm.description ?? event.description ?? ''}
                   onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                   rows={3}
+                  aria-label="Description de l'événement"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -376,6 +379,7 @@ export function CraEventDetailPage() {
                 <select
                   value={editForm.status ?? event.status}
                   onChange={(e) => setEditForm({ ...editForm, status: e.target.value as CraEventStatus })}
+                  aria-label="Statut de l'événement"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 >
                   <option value="DRAFT">DRAFT</option>
@@ -389,6 +393,7 @@ export function CraEventDetailPage() {
                   type="datetime-local"
                   value={editForm.patchAvailableAt ? editForm.patchAvailableAt.slice(0, 16) : (event.patchAvailableAt ? event.patchAvailableAt.slice(0, 16) : '')}
                   onChange={(e) => setEditForm({ ...editForm, patchAvailableAt: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                  aria-label="Date de disponibilité du correctif"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -398,6 +403,7 @@ export function CraEventDetailPage() {
                   type="datetime-local"
                   value={editForm.resolvedAt ? editForm.resolvedAt.slice(0, 16) : (event.resolvedAt ? event.resolvedAt.slice(0, 16) : '')}
                   onChange={(e) => setEditForm({ ...editForm, resolvedAt: e.target.value ? new Date(e.target.value).toISOString() : undefined })}
+                  aria-label="Date de résolution"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
@@ -414,9 +420,9 @@ export function CraEventDetailPage() {
 
       {/* Mark Submitted Modal */}
       {submitForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="submit-modal-title">
           <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 className="text-lg font-semibold mb-4">Mark as Submitted</h2>
+            <h2 id="submit-modal-title" className="text-lg font-semibold mb-4">Mark as Submitted</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">External Reference *</label>
@@ -425,6 +431,8 @@ export function CraEventDetailPage() {
                   value={submitForm.reference}
                   onChange={(e) => setSubmitForm({ ...submitForm, reference: e.target.value })}
                   placeholder="e.g. SRP-2026-001234"
+                  aria-label="Référence externe"
+                  aria-required="true"
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-primary-500 focus:border-primary-500"
                 />
               </div>
