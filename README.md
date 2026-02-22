@@ -1,6 +1,6 @@
 # SRPDesk - CRA Compliance & Evidence Manager
 
-SRPDesk (ton projet) est un cockpit de conformité CRA qui aide les éditeurs logiciels / fabricants IoT à réagir vite quand une vulnérabilité exploitée ou un incident sévère touche leur produit.
+SRPDesk est un cockpit de conformite CRA qui aide les editeurs logiciels / fabricants IoT a reagir vite quand une vulnerabilite exploitee ou un incident severe touche leur produit.
 
 En bref, il fait 3 choses :
 
@@ -58,6 +58,12 @@ Résultat : au lieu de gérer ça avec Excel + mails + panique, l’entreprise a
 | **Piste d'audit** | Chaine de hash append-only (SHA-256) avec detection de falsification et verification |
 | **Multi-tenant** | Isolation des donnees par organisation via contexte JWT (org_id) |
 | **RBAC** | 3 roles via Keycloak OIDC : Admin, Compliance Manager, Contributor |
+| **Tests frontend** | Suite de 47 tests unitaires avec Vitest + React Testing Library |
+| **Accessibilite WCAG AA** | Labels ARIA, skip-nav, attributs role, contraste conforme |
+| **Validation Zod** | Schemas de validation cote client pour tous les formulaires |
+| **OWASP Dependency Check** | Scan CVE automatise via owasp-dependency-check-maven |
+| **Securisation @PreAuthorize** | Controle d'acces Spring Security sur tous les endpoints REST |
+| **Rapports PDF ameliores** | Mise en page PDF corrigee avec separateurs, labels, CSS optimise |
 | **CRA War Room** | Gestion des evenements CRA (vulnerabilites exploitees, incidents severes), workflow par roles, liens vers releases/findings/evidences |
 | **SLA Timers** | Comptes a rebours configurables par organisation : Early Warning (24h), Notification (72h), Rapport Final (14j/30j) |
 | **SRP Autopilot** | Generation automatique des soumissions SRP (Early Warning, Notification, Final Report) avec autofill depuis les donnees existantes |
@@ -96,7 +102,7 @@ Résultat : au lieu de gérer ça avec Excel + mails + panique, l’entreprise a
 |-----------|-------------|
 | Backend | Java 21, Spring Boot 3.3, Maven, Architecture Hexagonale |
 | Frontend | React 18, TypeScript, Vite 5, Tailwind CSS, TanStack Query |
-| Base de donnees | PostgreSQL 16, Flyway (migrations V001-V016) |
+| Base de donnees | PostgreSQL 16, Flyway (migrations V001-V017) |
 | Authentification | Keycloak 24 (OIDC + PKCE) |
 | Stockage fichiers | S3 (MinIO en local) |
 | API | REST, OpenAPI 3.1, Problem+JSON (RFC 9457) |
@@ -511,7 +517,7 @@ lexsecura/
 │       ├── application.yml          # Config principale
 │       ├── application-local.yml    # Config dev local (port 5433)
 │       ├── application-docker.yml   # Config Docker
-│       ├── db/migration/            # Migrations Flyway (V001-V015)
+│       ├── db/migration/            # Migrations Flyway (V001-V017)
 │       └── schemas/                 # Schemas de validation SRP (early_warning, notification, final_report)
 │
 ├── frontend/                        # SPA React 18
@@ -661,6 +667,7 @@ Les migrations Flyway sont appliquees automatiquement au demarrage du backend.
 | `V014__create_organizations_and_members.sql` | Tables `organizations` et `org_members` |
 | `V015__create_cra_module.sql` | Module CRA : `org_sla_settings`, `cra_events`, `cra_event_participants`, `cra_event_links`, `srp_submissions` |
 | `V016__ai_tables.sql` | Module IA : `ai_jobs` (jobs IA avec audit), `ai_artifacts` (artefacts generes) |
+| `V017__add_indexes.sql` | Index de performance sur les tables principales |
 
 ---
 
@@ -669,6 +676,10 @@ Les migrations Flyway sont appliquees automatiquement au demarrage du backend.
 ```bash
 # Tests backend (unitaires)
 cd backend && ./mvnw test
+
+# Tests frontend (47 tests unitaires - Vitest + React Testing Library)
+cd frontend && npm test
+cd frontend && npm run test:ci    # mode CI (sans watch)
 
 # Verification types frontend
 cd frontend && npx tsc --noEmit
@@ -759,6 +770,38 @@ app:
 | `ai_job_latency` | Latence de generation Ollama |
 | `ai_failures_total` | Nombre d'echecs de generation |
 | `ai_retries_total` | Nombre de retries effectues |
+
+---
+
+## Securite
+
+SRPDesk applique une approche de defense en profondeur :
+
+| Couche | Mesure |
+|--------|--------|
+| **Multi-tenancy** | Isolation par `org_id` extrait du JWT — chaque requete est filtree par organisation |
+| **Autorisation** | `@PreAuthorize` sur tous les endpoints REST avec verification de roles (ADMIN, COMPLIANCE_MANAGER, CONTRIBUTOR) |
+| **Dependances** | Scan CVE automatise via **OWASP dependency-check-maven** integre au build Maven |
+| **Audit trail** | Chaine de hash SHA-256 append-only avec detection de falsification |
+| **Validation serveur** | `@Valid` + Bean Validation sur tous les DTOs d'entree |
+| **Validation client** | Schemas **Zod** sur tous les formulaires React |
+| **Stockage** | Verification d'integrite SHA-256 sur chaque fichier stocke en S3 |
+| **IA locale** | LLM Ollama local — aucune donnee ne quitte l'infrastructure |
+| **Redaction PII** | Masquage automatique des emails, IP, JWT, cles API avant envoi au LLM |
+| **Rate limiting** | Configurable par endpoint (RATE_LIMIT_RPM) |
+
+---
+
+## Accessibilite (WCAG AA)
+
+Le frontend respecte les criteres d'accessibilite **WCAG 2.1 niveau AA** :
+
+- **Labels ARIA** : tous les elements interactifs ont des `aria-label` ou `aria-labelledby`
+- **Skip navigation** : lien "Aller au contenu principal" pour la navigation clavier
+- **Attributs role** : roles semantiques sur les composants (alert, status, navigation, etc.)
+- **Contraste** : ratios de contraste conformes au niveau AA (4.5:1 pour le texte, 3:1 pour les grands textes)
+- **Navigation clavier** : tous les elements interactifs sont accessibles au clavier (tab, enter, escape)
+- **Messages d'erreur** : lies aux champs de formulaire via `aria-describedby`
 
 ---
 

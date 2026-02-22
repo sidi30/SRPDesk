@@ -1,4 +1,4 @@
-# LexSecura - CRA Reporting & Evidence Manager
+# SRPDesk - CRA Reporting & Evidence Manager
 
 ## Project Overview
 SaaS B2B for EU Cyber Resilience Act (2024/2847) compliance management.
