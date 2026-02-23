@@ -1,8 +1,10 @@
-package com.lexsecura.application.service;
+package com.lexsecura.extras.requirements.service;
 
 import com.lexsecura.application.dto.CraChecklistItemResponse;
 import com.lexsecura.application.dto.CraChecklistSummaryResponse;
 import com.lexsecura.application.dto.CraChecklistUpdateRequest;
+import com.lexsecura.application.service.AuditService;
+import com.lexsecura.application.service.EntityNotFoundException;
 import com.lexsecura.domain.model.CraChecklistItem;
 import com.lexsecura.domain.repository.CraChecklistRepository;
 import com.lexsecura.domain.repository.ProductRepository;

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.lexsecura.application.dto.AuditVerifyResponse;
 import com.lexsecura.domain.model.CraEvent;
 import com.lexsecura.domain.model.SrpSubmission;
+import com.lexsecura.domain.repository.VexDocumentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,13 +32,16 @@ class SrpExportServiceTest {
     @Mock
     private CraEventService craEventService;
 
+    @Mock
+    private VexDocumentRepository vexDocumentRepository;
+
     private SrpExportService exportService;
 
     @BeforeEach
     void setUp() {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
-        exportService = new SrpExportService(objectMapper, auditService, craEventService);
+        exportService = new SrpExportService(objectMapper, auditService, craEventService, vexDocumentRepository);
     }
 
     @Test

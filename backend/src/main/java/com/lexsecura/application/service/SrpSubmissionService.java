@@ -256,6 +256,12 @@ public class SrpSubmissionService {
                             fn.put("osvId", v.getOsvId());
                             fn.put("severity", v.getSeverity());
                             if (v.getSummary() != null) fn.put("summary", v.getSummary());
+                            // EUVD & monitoring enrichment (Phase 2.6-2.7)
+                            if (v.getEuvdId() != null) fn.put("euvdId", v.getEuvdId());
+                            if (v.getCvssScore() != null) fn.put("cvssScore", v.getCvssScore().doubleValue());
+                            if (v.getCvssVector() != null) fn.put("cvssVector", v.getCvssVector());
+                            fn.put("activelyExploited", v.isActivelyExploited());
+                            if (v.getKevDateAdded() != null) fn.put("kevDateAdded", v.getKevDateAdded().toString());
                         });
                         componentRepository.findById(f.getComponentId()).ifPresent(c -> {
                             fn.put("componentName", c.getName());

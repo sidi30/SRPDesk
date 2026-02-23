@@ -17,4 +17,6 @@ public interface FindingRepository {
     List<Finding> findAllByReleaseIdAndStatus(UUID releaseId, String status);
 
     boolean existsByReleaseIdAndComponentIdAndVulnerabilityId(UUID releaseId, UUID componentId, UUID vulnerabilityId);
+
+    List<Finding> findAllByVulnerabilityId(UUID vulnerabilityId);
 }

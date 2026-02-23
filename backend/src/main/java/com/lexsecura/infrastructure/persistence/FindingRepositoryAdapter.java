@@ -38,6 +38,10 @@ public class FindingRepositoryAdapter implements FindingRepository {
     public boolean existsByReleaseIdAndComponentIdAndVulnerabilityId(UUID releaseId, UUID componentId, UUID vulnerabilityId) {
         return jpa.existsByReleaseIdAndComponentIdAndVulnerabilityId(releaseId, componentId, vulnerabilityId);
     }
+    @Override
+    public List<Finding> findAllByVulnerabilityId(UUID vulnerabilityId) {
+        return jpa.findAllByVulnerabilityId(vulnerabilityId).stream().map(this::toDomain).collect(Collectors.toList());
+    }
 
     private Finding toDomain(FindingEntity e) {
         Finding f = new Finding();

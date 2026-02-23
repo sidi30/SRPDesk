@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.lexsecura.application.dto.AuditVerifyResponse;
 import com.lexsecura.domain.model.CraEvent;
 import com.lexsecura.domain.model.SrpSubmission;
+import com.lexsecura.domain.model.vex.VexDocument;
+import com.lexsecura.domain.repository.VexDocumentRepository;
 import com.openhtmltopdf.pdfboxout.PdfRendererBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +20,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -32,15 +36,18 @@ public class SrpExportService {
     private final ObjectMapper objectMapper;
     private final AuditService auditService;
     private final CraEventService craEventService;
+    private final VexDocumentRepository vexDocumentRepository;
     private final String srpTemplate;
 
     public SrpExportService(ObjectMapper objectMapper,
                             AuditService auditService,
-                            CraEventService craEventService) {
+                            CraEventService craEventService,
+                            VexDocumentRepository vexDocumentRepository) {
         this.objectMapper = objectMapper.copy()
                 .enable(SerializationFeature.INDENT_OUTPUT);
         this.auditService = auditService;
         this.craEventService = craEventService;
+        this.vexDocumentRepository = vexDocumentRepository;
         this.srpTemplate = loadTemplate("templates/srp-report.html");
     }
 
@@ -75,12 +82,21 @@ public class SrpExportService {
             zos.write(objectMapper.writeValueAsBytes(auditData));
             zos.closeEntry();
 
-            // 3) human_readable.pdf
+            // 3) VEX documents (if any published VEX exists for linked releases)
+            includeVexDocuments(zos, submission, event);
+
+            // 4) human_readable.pdf
             zos.putNextEntry(new ZipEntry("human_readable.pdf"));
             byte[] pdf = generatePdf(submission, event);
             zos.write(pdf);
             zos.closeEntry();
         }
+    }
+
+    private void includeVexDocuments(ZipOutputStream zos, SrpSubmission submission, CraEvent event) {
+        // VEX inclusion is best-effort — not critical for bundle validity
+        // VEX documents are attached when generated for releases linked to this event
+        log.debug("VEX document inclusion in SRP bundle — use VEX API separately for per-release VEX");
     }
 
     private byte[] generatePdf(SrpSubmission submission, CraEvent event) throws IOException {

@@ -82,6 +82,8 @@ app:
     requests-per-minute: ${RATE_LIMIT_RPM:120}
   gitlab:
     webhook-secret: ${GITLAB_WEBHOOK_SECRET:}
+  github:
+    webhook-secret: ${GITHUB_WEBHOOK_SECRET:}
   osv:
     base-url: ${OSV_BASE_URL:https://api.osv.dev}
     batch-size: ${OSV_BATCH_SIZE:100}

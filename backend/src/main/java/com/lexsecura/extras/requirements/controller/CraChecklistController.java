@@ -1,9 +1,9 @@
-package com.lexsecura.api.controller;
+package com.lexsecura.extras.requirements.controller;
 
 import com.lexsecura.application.dto.CraChecklistItemResponse;
 import com.lexsecura.application.dto.CraChecklistSummaryResponse;
 import com.lexsecura.application.dto.CraChecklistUpdateRequest;
-import com.lexsecura.application.service.CraChecklistService;
+import com.lexsecura.extras.requirements.service.CraChecklistService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/products/{productId}/cra-checklist")
-@Tag(name = "CRA Checklist", description = "CRA Annex I compliance checklist management")
+@Tag(name = "CRA Checklist", description = "CRA Annex I compliance checklist management (extras module)")
 public class CraChecklistController {
 
     private final CraChecklistService checklistService;

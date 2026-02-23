@@ -7,12 +7,12 @@ import com.lexsecura.domain.model.CraChecklistItem;
 import com.lexsecura.domain.model.Product;
 import com.lexsecura.domain.repository.CraChecklistRepository;
 import com.lexsecura.domain.repository.ProductRepository;
+import com.lexsecura.extras.requirements.service.CraChecklistService;
 import com.lexsecura.infrastructure.security.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -75,20 +75,17 @@ class CraChecklistServiceTest {
         verify(auditService).record(eq(orgId), eq("CRA_CHECKLIST"), eq(productId),
                 eq("INITIALIZE"), eq(userId), any());
 
-        // Verify categories
         long secureByDesign = result.stream().filter(i -> "SECURE_BY_DESIGN".equals(i.category())).count();
         long vulnMgmt = result.stream().filter(i -> "VULNERABILITY_MANAGEMENT".equals(i.category())).count();
         assertEquals(13, secureByDesign);
         assertEquals(8, vulnMgmt);
 
-        // All items should start as NOT_ASSESSED
         assertTrue(result.stream().allMatch(i -> "NOT_ASSESSED".equals(i.status())));
     }
 
     @Test
     void initializeChecklist_productNotFound_shouldThrow() {
         when(productRepository.findByIdAndOrgId(productId, orgId)).thenReturn(Optional.empty());
-
         assertThrows(EntityNotFoundException.class, () -> service.initializeChecklist(productId));
     }
 
@@ -171,7 +168,6 @@ class CraChecklistServiceTest {
         assertEquals(1, summary.nonCompliant());
         assertEquals(1, summary.notAssessed());
 
-        // Check category breakdown
         assertNotNull(summary.categories().get("SECURE_BY_DESIGN"));
         assertEquals(3, summary.categories().get("SECURE_BY_DESIGN").total());
         assertEquals(1, summary.categories().get("SECURE_BY_DESIGN").compliant());

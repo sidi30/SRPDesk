@@ -5,18 +5,15 @@ import com.lexsecura.application.ai.AiDtos;
 import com.lexsecura.application.ai.AiService;
 import com.lexsecura.domain.model.AiArtifact;
 import com.lexsecura.domain.model.AiJob;
-import com.lexsecura.infrastructure.ai.QuestionnaireParser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,12 +26,10 @@ public class AiController {
     private static final Logger log = LoggerFactory.getLogger(AiController.class);
 
     private final AiService aiService;
-    private final QuestionnaireParser questionnaireParser;
     private final ObjectMapper objectMapper;
 
-    public AiController(AiService aiService, QuestionnaireParser questionnaireParser, ObjectMapper objectMapper) {
+    public AiController(AiService aiService, ObjectMapper objectMapper) {
         this.aiService = aiService;
-        this.questionnaireParser = questionnaireParser;
         this.objectMapper = objectMapper;
     }
 
@@ -53,24 +48,6 @@ public class AiController {
     public ResponseEntity<AiDtos.AiJobResponse> generateCommPack(@Valid @RequestBody AiDtos.CommPackRequest request) {
         log.info("AI comm pack requested for event={}", request.craEventId());
         AiJob job = aiService.generateCommPack(request.craEventId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(job));
-    }
-
-    @PostMapping(value = "/questionnaire/parse", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @Operation(summary = "Parse a questionnaire file (xlsx/docx/txt) to extract text")
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_MANAGER', 'CONTRIBUTOR')")
-    public ResponseEntity<String> parseQuestionnaire(@RequestParam("file") MultipartFile file) {
-        log.info("Questionnaire parse requested: {}", file.getOriginalFilename());
-        String text = questionnaireParser.parse(file);
-        return ResponseEntity.ok(text);
-    }
-
-    @PostMapping("/questionnaire/fill")
-    @Operation(summary = "Auto-fill questionnaire answers via AI")
-    @PreAuthorize("hasAnyRole('ADMIN', 'COMPLIANCE_MANAGER')")
-    public ResponseEntity<AiDtos.AiJobResponse> fillQuestionnaire(@Valid @RequestBody AiDtos.QuestionnaireFillRequest request) {
-        log.info("AI questionnaire fill requested");
-        AiJob job = aiService.fillQuestionnaire(request.questionnaireText(), request.productId());
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(job));
     }
 

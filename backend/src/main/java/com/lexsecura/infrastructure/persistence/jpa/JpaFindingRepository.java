@@ -9,4 +9,5 @@ public interface JpaFindingRepository extends JpaRepository<FindingEntity, UUID>
     List<FindingEntity> findAllByReleaseId(UUID releaseId);
     List<FindingEntity> findAllByReleaseIdAndStatus(UUID releaseId, String status);
     boolean existsByReleaseIdAndComponentIdAndVulnerabilityId(UUID releaseId, UUID componentId, UUID vulnerabilityId);
+    List<FindingEntity> findAllByVulnerabilityId(UUID vulnerabilityId);
 }

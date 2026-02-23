@@ -1,4 +1,4 @@
-package com.lexsecura.infrastructure.ai;
+package com.lexsecura.extras.ai.questionnaire.service;
 
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
