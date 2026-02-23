@@ -154,6 +154,30 @@ export function getErrorMessage(err: unknown, fallback = 'Une erreur est survenu
   return fallback;
 }
 
+// ── API Keys ────────────────────────────────────────────
+
+export interface ApiKeyCreateRequest {
+  name: string;
+}
+
+export interface ApiKeyCreateResponse {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  plainTextKey: string;
+}
+
+export interface ApiKeyResponse {
+  id: string;
+  name: string;
+  keyPrefix: string;
+  scopes: string;
+  createdAt: string;
+  lastUsedAt: string | null;
+  revoked: boolean;
+  revokedAt: string | null;
+}
+
 // ── CRA War Room ────────────────────────────────────────
 
 export type CraEventType = 'EXPLOITED_VULNERABILITY' | 'SEVERE_INCIDENT';

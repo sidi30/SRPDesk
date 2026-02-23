@@ -14,5 +14,7 @@ public interface ProductRepository {
 
     List<Product> findAllByOrgId(UUID orgId);
 
+    Optional<Product> findByNameAndOrgId(String name, UUID orgId);
+
     void deleteByIdAndOrgId(UUID id, UUID orgId);
 }

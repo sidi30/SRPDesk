@@ -59,7 +59,10 @@
       "WebFetch(domain:www.european-cyber-resilience-act.com)",
       "WebFetch(domain:cybercertlabs.com)",
       "WebFetch(domain:cyber-resilience-act.com)",
-      "WebFetch(domain:www.eucyberresilience.com)"
+      "WebFetch(domain:www.eucyberresilience.com)",
+      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/infra && docker-compose down 2>&1)",
+      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/infra && docker-compose up -d 2>&1)",
+      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/infra && docker-compose ps 2>&1)"
     ]
   }
 }

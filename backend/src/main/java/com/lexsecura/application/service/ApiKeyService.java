@@ -4,6 +4,7 @@ import com.lexsecura.application.dto.ApiKeyCreateResponse;
 import com.lexsecura.application.dto.ApiKeyResponse;
 import com.lexsecura.domain.model.ApiKey;
 import com.lexsecura.domain.repository.ApiKeyRepository;
+import com.lexsecura.infrastructure.config.ApiKeyProperties;
 import com.lexsecura.infrastructure.security.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,14 +26,14 @@ import java.util.stream.Collectors;
 public class ApiKeyService {
 
     private static final Logger log = LoggerFactory.getLogger(ApiKeyService.class);
-    private static final String KEY_PREFIX = "srpd_";
-    private static final int RANDOM_BYTES = 20; // 40 hex chars
 
     private final ApiKeyRepository apiKeyRepository;
+    private final ApiKeyProperties properties;
     private final SecureRandom secureRandom;
 
-    public ApiKeyService(ApiKeyRepository apiKeyRepository) {
+    public ApiKeyService(ApiKeyRepository apiKeyRepository, ApiKeyProperties properties) {
         this.apiKeyRepository = apiKeyRepository;
+        this.properties = properties;
         this.secureRandom = new SecureRandom();
     }
 
@@ -40,14 +41,15 @@ public class ApiKeyService {
         UUID orgId = TenantContext.getOrgId();
         UUID userId = TenantContext.getUserId();
 
-        byte[] randomBytes = new byte[RANDOM_BYTES];
+        byte[] randomBytes = new byte[properties.getRandomBytes()];
         secureRandom.nextBytes(randomBytes);
         String randomHex = HexFormat.of().formatHex(randomBytes);
-        String plainTextKey = KEY_PREFIX + randomHex;
-        String keyPrefix = plainTextKey.substring(0, 12);
+        String plainTextKey = properties.getPrefix() + randomHex;
+        String keyPrefix = plainTextKey.substring(0, Math.min(12, plainTextKey.length()));
         String keyHash = sha256(plainTextKey);
 
         ApiKey apiKey = new ApiKey(orgId, name, keyPrefix, keyHash, userId);
+        apiKey.setScopes(properties.getDefaultScopes());
         apiKey = apiKeyRepository.save(apiKey);
 
         log.info("API key created: id={}, prefix={}, org={}", apiKey.getId(), keyPrefix, orgId);
@@ -80,7 +82,7 @@ public class ApiKeyService {
     }
 
     public Optional<ApiKey> authenticate(String rawKey) {
-        if (rawKey == null || !rawKey.startsWith(KEY_PREFIX)) {
+        if (rawKey == null || !rawKey.startsWith(properties.getPrefix())) {
             return Optional.empty();
         }
         String keyHash = sha256(rawKey);

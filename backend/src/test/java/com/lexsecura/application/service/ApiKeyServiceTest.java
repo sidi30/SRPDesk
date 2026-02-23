@@ -4,6 +4,7 @@ import com.lexsecura.application.dto.ApiKeyCreateResponse;
 import com.lexsecura.application.dto.ApiKeyResponse;
 import com.lexsecura.domain.model.ApiKey;
 import com.lexsecura.domain.repository.ApiKeyRepository;
+import com.lexsecura.infrastructure.config.ApiKeyProperties;
 import com.lexsecura.infrastructure.security.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,8 @@ class ApiKeyServiceTest {
     void setUp() {
         TenantContext.setOrgId(orgId);
         TenantContext.setUserId(userId);
-        apiKeyService = new ApiKeyService(apiKeyRepository);
+        ApiKeyProperties properties = new ApiKeyProperties();
+        apiKeyService = new ApiKeyService(apiKeyRepository, properties);
     }
 
     @AfterEach

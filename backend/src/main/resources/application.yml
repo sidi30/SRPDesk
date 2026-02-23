@@ -74,6 +74,15 @@ app:
     base-url: ${OSV_BASE_URL:https://api.osv.dev}
     batch-size: ${OSV_BATCH_SIZE:100}
     rate-limit-ms: ${OSV_RATE_LIMIT_MS:1000}
+  jwt:
+    issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/lexsecura}
+    jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/lexsecura/protocol/openid-connect/certs}
+  api-key:
+    prefix: ${API_KEY_PREFIX:srpd_}
+    random-bytes: ${API_KEY_LENGTH:20}
+    default-scopes: ${API_KEY_SCOPES:ci:sbom}
+  sbom:
+    max-size-mb: ${SBOM_MAX_SIZE_MB:10}
   ai:
     enabled: ${AI_ENABLED:true}
     ollama:

@@ -7,6 +7,7 @@ import com.lexsecura.application.port.StoragePort;
 import com.lexsecura.domain.model.*;
 import com.lexsecura.domain.model.Component;
 import com.lexsecura.domain.repository.*;
+import com.lexsecura.infrastructure.config.SbomProperties;
 import com.lexsecura.infrastructure.security.TenantContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,6 @@ import java.util.*;
 public class SbomService {
 
     private static final Logger log = LoggerFactory.getLogger(SbomService.class);
-    private static final long MAX_SBOM_SIZE = 10 * 1024 * 1024; // 10MB
 
     private final ReleaseRepository releaseRepository;
     private final ComponentRepository componentRepository;
@@ -35,6 +35,7 @@ public class SbomService {
     private final StoragePort storagePort;
     private final AuditService auditService;
     private final ObjectMapper objectMapper;
+    private final SbomProperties sbomProperties;
 
     public SbomService(ReleaseRepository releaseRepository,
                        ComponentRepository componentRepository,
@@ -42,7 +43,8 @@ public class SbomService {
                        EvidenceRepository evidenceRepository,
                        StoragePort storagePort,
                        AuditService auditService,
-                       ObjectMapper objectMapper) {
+                       ObjectMapper objectMapper,
+                       SbomProperties sbomProperties) {
         this.releaseRepository = releaseRepository;
         this.componentRepository = componentRepository;
         this.releaseComponentRepository = releaseComponentRepository;
@@ -50,14 +52,15 @@ public class SbomService {
         this.storagePort = storagePort;
         this.auditService = auditService;
         this.objectMapper = objectMapper;
+        this.sbomProperties = sbomProperties;
     }
 
     public SbomUploadResponse ingest(UUID releaseId, MultipartFile file) {
         UUID orgId = TenantContext.getOrgId();
         UUID userId = TenantContext.getUserId();
 
-        if (file.getSize() > MAX_SBOM_SIZE) {
-            throw new IllegalArgumentException("SBOM file exceeds maximum size of 10MB");
+        if (file.getSize() > sbomProperties.getMaxSizeBytes()) {
+            throw new IllegalArgumentException("SBOM file exceeds maximum size of " + sbomProperties.getMaxSizeMb() + "MB");
         }
 
         Release release = releaseRepository.findByIdAndOrgId(releaseId, orgId)

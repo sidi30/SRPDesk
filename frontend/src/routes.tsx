@@ -12,6 +12,7 @@ import { AuditTrailPage } from './pages/AuditTrailPage';
 import { AiSrpDraftPage } from './pages/AiSrpDraftPage';
 import { AiCommPackPage } from './pages/AiCommPackPage';
 import { AiQuestionnairePage } from './pages/AiQuestionnairePage';
+import { IntegrationsPage } from './pages/IntegrationsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export function AppRoutes() {
@@ -29,6 +30,7 @@ export function AppRoutes() {
         <Route path="/ai/srp-draft" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AiSrpDraftPage /></ProtectedRoute>} />
         <Route path="/ai/comm-pack" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AiCommPackPage /></ProtectedRoute>} />
         <Route path="/ai/questionnaire" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AiQuestionnairePage /></ProtectedRoute>} />
+        <Route path="/integrations" element={<ProtectedRoute requiredRoles={['ADMIN']}><IntegrationsPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

@@ -40,10 +40,13 @@ public class SecurityConfig {
 
     private final JwtTenantFilter jwtTenantFilter;
     private final RateLimitFilter rateLimitFilter;
+    private final ApiKeyAuthFilter apiKeyAuthFilter;
 
-    public SecurityConfig(JwtTenantFilter jwtTenantFilter, RateLimitFilter rateLimitFilter) {
+    public SecurityConfig(JwtTenantFilter jwtTenantFilter, RateLimitFilter rateLimitFilter,
+                          ApiKeyAuthFilter apiKeyAuthFilter) {
         this.jwtTenantFilter = jwtTenantFilter;
         this.rateLimitFilter = rateLimitFilter;
+        this.apiKeyAuthFilter = apiKeyAuthFilter;
     }
 
     @Bean
@@ -74,7 +77,8 @@ public class SecurityConfig {
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                 )
-                .addFilterAfter(jwtTenantFilter, BearerTokenAuthenticationFilter.class);
+                .addFilterAfter(jwtTenantFilter, BearerTokenAuthenticationFilter.class)
+                .addFilterBefore(apiKeyAuthFilter, BearerTokenAuthenticationFilter.class);
         http.addFilterBefore(rateLimitFilter, BearerTokenAuthenticationFilter.class);
 
         return http.build();
@@ -105,6 +109,13 @@ public class SecurityConfig {
     }
 
     @Bean
+    public FilterRegistrationBean<ApiKeyAuthFilter> apiKeyAuthFilterRegistration(ApiKeyAuthFilter filter) {
+        FilterRegistrationBean<ApiKeyAuthFilter> registration = new FilterRegistrationBean<>(filter);
+        registration.setEnabled(false);
+        return registration;
+    }
+
+    @Bean
     public FilterRegistrationBean<RateLimitFilter> rateLimitFilterRegistration(RateLimitFilter filter) {
         FilterRegistrationBean<RateLimitFilter> registration = new FilterRegistrationBean<>(filter);
         registration.setEnabled(false);
@@ -116,7 +127,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of(allowedOrigins.split(",")));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Request-ID"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Request-ID", "X-API-Key"));
         configuration.setExposedHeaders(List.of("Content-Disposition"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);

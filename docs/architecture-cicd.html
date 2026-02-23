@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRPDesk — Architecture Logicielle & Pipeline CI/CD</title>
+<style>
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --dark:#0b1120;--dark-card:#111827;--dark-border:#1e293b;
+    --accent:#22c55e;--accent-glow:#4ade80;--cyan:#06b6d4;
+    --red:#ef4444;--amber:#f59e0b;--purple:#a855f7;--pink:#ec4899;
+    --text-light:#e2e8f0;--text-muted:#94a3b8;
+  }
+  body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--dark);color:var(--text-light);line-height:1.6;overflow-x:hidden}
+  a{color:var(--accent);text-decoration:none}a:hover{text-decoration:underline}
+  .container{max-width:1280px;margin:0 auto;padding:0 1.5rem}
+  section{padding:5rem 0}
+
+  /* Header */
+  header{position:sticky;top:0;z-index:50;background:rgba(11,17,32,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(34,197,94,.12)}
+  header .container{display:flex;align-items:center;justify-content:space-between;height:64px}
+  .logo{font-size:1.25rem;font-weight:700;color:var(--accent)}.logo span{color:var(--text-light)}
+  header nav a{color:var(--text-muted);font-size:.85rem;margin-left:1.75rem;transition:color .2s}
+  header nav a:hover,header nav a.active{color:var(--accent);text-decoration:none}
+
+  .badge{display:inline-block;font-size:.72rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;padding:.25rem .75rem;border-radius:9999px;background:rgba(34,197,94,.1);color:var(--accent);border:1px solid rgba(34,197,94,.2);margin-bottom:1rem}
+  h1{font-size:clamp(2rem,4vw,3rem);font-weight:800;line-height:1.15;margin-bottom:.75rem}
+  h2{font-size:clamp(1.5rem,3vw,2.25rem);font-weight:700;margin-bottom:.5rem}
+  h3{font-size:1.1rem;font-weight:600;margin-bottom:.5rem}
+  .subtitle{color:var(--text-muted);font-size:1.05rem;max-width:720px}
+  .section-header{text-align:center;margin-bottom:3.5rem}.section-header .subtitle{margin:0 auto}
+
+  /* Hero */
+  .hero{text-align:center;padding:6rem 0 4rem;background-image:linear-gradient(rgba(34,197,94,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(34,197,94,.03) 1px,transparent 1px);background-size:40px 40px}
+  .hero h1 span{color:var(--accent)}
+
+  /* ═══ SVG Architecture Diagram ═══ */
+  .arch-svg-wrap{overflow-x:auto;padding:1rem 0}
+  .arch-svg-wrap svg{display:block;margin:0 auto}
+
+  /* ═══ Flow Diagram ═══ */
+  .flow-track{display:flex;flex-direction:column;gap:0;position:relative;padding-left:3.5rem}
+  .flow-track::before{content:'';position:absolute;left:1.25rem;top:2rem;bottom:2rem;width:3px;background:linear-gradient(to bottom,rgba(34,197,94,.1),rgba(34,197,94,.5) 15%,rgba(6,182,212,.5) 40%,rgba(168,85,247,.5) 65%,rgba(245,158,11,.5) 85%,rgba(34,197,94,.1));border-radius:4px}
+  .flow-step{position:relative;padding:1.5rem 0;opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+  .flow-step.visible{opacity:1;transform:translateY(0)}
+  .flow-dot{position:absolute;left:-3.5rem;top:1.75rem;width:2.5rem;height:2.5rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.85rem;z-index:2}
+  .flow-dot.green{background:var(--accent);color:var(--dark);box-shadow:0 0 12px rgba(34,197,94,.4)}
+  .flow-dot.cyan{background:var(--cyan);color:var(--dark);box-shadow:0 0 12px rgba(6,182,212,.4)}
+  .flow-dot.amber{background:var(--amber);color:var(--dark);box-shadow:0 0 12px rgba(245,158,11,.4)}
+  .flow-dot.purple{background:var(--purple);color:#fff;box-shadow:0 0 12px rgba(168,85,247,.4)}
+  .flow-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:1rem;padding:1.5rem;transition:border-color .3s,box-shadow .3s}
+  .flow-card:hover{border-color:rgba(34,197,94,.25);box-shadow:0 0 20px rgba(34,197,94,.06)}
+  .flow-card h3{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .tag{font-size:.65rem;font-weight:600;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.05em}
+  .tag-ci{background:rgba(6,182,212,.15);color:var(--cyan)}.tag-api{background:rgba(34,197,94,.15);color:var(--accent)}.tag-back{background:rgba(168,85,247,.15);color:var(--purple)}.tag-store{background:rgba(245,158,11,.15);color:var(--amber)}.tag-ui{background:rgba(236,72,153,.15);color:var(--pink)}
+  .flow-card p{color:var(--text-muted);font-size:.88rem;margin:.6rem 0}
+  .detail-list{list-style:none}.detail-list li{font-size:.82rem;color:var(--text-muted);padding:.25rem 0;padding-left:1.25rem;position:relative}.detail-list li::before{content:'';position:absolute;left:0;top:.6rem;width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  code{font-family:'JetBrains Mono','Fira Code',monospace;font-size:.8rem;background:rgba(34,197,94,.08);color:var(--accent);padding:.1rem .4rem;border-radius:.25rem}
+
+  /* ═══ Tools Catalog ═══ */
+  .tools-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.25rem}
+  .tool-card{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:1rem;padding:1.5rem;transition:border-color .3s,box-shadow .3s,transform .2s}
+  .tool-card:hover{border-color:rgba(34,197,94,.3);box-shadow:0 0 20px rgba(34,197,94,.08);transform:translateY(-2px)}
+  .tool-header{display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem}
+  .tool-icon{width:40px;height:40px;border-radius:.75rem;display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;flex-shrink:0}
+  .tool-name{font-size:1rem;font-weight:600;color:var(--text-light)}
+  .tool-meta{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem}
+  .tool-badge{font-size:.65rem;font-weight:600;padding:.15rem .5rem;border-radius:4px;text-transform:uppercase;letter-spacing:.04em}
+  .badge-free{background:rgba(34,197,94,.12);color:var(--accent);border:1px solid rgba(34,197,94,.2)}
+  .badge-paid{background:rgba(245,158,11,.12);color:var(--amber);border:1px solid rgba(245,158,11,.2)}
+  .badge-freemium{background:rgba(6,182,212,.12);color:var(--cyan);border:1px solid rgba(6,182,212,.2)}
+  .badge-lang{background:rgba(148,163,184,.08);color:var(--text-muted);border:1px solid rgba(148,163,184,.15)}
+  .tool-desc{font-size:.82rem;color:var(--text-muted);line-height:1.5}
+  .tool-cmd{margin-top:.75rem;background:rgba(0,0,0,.3);border-radius:.5rem;padding:.6rem .8rem;font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--cyan);overflow-x:auto;white-space:nowrap}
+
+  /* ═══ API Contracts ═══ */
+  .api-block{background:var(--dark-card);border:1px solid var(--dark-border);border-radius:1rem;overflow:hidden;margin-bottom:1.5rem}
+  .api-header{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-bottom:1px solid var(--dark-border)}
+  .method{font-size:.7rem;font-weight:700;padding:.2rem .6rem;border-radius:.35rem;letter-spacing:.05em}
+  .method-post{background:rgba(34,197,94,.15);color:var(--accent)}.method-get{background:rgba(6,182,212,.15);color:var(--cyan)}.method-del{background:rgba(239,68,68,.15);color:var(--red)}
+  .api-path{font-family:'JetBrains Mono',monospace;font-size:.85rem;color:var(--text-light)}.api-auth{margin-left:auto;font-size:.7rem;color:var(--text-muted)}
+  .api-body{padding:1.25rem}
+  .api-body pre{background:rgba(0,0,0,.3);border-radius:.5rem;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:.78rem;color:var(--text-muted);overflow-x:auto;line-height:1.5}
+  .api-body pre .key{color:var(--cyan)}.api-body pre .str{color:var(--accent)}.api-body pre .num{color:var(--amber)}.api-body pre .bool{color:var(--purple)}
+
+  /* ═══ Config Table ═══ */
+  .config-table{width:100%;border-collapse:collapse;font-size:.85rem}
+  .config-table th{text-align:left;padding:.75rem 1rem;font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);background:var(--dark-card);border-bottom:1px solid var(--dark-border)}
+  .config-table td{padding:.6rem 1rem;border-bottom:1px solid rgba(30,41,59,.5);color:var(--text-muted);vertical-align:top}
+  .config-table tr:hover td{background:rgba(34,197,94,.02)}
+  .config-table .dv{color:var(--cyan)}
+
+  footer{text-align:center;padding:2rem 0;font-size:.8rem;color:var(--text-muted);border-top:1px solid var(--dark-border)}
+
+  /* Scroll reveal */
+  .sr{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}.sr.visible{opacity:1;transform:translateY(0)}
+
+  @media(max-width:900px){
+    header nav{display:none}
+    .flow-track{padding-left:3rem}.flow-dot{left:-3rem;width:2rem;height:2rem;font-size:.75rem}
+  }
+  @media(max-width:600px){
+    .tools-grid{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <div class="logo">SRP<span>Desk</span></div>
+    <nav>
+      <a href="#architecture" class="active">Architecture</a>
+      <a href="#flow">Pipeline CI/CD</a>
+      <a href="#tools">Outils SBOM</a>
+      <a href="#api">API</a>
+      <a href="#config">Configuration</a>
+    </nav>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- HERO                                                    -->
+<!-- ════════════════════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="badge">Documentation Technique</div>
+    <h1>Architecture Logicielle <span>&amp;</span> Pipeline CI/CD</h1>
+    <p class="subtitle" style="margin:0 auto">
+      Diagramme d'architecture complet avec liaisons de donnees, flux CI/CD step-by-step,
+      catalogue d'outils de generation SBOM et contrats API.
+    </p>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- ARCHITECTURE DIAGRAM (SVG)                              -->
+<!-- ════════════════════════════════════════════════════════ -->
+<section id="architecture" style="background:var(--dark-card)">
+  <div class="container">
+    <div class="section-header sr">
+      <div class="badge">Architecture Logicielle</div>
+      <h2>Diagramme d'architecture avec liaisons</h2>
+      <p class="subtitle">Vue complete des composants, couches hexagonales et flux de donnees entre chaque brique.</p>
+    </div>
+
+    <div class="arch-svg-wrap sr">
+      <svg viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:1200px;height:auto">
+        <defs>
+          <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#22c55e"/></marker>
+          <marker id="arrow-cyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#06b6d4"/></marker>
+          <marker id="arrow-amber" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#f59e0b"/></marker>
+          <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#a855f7"/></marker>
+          <marker id="arrow-pink" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#ec4899"/></marker>
+          <filter id="glow-g"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#22c55e" flood-opacity=".3"/></filter>
+          <filter id="glow-c"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#06b6d4" flood-opacity=".3"/></filter>
+          <filter id="glow-a"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#f59e0b" flood-opacity=".3"/></filter>
+          <filter id="glow-p"><feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#a855f7" flood-opacity=".3"/></filter>
+        </defs>
+
+        <!-- ── Background grid ── -->
+        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(34,197,94,.04)" stroke-width="1"/>
+        </pattern>
+        <rect width="1200" height="820" fill="url(#grid)"/>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- LEFT COLUMN — External Inputs         -->
+        <!-- ══════════════════════════════════════ -->
+
+        <!-- Developer / CI -->
+        <rect x="20" y="40" width="200" height="80" rx="12" fill="#111827" stroke="#06b6d4" stroke-width="1.5" filter="url(#glow-c)"/>
+        <text x="120" y="68" text-anchor="middle" fill="#06b6d4" font-size="11" font-weight="700" font-family="Inter,sans-serif">DEVELOPPEUR</text>
+        <text x="120" y="88" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">git push / git tag</text>
+        <text x="120" y="103" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Code source</text>
+
+        <!-- CI/CD Pipeline -->
+        <rect x="20" y="170" width="200" height="100" rx="12" fill="#111827" stroke="#06b6d4" stroke-width="1.5" filter="url(#glow-c)"/>
+        <text x="120" y="198" text-anchor="middle" fill="#06b6d4" font-size="11" font-weight="700" font-family="Inter,sans-serif">PIPELINE CI/CD</text>
+        <text x="120" y="218" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">GitHub Actions / GitLab CI</text>
+        <text x="120" y="235" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Jenkins / Azure DevOps</text>
+        <text x="120" y="255" text-anchor="middle" fill="#22c55e" font-size="10" font-weight="600" font-family="Inter,sans-serif">SBOM Generation + Upload</text>
+
+        <!-- Browser / User -->
+        <rect x="20" y="380" width="200" height="80" rx="12" fill="#111827" stroke="#ec4899" stroke-width="1.5"/>
+        <text x="120" y="408" text-anchor="middle" fill="#ec4899" font-size="11" font-weight="700" font-family="Inter,sans-serif">NAVIGATEUR WEB</text>
+        <text x="120" y="428" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">React 18 + TypeScript</text>
+        <text x="120" y="445" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Dashboard, Gestion, CI/CD</text>
+
+        <!-- Keycloak -->
+        <rect x="20" y="530" width="200" height="90" rx="12" fill="#111827" stroke="#f59e0b" stroke-width="1.5" filter="url(#glow-a)"/>
+        <text x="120" y="558" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700" font-family="Inter,sans-serif">KEYCLOAK 24</text>
+        <text x="120" y="578" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">SSO / OIDC / JWT</text>
+        <text x="120" y="595" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">ADMIN | COMPLIANCE_MGR</text>
+        <text x="120" y="610" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">CONTRIBUTOR + org_id claim</text>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- CENTER — SRPDesk Backend (Hexagonal)  -->
+        <!-- ══════════════════════════════════════ -->
+
+        <!-- Outer box -->
+        <rect x="310" y="20" width="520" height="780" rx="16" fill="rgba(17,24,39,.6)" stroke="#22c55e" stroke-width="2" stroke-dasharray="4,4"/>
+        <text x="570" y="50" text-anchor="middle" fill="#22c55e" font-size="14" font-weight="800" font-family="Inter,sans-serif">SRPDesk Backend — Java 21 + Spring Boot 3.3</text>
+
+        <!-- Security Layer -->
+        <rect x="330" y="70" width="480" height="100" rx="10" fill="rgba(239,68,68,.04)" stroke="rgba(239,68,68,.3)" stroke-width="1"/>
+        <text x="345" y="92" fill="#ef4444" font-size="10" font-weight="700" font-family="Inter,sans-serif">SECURITY LAYER</text>
+        <rect x="345" y="100" width="135" height="55" rx="6" fill="rgba(239,68,68,.06)" stroke="rgba(239,68,68,.15)" stroke-width="1"/>
+        <text x="412" y="122" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="600" font-family="Inter,sans-serif">ApiKeyAuthFilter</text>
+        <text x="412" y="138" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter,sans-serif">X-API-Key → SHA-256</text>
+        <text x="412" y="150" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter,sans-serif">/integrations/ci/**</text>
+
+        <rect x="500" y="100" width="135" height="55" rx="6" fill="rgba(239,68,68,.06)" stroke="rgba(239,68,68,.15)" stroke-width="1"/>
+        <text x="567" y="122" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="600" font-family="Inter,sans-serif">JwtTenantFilter</text>
+        <text x="567" y="138" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter,sans-serif">Bearer JWT → org_id</text>
+        <text x="567" y="150" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter,sans-serif">/api/v1/**</text>
+
+        <rect x="655" y="100" width="140" height="55" rx="6" fill="rgba(239,68,68,.06)" stroke="rgba(239,68,68,.15)" stroke-width="1"/>
+        <text x="725" y="122" text-anchor="middle" fill="#ef4444" font-size="9" font-weight="600" font-family="Inter,sans-serif">SecurityConfig</text>
+        <text x="725" y="138" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter,sans-serif">CORS, CSRF, Headers</text>
+        <text x="725" y="150" text-anchor="middle" fill="#94a3b8" font-size="8" font-family="Inter,sans-serif">OAuth2 Resource Server</text>
+
+        <!-- API Layer -->
+        <rect x="330" y="185" width="480" height="105" rx="10" fill="rgba(6,182,212,.04)" stroke="rgba(6,182,212,.3)" stroke-width="1"/>
+        <text x="345" y="207" fill="#06b6d4" font-size="10" font-weight="700" font-family="Inter,sans-serif">API LAYER — REST Controllers</text>
+        <rect x="345" y="215" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="395" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">CiSbomCtrl</text>
+        <rect x="455" y="215" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="505" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">ApiKeyCtrl</text>
+        <rect x="565" y="215" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="615" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">ProductCtrl</text>
+        <rect x="675" y="215" width="120" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="735" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">ReleaseCtrl</text>
+        <rect x="345" y="253" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="395" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">FindingCtrl</text>
+        <rect x="455" y="253" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="505" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">CraEventCtrl</text>
+        <rect x="565" y="253" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="615" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">AuditCtrl</text>
+        <rect x="675" y="253" width="120" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="735" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">SbomCtrl</text>
+
+        <!-- Application Layer -->
+        <rect x="330" y="305" width="480" height="130" rx="10" fill="rgba(34,197,94,.04)" stroke="rgba(34,197,94,.3)" stroke-width="1"/>
+        <text x="345" y="327" fill="#22c55e" font-size="10" font-weight="700" font-family="Inter,sans-serif">APPLICATION LAYER — Services &amp; DTOs</text>
+        <rect x="345" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="397" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">CiSbomService</text>
+        <text x="397" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">resolve + ingest</text>
+
+        <rect x="460" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="512" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ApiKeyService</text>
+        <text x="512" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">create/auth/revoke</text>
+
+        <rect x="575" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="627" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">SbomService</text>
+        <text x="627" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">parse CycloneDX/SPDX</text>
+
+        <rect x="690" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="742" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">AuditService</text>
+        <text x="742" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">SHA-256 chain</text>
+
+        <rect x="345" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="397" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ProductService</text>
+        <rect x="460" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="512" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ReleaseService</text>
+        <rect x="575" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="627" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">VulnScanService</text>
+        <rect x="690" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="742" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ReadinessService</text>
+
+        <!-- Domain Layer -->
+        <rect x="330" y="450" width="480" height="115" rx="10" fill="rgba(245,158,11,.04)" stroke="rgba(245,158,11,.3)" stroke-width="1"/>
+        <text x="345" y="472" fill="#f59e0b" font-size="10" font-weight="700" font-family="Inter,sans-serif">DOMAIN LAYER — Models &amp; Repository Ports</text>
+        <rect x="345" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="385" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Product</text>
+        <rect x="435" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="475" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Release</text>
+        <rect x="525" y="480" width="90" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="570" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Component</text>
+        <rect x="625" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="665" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Evidence</text>
+        <rect x="715" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="755" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">ApiKey</text>
+        <rect x="345" y="515" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="385" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Finding</text>
+        <rect x="435" y="515" width="90" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="480" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">AuditEvent</text>
+        <rect x="535" y="515" width="90" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="580" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">CraEvent</text>
+        <rect x="635" y="515" width="160" height="28" rx="5" fill="rgba(245,158,11,.06)" stroke="rgba(245,158,11,.15)" stroke-dasharray="3,2"/>
+        <text x="715" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-family="Inter,sans-serif">Repository Ports (interfaces)</text>
+
+        <!-- Infrastructure Layer -->
+        <rect x="330" y="580" width="480" height="105" rx="10" fill="rgba(168,85,247,.04)" stroke="rgba(168,85,247,.3)" stroke-width="1"/>
+        <text x="345" y="602" fill="#a855f7" font-size="10" font-weight="700" font-family="Inter,sans-serif">INFRASTRUCTURE LAYER — Adapters</text>
+        <rect x="345" y="610" width="110" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="400" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">JPA Entities</text>
+        <rect x="465" y="610" width="125" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="527" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">Repo Adapters</text>
+        <rect x="600" y="610" width="100" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="650" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">S3 StoragePort</text>
+        <rect x="710" y="610" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="755" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">OSV Client</text>
+        <rect x="345" y="647" width="110" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="400" y="665" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">PersistenceMapper</text>
+        <rect x="465" y="647" width="125" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="527" y="665" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">Ollama AI Client</text>
+        <rect x="600" y="647" width="100" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="650" y="665" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">Flyway V001-19</text>
+
+        <!-- TenantContext (cross-cutting) -->
+        <rect x="340" y="700" width="460" height="32" rx="6" fill="rgba(236,72,153,.06)" stroke="rgba(236,72,153,.25)" stroke-dasharray="4,3"/>
+        <text x="570" y="720" text-anchor="middle" fill="#ec4899" font-size="9" font-weight="600" font-family="Inter,sans-serif">TenantContext (ThreadLocal) — org_id + user_id isolation multi-tenant sur chaque requete</text>
+
+        <!-- Hexagonal note -->
+        <text x="570" y="770" text-anchor="middle" fill="#94a3b8" font-size="9" font-style="italic" font-family="Inter,sans-serif">Architecture Hexagonale : le Domain Layer ne depend de rien. Les Adapters sont interchangeables.</text>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- RIGHT COLUMN — External Services      -->
+        <!-- ══════════════════════════════════════ -->
+
+        <!-- PostgreSQL -->
+        <rect x="920" y="70" width="220" height="90" rx="12" fill="#111827" stroke="#a855f7" stroke-width="1.5" filter="url(#glow-p)"/>
+        <text x="1030" y="98" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="700" font-family="Inter,sans-serif">POSTGRESQL 16</text>
+        <text x="1030" y="118" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">19 tables (Flyway V001→V019)</text>
+        <text x="1030" y="135" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">JSONB, UUID, org_id partout</text>
+        <text x="1030" y="150" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">api_keys, products, releases...</text>
+
+        <!-- MinIO S3 -->
+        <rect x="920" y="200" width="220" height="80" rx="12" fill="#111827" stroke="#a855f7" stroke-width="1.5"/>
+        <text x="1030" y="228" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="700" font-family="Inter,sans-serif">MINIO / S3</text>
+        <text x="1030" y="248" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Stockage preuves &amp; SBOM</text>
+        <text x="1030" y="265" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">SHA-256 integrite fichiers</text>
+
+        <!-- OSV.dev -->
+        <rect x="920" y="320" width="220" height="70" rx="12" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+        <text x="1030" y="348" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="700" font-family="Inter,sans-serif">OSV.dev API</text>
+        <text x="1030" y="368" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Scan vulnerabilites par PURL</text>
+        <text x="1030" y="383" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Batch 100, rate limit 1s</text>
+
+        <!-- Ollama -->
+        <rect x="920" y="430" width="220" height="70" rx="12" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+        <text x="1030" y="458" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="700" font-family="Inter,sans-serif">OLLAMA (IA LOCALE)</text>
+        <text x="1030" y="478" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Modele phi3.5 — brouillons SRP</text>
+        <text x="1030" y="493" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Questionnaires, Comm Packs</text>
+
+        <!-- ENISA SRP -->
+        <rect x="920" y="550" width="220" height="70" rx="12" fill="#111827" stroke="#f59e0b" stroke-width="1.5" filter="url(#glow-a)"/>
+        <text x="1030" y="578" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700" font-family="Inter,sans-serif">ENISA SRP</text>
+        <text x="1030" y="598" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Soumissions CRA (JSON/PDF)</text>
+        <text x="1030" y="613" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Compliance Packs exports</text>
+
+        <!-- ══════════════════════════════════════ -->
+        <!-- ARROWS / LIAISONS                     -->
+        <!-- ══════════════════════════════════════ -->
+
+        <!-- Dev → CI/CD -->
+        <line x1="120" y1="120" x2="120" y2="165" stroke="#06b6d4" stroke-width="1.5" marker-end="url(#arrow-cyan)" stroke-dasharray="4,3"/>
+        <text x="135" y="147" fill="#06b6d4" font-size="7" font-family="Inter,sans-serif">push</text>
+
+        <!-- CI/CD → ApiKeyAuthFilter (SBOM upload) -->
+        <path d="M220,220 C270,220 270,127 325,127" fill="none" stroke="#22c55e" stroke-width="2" marker-end="url(#arrow-green)"/>
+        <text x="250" y="165" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">X-API-Key</text>
+        <text x="250" y="175" fill="#22c55e" font-size="7" font-family="Inter,sans-serif">SBOM file</text>
+
+        <!-- Browser → JwtTenantFilter -->
+        <path d="M220,405 C285,405 285,127 495,127" fill="none" stroke="#ec4899" stroke-width="1.5" marker-end="url(#arrow-pink)"/>
+        <text x="248" y="360" fill="#ec4899" font-size="7" font-family="Inter,sans-serif">JWT Bearer</text>
+
+        <!-- Keycloak → JwtTenantFilter -->
+        <path d="M220,560 C290,560 290,140 495,140" fill="none" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-amber)" stroke-dasharray="5,3"/>
+        <text x="235" y="500" fill="#f59e0b" font-size="7" font-family="Inter,sans-serif">JWKS validation</text>
+
+        <!-- Keycloak → Browser -->
+        <line x1="120" y1="530" x2="120" y2="465" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+        <text x="135" y="500" fill="#f59e0b" font-size="7" font-family="Inter,sans-serif">tokens</text>
+
+        <!-- Security → API Layer -->
+        <line x1="570" y1="170" x2="570" y2="182" stroke="rgba(239,68,68,.4)" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+        <!-- API → Application -->
+        <line x1="570" y1="290" x2="570" y2="302" stroke="rgba(6,182,212,.4)" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+
+        <!-- Application → Domain -->
+        <line x1="570" y1="435" x2="570" y2="447" stroke="rgba(34,197,94,.4)" stroke-width="1.5" marker-end="url(#arrow-amber)"/>
+
+        <!-- Domain → Infrastructure -->
+        <line x1="570" y1="565" x2="570" y2="577" stroke="rgba(245,158,11,.4)" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+
+        <!-- Infrastructure → PostgreSQL -->
+        <path d="M810,630 L920,115" fill="none" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+        <text x="870" y="340" fill="#a855f7" font-size="7" font-family="Inter,sans-serif" transform="rotate(-40,870,340)">JPA/Hibernate</text>
+
+        <!-- Infrastructure → S3 -->
+        <path d="M810,640 L920,240" fill="none" stroke="#a855f7" stroke-width="1.5" marker-end="url(#arrow-purple)"/>
+        <text x="885" y="465" fill="#a855f7" font-size="7" font-family="Inter,sans-serif" transform="rotate(-38,885,465)">upload/download</text>
+
+        <!-- Application → OSV -->
+        <path d="M810,370 Q870,370 915,355" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="860" y="360" fill="#22c55e" font-size="7" font-family="Inter,sans-serif">PURL batch</text>
+
+        <!-- Application → Ollama -->
+        <path d="M810,400 Q870,430 915,460" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="855" y="435" fill="#22c55e" font-size="7" font-family="Inter,sans-serif">prompts</text>
+
+        <!-- Application → ENISA -->
+        <path d="M810,410 Q880,530 915,575" fill="none" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-amber)" stroke-dasharray="5,3"/>
+        <text x="860" y="530" fill="#f59e0b" font-size="7" font-family="Inter,sans-serif">SRP exports</text>
+
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- PIPELINE CI/CD STEP BY STEP                             -->
+<!-- ════════════════════════════════════════════════════════ -->
+<section id="flow">
+  <div class="container">
+    <div class="section-header sr">
+      <div class="badge">Pipeline Step by Step</div>
+      <h2>Du commit au dashboard : le flux complet</h2>
+      <p class="subtitle">Chaque etape du pipeline CI/CD, avec le composant responsable et les donnees echangees.</p>
+    </div>
+
+    <div class="flow-track">
+      <div class="flow-step"><div class="flow-dot cyan">1</div><div class="flow-card">
+        <h3>Commit &amp; Push <span class="tag tag-ci">CI/CD</span></h3>
+        <p>Le developpeur pousse du code ou cree un tag. Le pipeline CI/CD se declenche automatiquement.</p>
+        <ul class="detail-list">
+          <li>Declencheur : <code>push</code> sur main ou creation d'un tag/release</li>
+          <li>Compatible GitHub Actions, GitLab CI, Jenkins, Azure DevOps, CircleCI</li>
+        </ul>
+      </div></div>
+
+      <div class="flow-step"><div class="flow-dot cyan">2</div><div class="flow-card">
+        <h3>Generation automatique du SBOM <span class="tag tag-ci">CI/CD</span></h3>
+        <p>Un outil de generation SBOM analyse les dependances et produit un fichier CycloneDX ou SPDX JSON.</p>
+        <ul class="detail-list">
+          <li><strong>Oui, c'est automatique</strong> — integre dans le pipeline, zero intervention manuelle</li>
+          <li>Outils gratuits : <strong>Syft</strong>, <strong>cdxgen</strong>, <strong>Trivy</strong> (voir catalogue ci-dessous)</li>
+          <li>Sortie : <code>sbom.cdx.json</code> avec composants, versions, PURLs</li>
+        </ul>
+      </div></div>
+
+      <div class="flow-step"><div class="flow-dot green">3</div><div class="flow-card">
+        <h3>Upload automatique vers SRPDesk <span class="tag tag-api">API REST</span></h3>
+        <p>Le pipeline envoie le SBOM via <code>curl</code> a l'endpoint <code>POST /integrations/ci/sbom</code>.</p>
+        <ul class="detail-list">
+          <li>Authentification : header <code>X-API-Key: srpd_...</code></li>
+          <li>Multipart : fichier + productName + version + gitRef</li>
+          <li>La cle API est un secret CI (jamais en clair dans le code)</li>
+        </ul>
+      </div></div>
+
+      <div class="flow-step"><div class="flow-dot green">4</div><div class="flow-card">
+        <h3>Authentification &amp; TenantContext <span class="tag tag-back">Security Layer</span></h3>
+        <p><code>ApiKeyAuthFilter</code> valide la cle (SHA-256), charge <code>TenantContext</code> avec orgId + userId.</p>
+        <ul class="detail-list">
+          <li>SHA-256 de la cle brute compare au hash en base</li>
+          <li>Cle non revoquee ? → org_id et user_id injectes dans le ThreadLocal</li>
+          <li>Champ <code>last_used_at</code> mis a jour pour monitoring</li>
+          <li>Si invalide → <code>401 Problem+JSON</code></li>
+        </ul>
+      </div></div>
+
+      <div class="flow-step"><div class="flow-dot purple">5</div><div class="flow-card">
+        <h3>Resolution Produit &amp; Release <span class="tag tag-back">CiSbomService</span></h3>
+        <p>Le service cherche le produit par nom dans l'org, puis trouve ou cree la release pour la version donnee.</p>
+        <ul class="detail-list">
+          <li><code>ProductRepository.findByNameAndOrgId()</code> — le produit doit exister</li>
+          <li><code>ReleaseRepository.findByProductIdAndVersionAndOrgId()</code></li>
+          <li>Si la release n'existe pas → creation automatique en statut DRAFT</li>
+          <li>Le <code>gitRef</code> (commit SHA) est enregistre</li>
+        </ul>
+      </div></div>
+
+      <div class="flow-step"><div class="flow-dot purple">6</div><div class="flow-card">
+        <h3>Parsing &amp; Ingestion SBOM <span class="tag tag-back">SbomService</span></h3>
+        <p>Auto-detection CycloneDX/SPDX, extraction des composants, stockage S3, creation de la preuve.</p>
+        <ul class="detail-list">
+          <li>CycloneDX (<code>bomFormat</code>) ou SPDX (<code>spdxVersion</code>)</li>
+          <li>Find-or-create pour chaque Component + association ReleaseComponent</li>
+          <li>SHA-256 calcule sur le contenu du fichier SBOM</li>
+          <li>Fichier stocke sur S3/MinIO : <code>orgId/releases/releaseId/sbom_*.json</code></li>
+        </ul>
+      </div></div>
+
+      <div class="flow-step"><div class="flow-dot amber">7</div><div class="flow-card">
+        <h3>Evidence &amp; Audit Trail <span class="tag tag-store">Persistence</span></h3>
+        <p>Preuve de type SBOM creee. Evenement d'audit enregistre dans la chaine immutable SHA-256.</p>
+        <ul class="detail-list">
+          <li>Evidence type=SBOM avec hash d'integrite</li>
+          <li>AuditEvent : action=INGEST, payload=(components, filename, sha256)</li>
+          <li>Chaine de hachage : chaque evenement reference le hash du precedent</li>
+        </ul>
+      </div></div>
+
+      <div class="flow-step"><div class="flow-dot amber">8</div><div class="flow-card">
+        <h3>Reponse CI + Dashboard <span class="tag tag-ui">Frontend</span></h3>
+        <p>Le pipeline recoit <code>201 Created</code>. Les composants apparaissent dans le dashboard SRPDesk.</p>
+        <ul class="detail-list">
+          <li>Reponse : releaseId, evidenceId, componentCount, sha256, releaseCreated</li>
+          <li>Le score de readiness se met a jour automatiquement</li>
+          <li>Le scan de vulnerabilites peut etre lance sur les composants importes</li>
+          <li>Le compliance pack integre automatiquement le SBOM</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- SBOM TOOLS CATALOG                                      -->
+<!-- ════════════════════════════════════════════════════════ -->
+<section id="tools" style="background:var(--dark-card)">
+  <div class="container">
+    <div class="section-header sr">
+      <div class="badge">Catalogue Outils SBOM</div>
+      <h2>Outils de generation SBOM recommandes</h2>
+      <p class="subtitle">Solutions gratuites et payantes que vous pouvez proposer a vos clients. Tous compatibles avec SRPDesk.</p>
+    </div>
+
+    <h3 style="color:var(--accent);margin-bottom:1.25rem;font-size:1.2rem">Solutions Open-Source (Gratuites)</h3>
+    <div class="tools-grid sr" style="margin-bottom:3rem">
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(34,197,94,.1);color:var(--accent)">Sy</div>
+          <div><div class="tool-name">Syft (Anchore)</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-free">Gratuit</span>
+          <span class="tool-badge badge-lang">Go, Java, JS, Python, Rust, .NET</span>
+        </div>
+        <p class="tool-desc">Le plus populaire. Genere des SBOM CycloneDX &amp; SPDX depuis des images Docker, dossiers de code ou archives. Supporte 15+ ecosystemes de packages.</p>
+        <div class="tool-cmd">syft . -o cyclonedx-json=sbom.cdx.json</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(6,182,212,.1);color:var(--cyan)">Tv</div>
+          <div><div class="tool-name">Trivy (Aqua Security)</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-free">Gratuit</span>
+          <span class="tool-badge badge-lang">Universel + scan vuln integre</span>
+        </div>
+        <p class="tool-desc">Scanner tout-en-un : SBOM + vulnerabilites + secrets + IaC. Ideal si vous voulez un seul outil pour la securite dans votre CI.</p>
+        <div class="tool-cmd">trivy fs --format cyclonedx -o sbom.cdx.json .</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(168,85,247,.1);color:var(--purple)">Cd</div>
+          <div><div class="tool-name">cdxgen (CycloneDX)</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-free">Gratuit</span>
+          <span class="tool-badge badge-lang">Java, JS/TS, Python, Go, .NET, PHP</span>
+        </div>
+        <p class="tool-desc">Outil officiel CycloneDX. Tres precis pour les projets Java (Maven/Gradle) et Node.js. Genere directement en CycloneDX 1.5+.</p>
+        <div class="tool-cmd">cdxgen -o sbom.cdx.json</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">Mx</div>
+          <div><div class="tool-name">CycloneDX Maven Plugin</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-free">Gratuit</span>
+          <span class="tool-badge badge-lang">Java / Maven</span>
+        </div>
+        <p class="tool-desc">Plugin Maven natif. S'integre dans le build existant, genere le SBOM a chaque <code>mvn package</code>. Parfait pour les projets Java.</p>
+        <div class="tool-cmd">mvn org.cyclonedx:cyclonedx-maven-plugin:makeBom</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(34,197,94,.1);color:var(--accent)">Gx</div>
+          <div><div class="tool-name">CycloneDX Gradle Plugin</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-free">Gratuit</span>
+          <span class="tool-badge badge-lang">Java / Gradle</span>
+        </div>
+        <p class="tool-desc">Plugin Gradle officiel. Ajouter au <code>build.gradle</code> pour generer automatiquement a chaque build.</p>
+        <div class="tool-cmd">gradle cyclonedxBom</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(6,182,212,.1);color:var(--cyan)">Ms</div>
+          <div><div class="tool-name">Microsoft sbom-tool</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-free">Gratuit</span>
+          <span class="tool-badge badge-lang">.NET, npm, pip, Go, Rust</span>
+        </div>
+        <p class="tool-desc">Outil SBOM officiel de Microsoft. Genere en SPDX 2.2. Utilise en interne par Microsoft pour toutes leurs releases.</p>
+        <div class="tool-cmd">sbom-tool generate -b . -bc . -pn MyApp -pv 1.0.0</div>
+      </div>
+
+    </div>
+
+    <h3 style="color:var(--amber);margin-bottom:1.25rem;font-size:1.2rem">Solutions Commerciales (Payantes / Freemium)</h3>
+    <div class="tools-grid sr">
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">Sn</div>
+          <div><div class="tool-name">Snyk</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-freemium">Freemium</span>
+          <span class="tool-badge badge-lang">Universel</span>
+        </div>
+        <p class="tool-desc">Plateforme leader en securite applicative. SBOM + SCA + licence compliance. Plan gratuit pour projets open-source, payant pour entreprise.</p>
+        <div class="tool-cmd">snyk sbom --format=cyclonedx1.4+json &gt; sbom.cdx.json</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">Fg</div>
+          <div><div class="tool-name">FOSSA</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-freemium">Freemium</span>
+          <span class="tool-badge badge-lang">200+ langages</span>
+        </div>
+        <p class="tool-desc">Reference pour la compliance licences open-source + SBOM. Plan Team gratuit. Integration GitHub/GitLab native. Export CycloneDX &amp; SPDX.</p>
+        <div class="tool-cmd">fossa analyze &amp;&amp; fossa report attribution --format cyclonedx</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">Sx</div>
+          <div><div class="tool-name">Sonatype Lifecycle</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-paid">Payant</span>
+          <span class="tool-badge badge-lang">Java, JS, Python, .NET, Go</span>
+        </div>
+        <p class="tool-desc">Plateforme SCA enterprise. SBOM + politique de securite + remediations guidees. Version community de Nexus IQ disponible.</p>
+        <div class="tool-cmd">Integration via plugin CI — console web pour export SBOM</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">Ac</div>
+          <div><div class="tool-name">Anchore Enterprise</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-paid">Payant</span>
+          <span class="tool-badge badge-lang">Containers + code source</span>
+        </div>
+        <p class="tool-desc">Version enterprise de Syft/Grype. Gestion centralisee des SBOM, politiques, reporting compliance. L'open-source Syft est la version gratuite.</p>
+        <div class="tool-cmd">anchore-cli image add myapp:latest (SBOM auto-genere)</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(245,158,11,.1);color:var(--amber)">Jf</div>
+          <div><div class="tool-name">JFrog Xray</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-paid">Payant</span>
+          <span class="tool-badge badge-lang">Universel (via Artifactory)</span>
+        </div>
+        <p class="tool-desc">Analyse de composition pour tous les artefacts stockes dans Artifactory. SBOM automatique, scan deep recursive, politique de securite.</p>
+        <div class="tool-cmd">Integration Artifactory — SBOM genere a chaque build publie</div>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-header">
+          <div class="tool-icon" style="background:rgba(6,182,212,.1);color:var(--cyan)">Gh</div>
+          <div><div class="tool-name">GitHub Dependency Graph</div></div>
+        </div>
+        <div class="tool-meta">
+          <span class="tool-badge badge-freemium">Gratuit (public) / Payant (prive)</span>
+          <span class="tool-badge badge-lang">Universel</span>
+        </div>
+        <p class="tool-desc">Genere un SBOM natif depuis n'importe quel repo GitHub. Export en SPDX via l'API REST ou l'interface. Inclus dans GitHub Advanced Security.</p>
+        <div class="tool-cmd">gh api repos/OWNER/REPO/dependency-graph/sbom &gt; sbom.spdx.json</div>
+      </div>
+
+    </div>
+
+    <!-- Recommendation box -->
+    <div class="sr" style="margin-top:2.5rem;background:rgba(34,197,94,.04);border:1px solid rgba(34,197,94,.2);border-radius:1rem;padding:1.5rem">
+      <h3 style="color:var(--accent);margin-bottom:.75rem">Notre recommandation par cas d'usage</h3>
+      <table style="width:100%;font-size:.85rem;border-collapse:collapse">
+        <tr style="border-bottom:1px solid var(--dark-border)">
+          <td style="padding:.5rem;color:var(--text-light);font-weight:600">Startup / PME</td>
+          <td style="padding:.5rem;color:var(--text-muted)"><strong style="color:var(--accent)">Syft</strong> (gratuit, simple) + SRPDesk CI/CD integration</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--dark-border)">
+          <td style="padding:.5rem;color:var(--text-light);font-weight:600">Projet Java / Maven</td>
+          <td style="padding:.5rem;color:var(--text-muted)"><strong style="color:var(--accent)">CycloneDX Maven Plugin</strong> (natif dans le build)</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--dark-border)">
+          <td style="padding:.5rem;color:var(--text-light);font-weight:600">Multi-langage</td>
+          <td style="padding:.5rem;color:var(--text-muted)"><strong style="color:var(--accent)">cdxgen</strong> ou <strong style="color:var(--accent)">Trivy</strong> (SBOM + vuln scan combine)</td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--dark-border)">
+          <td style="padding:.5rem;color:var(--text-light);font-weight:600">Containers / Docker</td>
+          <td style="padding:.5rem;color:var(--text-muted)"><strong style="color:var(--accent)">Syft</strong> (image:tag) ou <strong style="color:var(--accent)">Trivy</strong></td>
+        </tr>
+        <tr style="border-bottom:1px solid var(--dark-border)">
+          <td style="padding:.5rem;color:var(--text-light);font-weight:600">Enterprise (compliance licences)</td>
+          <td style="padding:.5rem;color:var(--text-muted)"><strong style="color:var(--amber)">FOSSA</strong> ou <strong style="color:var(--amber)">Snyk</strong> (SCA + licences + SBOM)</td>
+        </tr>
+        <tr>
+          <td style="padding:.5rem;color:var(--text-light);font-weight:600">GitHub natif</td>
+          <td style="padding:.5rem;color:var(--text-muted)"><strong style="color:var(--cyan)">gh dependency-graph sbom</strong> (zero install)</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- API CONTRACTS                                           -->
+<!-- ════════════════════════════════════════════════════════ -->
+<section id="api">
+  <div class="container">
+    <div class="section-header sr">
+      <div class="badge">Contrats API</div>
+      <h2>Endpoints CI/CD &amp; API Keys</h2>
+      <p class="subtitle">Les contrats d'API pour l'integration CI/CD et la gestion des cles.</p>
+    </div>
+
+    <div class="api-block sr" style="border:1px solid rgba(34,197,94,.3)">
+      <div class="api-header" style="background:rgba(34,197,94,.04)">
+        <span class="method method-post">POST</span>
+        <span class="api-path">/integrations/ci/sbom</span>
+        <span class="api-auth">Auth: X-API-Key</span>
+      </div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Endpoint principal CI/CD : upload d'un SBOM avec resolution automatique du produit et de la release.</p>
+<pre><span class="key">// Request (multipart/form-data)</span>
+<span class="key">Headers:</span> X-API-Key: <span class="str">srpd_a3f7b2c1e4d6...</span>
+<span class="key">file:</span>        <span class="str">@sbom.cdx.json</span>
+<span class="key">productName:</span> <span class="str">Mon Produit</span>
+<span class="key">version:</span>     <span class="str">1.0.0</span>
+<span class="key">gitRef:</span>      <span class="str">abc123def</span> <span class="key">(optionnel)</span>
+
+<span class="key">// Response 201</span>
+{
+  <span class="key">"releaseId"</span>: <span class="str">"660e9500-..."</span>,
+  <span class="key">"evidenceId"</span>: <span class="str">"770ea600-..."</span>,
+  <span class="key">"componentCount"</span>: <span class="num">47</span>,
+  <span class="key">"sha256"</span>: <span class="str">"a1b2c3d4e5..."</span>,
+  <span class="key">"releaseCreated"</span>: <span class="bool">true</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-post">POST</span><span class="api-path">/api/v1/api-keys</span><span class="api-auth">Auth: JWT (ADMIN)</span></div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Creer une cle API. La cle en clair n'est retournee qu'une seule fois.</p>
+<pre><span class="key">// Request</span>
+{ <span class="key">"name"</span>: <span class="str">"GitLab CI - mon-projet"</span> }
+
+<span class="key">// Response 201</span>
+{
+  <span class="key">"id"</span>: <span class="str">"550e8400-..."</span>,
+  <span class="key">"name"</span>: <span class="str">"GitLab CI - mon-projet"</span>,
+  <span class="key">"keyPrefix"</span>: <span class="str">"srpd_a3f7b2c1"</span>,
+  <span class="key">"plainTextKey"</span>: <span class="str">"srpd_a3f7b2c1e4d6..."</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-get">GET</span><span class="api-path">/api/v1/api-keys</span><span class="api-auth">Auth: JWT (ADMIN)</span></div>
+      <div class="api-body"><pre><span class="key">// Response 200</span>
+[{ <span class="key">"id"</span>:<span class="str">"..."</span>, <span class="key">"name"</span>:<span class="str">"GitLab CI"</span>, <span class="key">"keyPrefix"</span>:<span class="str">"srpd_a3f7"</span>, <span class="key">"revoked"</span>:<span class="bool">false</span>, <span class="key">"lastUsedAt"</span>:<span class="str">"2026-02-23T14:30Z"</span> }]</pre></div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-del">DELETE</span><span class="api-path">/api/v1/api-keys/{id}</span><span class="api-auth">Auth: JWT (ADMIN)</span></div>
+      <div class="api-body"><pre><span class="key">// Response 204 No Content</span> — Cle revoquee definitivement</pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════ -->
+<!-- CONFIGURATION                                           -->
+<!-- ════════════════════════════════════════════════════════ -->
+<section id="config" style="background:var(--dark-card)">
+  <div class="container">
+    <div class="section-header sr">
+      <div class="badge">Configuration</div>
+      <h2>Variables d'environnement</h2>
+      <p class="subtitle">Tous les parametres configurables pour adapter SRPDesk a votre infrastructure client.</p>
+    </div>
+    <div style="overflow-x:auto" class="sr">
+    <table class="config-table">
+      <thead><tr><th>Variable</th><th>Description</th><th>Defaut</th></tr></thead>
+      <tbody>
+        <tr><td colspan="3" style="color:var(--accent);font-weight:700;padding-top:1rem">Base de donnees</td></tr>
+        <tr><td><code>DB_HOST</code></td><td>Hote PostgreSQL</td><td class="dv">localhost</td></tr>
+        <tr><td><code>DB_PORT</code></td><td>Port PostgreSQL</td><td class="dv">5432</td></tr>
+        <tr><td><code>DB_NAME</code></td><td>Nom de la base</td><td class="dv">lexsecura</td></tr>
+        <tr><td><code>DB_USER</code></td><td>Utilisateur</td><td class="dv">lexsecura</td></tr>
+        <tr><td><code>DB_PASSWORD</code></td><td>Mot de passe</td><td class="dv">lexsecura</td></tr>
+        <tr><td colspan="3" style="color:var(--amber);font-weight:700;padding-top:1rem">Authentification</td></tr>
+        <tr><td><code>KEYCLOAK_ISSUER_URI</code></td><td>Emetteur JWT Keycloak</td><td class="dv">http://localhost:8180/realms/lexsecura</td></tr>
+        <tr><td><code>KEYCLOAK_JWK_URI</code></td><td>Cles publiques JWT</td><td class="dv">.../openid-connect/certs</td></tr>
+        <tr><td><code>CORS_ORIGINS</code></td><td>Origines autorisees (virgule)</td><td class="dv">http://localhost:3000</td></tr>
+        <tr><td colspan="3" style="color:var(--purple);font-weight:700;padding-top:1rem">Stockage</td></tr>
+        <tr><td><code>S3_ENDPOINT</code></td><td>Endpoint S3 / MinIO</td><td class="dv">http://localhost:9000</td></tr>
+        <tr><td><code>S3_ACCESS_KEY</code></td><td>Cle d'acces</td><td class="dv">minioadmin</td></tr>
+        <tr><td><code>S3_SECRET_KEY</code></td><td>Secret</td><td class="dv">minioadmin</td></tr>
+        <tr><td><code>S3_BUCKET</code></td><td>Bucket</td><td class="dv">evidences</td></tr>
+        <tr><td colspan="3" style="color:var(--cyan);font-weight:700;padding-top:1rem">Cles API &amp; CI/CD</td></tr>
+        <tr><td><code>API_KEY_PREFIX</code></td><td>Prefixe des cles generees</td><td class="dv">srpd_</td></tr>
+        <tr><td><code>API_KEY_LENGTH</code></td><td>Longueur aleatoire (octets)</td><td class="dv">20</td></tr>
+        <tr><td><code>API_KEY_SCOPES</code></td><td>Scopes par defaut</td><td class="dv">ci:sbom</td></tr>
+        <tr><td><code>SBOM_MAX_SIZE_MB</code></td><td>Taille max SBOM (Mo)</td><td class="dv">10</td></tr>
+        <tr><td colspan="3" style="color:var(--accent);font-weight:700;padding-top:1rem">Services externes</td></tr>
+        <tr><td><code>OSV_BASE_URL</code></td><td>API OSV pour scan vuln</td><td class="dv">https://api.osv.dev</td></tr>
+        <tr><td><code>AI_ENABLED</code></td><td>Activer l'assistant IA</td><td class="dv">true</td></tr>
+        <tr><td><code>OLLAMA_BASE_URL</code></td><td>URL serveur Ollama</td><td class="dv">http://localhost:11434</td></tr>
+        <tr><td><code>OLLAMA_MODEL</code></td><td>Modele IA</td><td class="dv">phi3.5</td></tr>
+        <tr><td><code>RATE_LIMIT_ENABLED</code></td><td>Rate limiting</td><td class="dv">true</td></tr>
+        <tr><td><code>RATE_LIMIT_RPM</code></td><td>Requetes/minute</td><td class="dv">120</td></tr>
+        <tr><td colspan="3" style="color:var(--pink);font-weight:700;padding-top:1rem">Frontend</td></tr>
+        <tr><td><code>VITE_KEYCLOAK_URL</code></td><td>URL Keycloak</td><td class="dv">http://localhost:8180</td></tr>
+        <tr><td><code>VITE_KEYCLOAK_REALM</code></td><td>Realm</td><td class="dv">lexsecura</td></tr>
+        <tr><td><code>VITE_KEYCLOAK_CLIENT_ID</code></td><td>Client ID</td><td class="dv">frontend</td></tr>
+        <tr><td><code>VITE_API_URL</code></td><td>URL base API</td><td class="dv">/api/v1</td></tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</section>
+
+<footer><div class="container"><p>SRPDesk — Documentation Architecture &amp; CI/CD — Fevrier 2026</p></div></footer>
+
+<script>
+document.addEventListener('DOMContentLoaded',()=>{
+  const obs=new IntersectionObserver(e=>{e.forEach(x=>{if(x.isIntersecting)x.target.classList.add('visible')})},{threshold:.08,rootMargin:'0px 0px -30px 0px'});
+  document.querySelectorAll('.sr,.flow-step').forEach(el=>obs.observe(el));
+  document.querySelectorAll('header nav a').forEach(l=>{l.addEventListener('click',e=>{const h=l.getAttribute('href');if(h&&h.startsWith('#')){e.preventDefault();document.querySelector(h)?.scrollIntoView({behavior:'smooth',block:'start'});document.querySelectorAll('header nav a').forEach(a=>a.classList.remove('active'));l.classList.add('active')}})});
+  const secs=document.querySelectorAll('section[id]');
+  window.addEventListener('scroll',()=>{const y=window.scrollY+100;secs.forEach(s=>{if(y>=s.offsetTop&&y<s.offsetTop+s.offsetHeight){const id=s.getAttribute('id');document.querySelectorAll('header nav a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id))}})});
+});
+</script>
+</body>
+</html>

@@ -40,6 +40,11 @@ public class ProductRepositoryAdapter implements ProductRepository {
     }
 
     @Override
+    public Optional<Product> findByNameAndOrgId(String name, UUID orgId) {
+        return jpa.findByNameAndOrgId(name, orgId).map(mapper::toDomain);
+    }
+
+    @Override
     public void deleteByIdAndOrgId(UUID id, UUID orgId) {
         jpa.deleteByIdAndOrgId(id, orgId);
     }

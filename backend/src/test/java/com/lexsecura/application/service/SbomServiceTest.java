@@ -8,6 +8,7 @@ import com.lexsecura.domain.model.Evidence;
 import com.lexsecura.domain.model.Release;
 import com.lexsecura.domain.model.ReleaseComponent;
 import com.lexsecura.domain.repository.*;
+import com.lexsecura.infrastructure.config.SbomProperties;
 import com.lexsecura.infrastructure.security.TenantContext;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,6 +59,7 @@ class SbomServiceTest {
     @BeforeEach
     void setUp() {
         ObjectMapper objectMapper = new ObjectMapper();
+        SbomProperties sbomProperties = new SbomProperties();
         service = new SbomService(
                 releaseRepository,
                 componentRepository,
@@ -65,7 +67,8 @@ class SbomServiceTest {
                 evidenceRepository,
                 storagePort,
                 auditService,
-                objectMapper);
+                objectMapper,
+                sbomProperties);
         TenantContext.setOrgId(orgId);
         TenantContext.setUserId(userId);
     }

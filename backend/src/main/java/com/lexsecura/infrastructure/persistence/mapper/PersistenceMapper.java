@@ -114,6 +114,39 @@ public class PersistenceMapper {
         return e;
     }
 
+    // ApiKey mappings
+    public ApiKey toDomain(ApiKeyEntity entity) {
+        ApiKey a = new ApiKey();
+        a.setId(entity.getId());
+        a.setOrgId(entity.getOrgId());
+        a.setName(entity.getName());
+        a.setKeyPrefix(entity.getKeyPrefix());
+        a.setKeyHash(entity.getKeyHash());
+        a.setScopes(entity.getScopes());
+        a.setCreatedBy(entity.getCreatedBy());
+        a.setCreatedAt(entity.getCreatedAt());
+        a.setLastUsedAt(entity.getLastUsedAt());
+        a.setRevoked(entity.isRevoked());
+        a.setRevokedAt(entity.getRevokedAt());
+        return a;
+    }
+
+    public ApiKeyEntity toEntity(ApiKey domain) {
+        ApiKeyEntity e = new ApiKeyEntity();
+        e.setId(domain.getId());
+        e.setOrgId(domain.getOrgId());
+        e.setName(domain.getName());
+        e.setKeyPrefix(domain.getKeyPrefix());
+        e.setKeyHash(domain.getKeyHash());
+        e.setScopes(domain.getScopes());
+        e.setCreatedBy(domain.getCreatedBy());
+        e.setCreatedAt(domain.getCreatedAt());
+        e.setLastUsedAt(domain.getLastUsedAt());
+        e.setRevoked(domain.isRevoked());
+        e.setRevokedAt(domain.getRevokedAt());
+        return e;
+    }
+
     // AuditEvent mappings
     public AuditEvent toDomain(AuditEventEntity entity) {
         AuditEvent a = new AuditEvent();
