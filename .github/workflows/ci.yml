@@ -105,6 +105,10 @@ jobs:
         run: npm run lint
         continue-on-error: true
 
+      - name: Run tests
+        working-directory: frontend
+        run: npx vitest run
+
       - name: Build
         working-directory: frontend
         run: npm run build

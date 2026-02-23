@@ -61,7 +61,7 @@ class EvidenceServiceTest {
 
         Release release = new Release(UUID.randomUUID(), "1.0.0");
         release.setId(releaseId);
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
 
         MultipartFile file = mock(MultipartFile.class);
         when(file.getOriginalFilename()).thenReturn("sbom.json");
@@ -93,7 +93,7 @@ class EvidenceServiceTest {
     @Test
     void upload_releaseNotFound_shouldThrow() {
         UUID releaseId = UUID.randomUUID();
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.empty());
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.empty());
 
         MultipartFile file = mock(MultipartFile.class);
 
@@ -114,7 +114,7 @@ class EvidenceServiceTest {
         evidenceService.delete(evidenceId);
 
         verify(storagePort).delete("key/file.json");
-        verify(evidenceRepository).deleteById(evidenceId);
+        verify(evidenceRepository).deleteByIdAndOrgId(evidenceId, orgId);
         verify(auditService).record(eq(orgId), eq("EVIDENCE"), eq(evidenceId),
                 eq("DELETE"), eq(userId), any());
     }

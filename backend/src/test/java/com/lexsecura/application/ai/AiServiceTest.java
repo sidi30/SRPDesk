@@ -92,7 +92,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             j.setStatus("COMPLETED");
@@ -137,7 +137,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             j.setStatus("FAILED");
@@ -171,7 +171,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             j.setStatus("FAILED");
@@ -207,7 +207,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             j.setStatus("COMPLETED");
@@ -247,7 +247,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             j.setStatus("COMPLETED");
@@ -282,7 +282,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             j.setStatus("FAILED");
@@ -352,7 +352,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             return Optional.of(j);
@@ -389,7 +389,7 @@ class AiServiceTest {
             if (j.getId() == null) j.setId(UUID.randomUUID());
             return j;
         });
-        when(aiJobRepository.findById(any())).thenAnswer(inv -> {
+        when(aiJobRepository.findByIdAndOrgId(any(), eq(orgId))).thenAnswer(inv -> {
             AiJob j = new AiJob();
             j.setId(inv.getArgument(0));
             j.setStatus("COMPLETED");

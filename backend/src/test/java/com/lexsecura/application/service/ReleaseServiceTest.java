@@ -95,7 +95,7 @@ class ReleaseServiceTest {
 
         Release release = new Release(productId, "1.0.0");
         release.setId(UUID.randomUUID());
-        when(releaseRepository.findAllByProductId(productId)).thenReturn(List.of(release));
+        when(releaseRepository.findAllByProductIdAndOrgId(productId, orgId)).thenReturn(List.of(release));
 
         List<ReleaseResponse> responses = releaseService.findAllByProductId(productId);
 
@@ -108,7 +108,7 @@ class ReleaseServiceTest {
         UUID releaseId = UUID.randomUUID();
         Release release = new Release(productId, "2.0.0");
         release.setId(releaseId);
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
 
         ReleaseResponse response = releaseService.findById(releaseId);
 
@@ -119,7 +119,7 @@ class ReleaseServiceTest {
     @Test
     void findById_notFound_shouldThrow() {
         UUID releaseId = UUID.randomUUID();
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.empty());
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.empty());
 
         assertThrows(EntityNotFoundException.class, () -> releaseService.findById(releaseId));
     }

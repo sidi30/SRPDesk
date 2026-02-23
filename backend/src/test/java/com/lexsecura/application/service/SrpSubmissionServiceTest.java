@@ -150,7 +150,7 @@ class SrpSubmissionServiceTest {
         when(linkRepository.findAllByCraEventIdAndLinkType(eventId, "RELEASE")).thenReturn(List.of(releaseLink));
         when(linkRepository.findAllByCraEventIdAndLinkType(eventId, "FINDING")).thenReturn(List.of(findingLink));
         when(linkRepository.findAllByCraEventIdAndLinkType(eventId, "EVIDENCE")).thenReturn(List.of());
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
         when(findingRepository.findById(findingId)).thenReturn(Optional.of(finding));
         when(vulnerabilityRepository.findById(vulnId)).thenReturn(Optional.of(vuln));
         when(componentRepository.findById(compId)).thenReturn(Optional.of(comp));

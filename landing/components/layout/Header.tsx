@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 const navigation = [
   { label: "Fonctionnalites", href: "/fonctionnalites" },
   { label: "Cas d'usage", href: "/cas-usage" },
+  { label: "Guide", href: "/guide-integration" },
   { label: "Tarifs", href: "/tarifs" },
 ];
 

@@ -151,7 +151,7 @@ class CompliancePackServiceTest {
         auditEvent.setHash("b".repeat(64));
 
         // Mock repository calls
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
         when(productRepository.findByIdAndOrgId(productId, orgId)).thenReturn(Optional.of(product));
         when(evidenceRepository.findAllByReleaseIdAndOrgId(releaseId, orgId)).thenReturn(List.of(evidence));
         when(componentRepository.findAllByReleaseId(releaseId)).thenReturn(List.of(component));
@@ -198,7 +198,7 @@ class CompliancePackServiceTest {
     void generatePack_releaseNotFound_shouldThrow() {
         UUID releaseId = UUID.randomUUID();
 
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.empty());
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.empty());
 
         ByteArrayOutputStream out = new ByteArrayOutputStream();
         EntityNotFoundException ex = assertThrows(EntityNotFoundException.class,

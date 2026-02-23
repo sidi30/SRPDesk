@@ -129,7 +129,7 @@ class AuditServiceTest {
 
     @Test
     void verify_emptyChain_shouldReturnValid() {
-        when(auditEventRepository.findAllByOrgIdOrderByCreatedAt(orgId)).thenReturn(List.of());
+        when(auditEventRepository.countByOrgId(orgId)).thenReturn(0L);
 
         AuditVerifyResponse result = auditService.verify(orgId);
 
@@ -174,7 +174,8 @@ class AuditServiceTest {
         event2.setPrevHash(hash1);
         event2.setHash(hash2);
 
-        when(auditEventRepository.findAllByOrgIdOrderByCreatedAt(orgId))
+        when(auditEventRepository.countByOrgId(orgId)).thenReturn(2L);
+        when(auditEventRepository.findByOrgIdOrderByCreatedAtAsc(orgId, 0, 500))
                 .thenReturn(List.of(event1, event2));
 
         AuditVerifyResponse result = auditService.verify(orgId);
@@ -204,7 +205,9 @@ class AuditServiceTest {
         event.setPrevHash(null);
         event.setHash(hash);
 
-        when(auditEventRepository.findAllByOrgIdOrderByCreatedAt(orgId)).thenReturn(List.of(event));
+        when(auditEventRepository.countByOrgId(orgId)).thenReturn(1L);
+        when(auditEventRepository.findByOrgIdOrderByCreatedAtAsc(orgId, 0, 500))
+                .thenReturn(List.of(event));
 
         AuditVerifyResponse result = auditService.verify(orgId);
 
@@ -250,7 +253,8 @@ class AuditServiceTest {
         event2.setPrevHash(wrongPrevHash);
         event2.setHash(hash2);
 
-        when(auditEventRepository.findAllByOrgIdOrderByCreatedAt(orgId))
+        when(auditEventRepository.countByOrgId(orgId)).thenReturn(2L);
+        when(auditEventRepository.findByOrgIdOrderByCreatedAtAsc(orgId, 0, 500))
                 .thenReturn(List.of(event1, event2));
 
         AuditVerifyResponse result = auditService.verify(orgId);

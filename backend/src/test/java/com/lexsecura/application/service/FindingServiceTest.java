@@ -5,6 +5,7 @@ import com.lexsecura.application.dto.FindingDecisionResponse;
 import com.lexsecura.application.dto.FindingResponse;
 import com.lexsecura.domain.model.*;
 import com.lexsecura.domain.model.Component;
+import com.lexsecura.domain.model.Release;
 import com.lexsecura.domain.repository.*;
 import com.lexsecura.infrastructure.security.TenantContext;
 import org.junit.jupiter.api.AfterEach;
@@ -151,17 +152,22 @@ class FindingServiceTest {
     @Test
     void addDecision_validType_shouldSave() {
         UUID findingId = UUID.randomUUID();
+        UUID releaseId = UUID.randomUUID();
 
         Finding finding = new Finding();
         finding.setId(findingId);
-        finding.setReleaseId(UUID.randomUUID());
+        finding.setReleaseId(releaseId);
         finding.setComponentId(UUID.randomUUID());
         finding.setVulnerabilityId(UUID.randomUUID());
         finding.setStatus("OPEN");
         finding.setDetectedAt(Instant.now());
         finding.setSource("OSV");
 
+        Release release = new Release(UUID.randomUUID(), "1.0");
+        release.setId(releaseId);
+
         when(findingRepository.findById(findingId)).thenReturn(Optional.of(finding));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
         when(decisionRepository.save(any(FindingDecision.class))).thenAnswer(inv -> {
             FindingDecision d = inv.getArgument(0);
             d.setId(UUID.randomUUID());
@@ -192,12 +198,18 @@ class FindingServiceTest {
     @Test
     void addDecision_invalidType_shouldThrow() {
         UUID findingId = UUID.randomUUID();
+        UUID releaseId = UUID.randomUUID();
 
         Finding finding = new Finding();
         finding.setId(findingId);
+        finding.setReleaseId(releaseId);
         finding.setStatus("OPEN");
 
+        Release release = new Release(UUID.randomUUID(), "1.0");
+        release.setId(releaseId);
+
         when(findingRepository.findById(findingId)).thenReturn(Optional.of(finding));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
 
         FindingDecisionRequest request = new FindingDecisionRequest(
                 "INVALID", "Some rationale", null, null);

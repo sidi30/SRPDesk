@@ -89,7 +89,7 @@ class SbomServiceTest {
 
         Release release = new Release(UUID.randomUUID(), "1.0.0");
         release.setId(releaseId);
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
 
         UUID comp1Id = UUID.randomUUID();
         UUID comp2Id = UUID.randomUUID();
@@ -135,7 +135,8 @@ class SbomServiceTest {
 
     @Test
     void ingest_invalidFormat_shouldThrow() throws Exception {
-        String sbomJson = "{\"bomFormat\":\"SPDX\",\"specVersion\":\"2.3\",\"components\":[]}";
+        // Neither CycloneDX nor SPDX format
+        String sbomJson = "{\"format\":\"unknown\",\"data\":[]}";
         byte[] content = sbomJson.getBytes();
 
         when(multipartFile.getBytes()).thenReturn(content);
@@ -143,13 +144,56 @@ class SbomServiceTest {
 
         Release release = new Release(UUID.randomUUID(), "1.0.0");
         release.setId(releaseId);
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> service.ingest(releaseId, multipartFile));
 
-        assertTrue(ex.getMessage().contains("CycloneDX"));
+        assertTrue(ex.getMessage().contains("Unsupported SBOM format"));
         verify(componentRepository, never()).save(any());
+    }
+
+    @Test
+    void ingest_validSpdx_shouldParse() throws Exception {
+        String spdxJson = "{\"spdxVersion\":\"SPDX-2.3\",\"packages\":["
+                + "{\"name\":\"lodash\",\"versionInfo\":\"4.17.21\",\"externalRefs\":["
+                + "{\"referenceCategory\":\"PACKAGE_MANAGER\",\"referenceType\":\"purl\",\"referenceLocator\":\"pkg:npm/lodash@4.17.21\"}"
+                + "]},"
+                + "{\"name\":\"express\",\"versionInfo\":\"4.18.2\"}"
+                + "]}";
+        byte[] content = spdxJson.getBytes();
+
+        when(multipartFile.getBytes()).thenReturn(content);
+        when(multipartFile.getSize()).thenReturn((long) content.length);
+        when(multipartFile.getOriginalFilename()).thenReturn("spdx-sbom.json");
+
+        Release release = new Release(UUID.randomUUID(), "2.0.0");
+        release.setId(releaseId);
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
+
+        when(componentRepository.findByPurl(anyString())).thenReturn(Optional.empty());
+        when(componentRepository.save(any(Component.class))).thenAnswer(inv -> {
+            Component c = inv.getArgument(0);
+            if (c.getId() == null) c.setId(UUID.randomUUID());
+            return c;
+        });
+        when(releaseComponentRepository.existsByReleaseIdAndComponentId(any(), any())).thenReturn(false);
+        when(releaseComponentRepository.save(any(ReleaseComponent.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(evidenceRepository.save(any(Evidence.class))).thenAnswer(inv -> {
+            Evidence e = inv.getArgument(0);
+            e.setId(UUID.randomUUID());
+            return e;
+        });
+
+        SbomUploadResponse response = service.ingest(releaseId, multipartFile);
+
+        assertEquals(2, response.componentCount());
+        assertNotNull(response.sha256());
+
+        // Verify lodash used purl from externalRefs
+        verify(componentRepository).findByPurl("pkg:npm/lodash@4.17.21");
+        // Verify express got synthetic purl
+        verify(componentRepository).findByPurl("pkg:generic/express@4.18.2");
     }
 
     @Test
@@ -173,7 +217,7 @@ class SbomServiceTest {
 
         Release release = new Release(UUID.randomUUID(), "1.0.0");
         release.setId(releaseId);
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
 
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                 () -> service.ingest(releaseId, multipartFile));
@@ -195,7 +239,7 @@ class SbomServiceTest {
 
         Release release = new Release(UUID.randomUUID(), "1.0.0");
         release.setId(releaseId);
-        when(releaseRepository.findById(releaseId)).thenReturn(Optional.of(release));
+        when(releaseRepository.findByIdAndOrgId(releaseId, orgId)).thenReturn(Optional.of(release));
 
         when(componentRepository.findByPurl("pkg:generic/my-lib@1.0")).thenReturn(Optional.empty());
         when(componentRepository.save(any(Component.class))).thenAnswer(inv -> {
