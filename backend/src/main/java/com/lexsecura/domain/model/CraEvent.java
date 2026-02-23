@@ -16,11 +16,16 @@ public class CraEvent {
     private Instant detectedAt;
     private Instant patchAvailableAt;
     private Instant resolvedAt;
+    private String escalationLevel;
+    private Instant escalatedAt;
+    private boolean autoSubmitted;
     private UUID createdBy;
     private Instant createdAt;
     private Instant updatedAt;
 
-    public CraEvent() {}
+    public CraEvent() {
+        this.escalationLevel = "NONE";
+    }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -50,4 +55,10 @@ public class CraEvent {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getEscalationLevel() { return escalationLevel; }
+    public void setEscalationLevel(String escalationLevel) { this.escalationLevel = escalationLevel; }
+    public Instant getEscalatedAt() { return escalatedAt; }
+    public void setEscalatedAt(Instant escalatedAt) { this.escalatedAt = escalatedAt; }
+    public boolean isAutoSubmitted() { return autoSubmitted; }
+    public void setAutoSubmitted(boolean autoSubmitted) { this.autoSubmitted = autoSubmitted; }
 }

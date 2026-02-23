@@ -10,6 +10,7 @@ import { ReadinessGauge } from '../components/ReadinessGauge';
 import { CraChecklistTable } from '../components/CraChecklistTable';
 import { useAuth } from '../auth/AuthProvider';
 import { FR } from '../i18n/fr';
+import { FEATURES } from '../config/features';
 import type { ReleaseCreateRequest, ProductUpdateRequest, Release, Finding } from '../types';
 import { getErrorMessage } from '../types';
 
@@ -42,6 +43,7 @@ export function ProductDetailPage() {
   const [releaseForm, setReleaseForm] = useState<ReleaseCreateRequest>({ version: '', gitRef: '' });
   const [editForm, setEditForm] = useState<ProductUpdateRequest>({ name: '', type: '', criticality: '' });
   const [error, setError] = useState<string | null>(null);
+  type TabType = 'releases' | 'findings' | 'readiness' | (typeof FEATURES.REQUIREMENTS extends true ? 'checklist' : never);
   const [activeTab, setActiveTab] = useState<'releases' | 'findings' | 'readiness' | 'checklist'>('releases');
 
   if (productLoading) return <div className="text-gray-500">Loading product...</div>;
@@ -158,7 +160,7 @@ export function ProductDetailPage() {
       {/* Tabs */}
       <div className="border-b mb-6">
         <nav className="flex gap-6">
-          {(['releases', 'findings', 'readiness', 'checklist'] as const).map(tab => (
+          {(['releases', 'findings', 'readiness', ...(FEATURES.REQUIREMENTS ? ['checklist'] : [])] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}

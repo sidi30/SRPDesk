@@ -72,6 +72,9 @@ public class CraEventRepositoryAdapter implements CraEventRepository {
         m.setDetectedAt(e.getDetectedAt());
         m.setPatchAvailableAt(e.getPatchAvailableAt());
         m.setResolvedAt(e.getResolvedAt());
+        m.setEscalationLevel(e.getEscalationLevel());
+        m.setEscalatedAt(e.getEscalatedAt());
+        m.setAutoSubmitted(e.getAutoSubmitted() != null && e.getAutoSubmitted());
         m.setCreatedBy(e.getCreatedBy());
         m.setCreatedAt(e.getCreatedAt());
         m.setUpdatedAt(e.getUpdatedAt());
@@ -91,6 +94,9 @@ public class CraEventRepositoryAdapter implements CraEventRepository {
         e.setDetectedAt(m.getDetectedAt());
         e.setPatchAvailableAt(m.getPatchAvailableAt());
         e.setResolvedAt(m.getResolvedAt());
+        e.setEscalationLevel(m.getEscalationLevel());
+        e.setEscalatedAt(m.getEscalatedAt());
+        e.setAutoSubmitted(m.isAutoSubmitted());
         e.setCreatedBy(m.getCreatedBy());
         e.setCreatedAt(m.getCreatedAt());
         e.setUpdatedAt(m.getUpdatedAt());

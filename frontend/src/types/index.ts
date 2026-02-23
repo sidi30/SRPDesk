@@ -353,6 +353,57 @@ export interface ReadinessCategoryScore {
   label: string;
 }
 
+// ── Webhooks ──────────────────────────────────────────────
+
+export interface WebhookCreateRequest {
+  name: string;
+  url: string;
+  secret?: string;
+  eventTypes?: string;
+  channelType: string;
+}
+
+export interface WebhookResponse {
+  id: string;
+  name: string;
+  url: string;
+  eventTypes: string;
+  channelType: string;
+  enabled: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// ── Security Advisories (Art.14.3) ───────────────────────
+
+export type AdvisoryStatus = 'DRAFT' | 'PUBLISHED' | 'NOTIFIED';
+
+export interface SecurityAdvisoryCreateRequest {
+  craEventId: string;
+  title: string;
+  severity: string;
+  affectedVersions?: string;
+  description: string;
+  remediation?: string;
+}
+
+export interface SecurityAdvisoryResponse {
+  id: string;
+  craEventId: string;
+  productId: string;
+  title: string;
+  severity: string;
+  affectedVersions?: string;
+  description: string;
+  remediation?: string;
+  advisoryUrl?: string;
+  status: AdvisoryStatus;
+  publishedAt?: string;
+  notifiedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 // ── Dashboard ──────────────────────────────────────────────
 
 export interface DashboardData {

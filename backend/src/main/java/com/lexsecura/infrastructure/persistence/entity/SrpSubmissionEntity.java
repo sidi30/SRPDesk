@@ -44,6 +44,21 @@ public class SrpSubmissionEntity {
     @Column(name = "acknowledgment_evidence_id")
     private UUID acknowledgmentEvidenceId;
 
+    @Column(name = "enisa_reference")
+    private String enisaReference;
+
+    @Column(name = "enisa_submitted_at")
+    private Instant enisaSubmittedAt;
+
+    @Column(name = "enisa_status", length = 50)
+    private String enisaStatus;
+
+    @Column(name = "retry_count")
+    private Integer retryCount;
+
+    @Column(name = "last_error", columnDefinition = "TEXT")
+    private String lastError;
+
     @Column(name = "generated_by", nullable = false)
     private UUID generatedBy;
 
@@ -93,4 +108,14 @@ public class SrpSubmissionEntity {
     public void setGeneratedAt(Instant generatedAt) { this.generatedAt = generatedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getEnisaReference() { return enisaReference; }
+    public void setEnisaReference(String enisaReference) { this.enisaReference = enisaReference; }
+    public Instant getEnisaSubmittedAt() { return enisaSubmittedAt; }
+    public void setEnisaSubmittedAt(Instant enisaSubmittedAt) { this.enisaSubmittedAt = enisaSubmittedAt; }
+    public String getEnisaStatus() { return enisaStatus; }
+    public void setEnisaStatus(String enisaStatus) { this.enisaStatus = enisaStatus; }
+    public Integer getRetryCount() { return retryCount; }
+    public void setRetryCount(Integer retryCount) { this.retryCount = retryCount; }
+    public String getLastError() { return lastError; }
+    public void setLastError(String lastError) { this.lastError = lastError; }
 }

@@ -32,6 +32,18 @@ spring:
           issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/lexsecura}
           jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/lexsecura/protocol/openid-connect/certs}
 
+  mail:
+    host: ${SMTP_HOST:localhost}
+    port: ${SMTP_PORT:587}
+    username: ${SMTP_USERNAME:}
+    password: ${SMTP_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: ${SMTP_AUTH:false}
+          starttls:
+            enable: ${SMTP_STARTTLS:true}
+
   servlet:
     multipart:
       max-file-size: 50MB
@@ -83,6 +95,30 @@ app:
     default-scopes: ${API_KEY_SCOPES:ci:sbom}
   sbom:
     max-size-mb: ${SBOM_MAX_SIZE_MB:10}
+  # Email (SMTP) configuration
+  email:
+    enabled: ${EMAIL_ENABLED:false}
+    from: ${EMAIL_FROM:noreply@srpdesk.com}
+  # CRA notification & escalation
+  cra:
+    notification-check-ms: ${CRA_NOTIFICATION_CHECK_MS:900000}
+    escalation-check-ms: ${CRA_ESCALATION_CHECK_MS:300000}
+    alert-email: ${CRA_ALERT_EMAIL:}
+    escalation:
+      alert-email: ${CRA_ESCALATION_EMAIL:}
+  # ENISA SRP connector
+  enisa:
+    enabled: ${ENISA_ENABLED:false}
+    base-url: ${ENISA_BASE_URL:https://srp.enisa.europa.eu}
+    api-key: ${ENISA_API_KEY:}
+    timeout-seconds: ${ENISA_TIMEOUT:30}
+  monitoring:
+    interval-ms: ${MONITORING_INTERVAL_MS:21600000}
+  extras:
+    requirements:
+      enabled: ${EXTRAS_REQUIREMENTS_ENABLED:false}
+    questionnaire:
+      enabled: ${EXTRAS_QUESTIONNAIRE_ENABLED:false}
   ai:
     enabled: ${AI_ENABLED:true}
     ollama:

@@ -225,4 +225,33 @@ export const FR = {
     newKey: 'Nouvelle cl\u00e9 API',
     namePlaceholder: 'Ex: GitLab CI - mon-projet',
   },
+
+  webhooks: {
+    title: 'Webhooks sortants',
+    subtitle: 'Recevez des notifications CRA en temps r\u00e9el dans vos outils',
+    create: 'Ajouter un webhook',
+    name: 'Nom',
+    channel: 'Canal',
+    url: 'URL',
+    events: '\u00c9v\u00e9nements',
+    status: 'Statut',
+    active: 'Actif',
+    inactive: 'Inactif',
+    delete: 'Supprimer',
+    noWebhooks: 'Aucun webhook configur\u00e9',
+  },
+
+  advisories: {
+    title: 'Security Advisories',
+    subtitle: 'Article 14.3 CRA : notification des utilisateurs',
+    create: 'Nouvel advisory',
+    severity: 'S\u00e9v\u00e9rit\u00e9',
+    status: 'Statut',
+    publish: 'Publier',
+    notify: 'Notifier utilisateurs',
+    draft: 'Brouillon',
+    published: 'Publi\u00e9',
+    notified: 'Notifi\u00e9',
+    noAdvisories: 'Aucun advisory',
+  },
 } as const;

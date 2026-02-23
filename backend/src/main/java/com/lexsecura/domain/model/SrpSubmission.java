@@ -15,6 +15,11 @@ public class SrpSubmission {
     private String submittedReference;
     private Instant submittedAt;
     private UUID acknowledgmentEvidenceId;
+    private String enisaReference;
+    private Instant enisaSubmittedAt;
+    private String enisaStatus;
+    private int retryCount;
+    private String lastError;
     private UUID generatedBy;
     private Instant generatedAt;
     private Instant updatedAt;
@@ -47,4 +52,14 @@ public class SrpSubmission {
     public void setGeneratedAt(Instant generatedAt) { this.generatedAt = generatedAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getEnisaReference() { return enisaReference; }
+    public void setEnisaReference(String enisaReference) { this.enisaReference = enisaReference; }
+    public Instant getEnisaSubmittedAt() { return enisaSubmittedAt; }
+    public void setEnisaSubmittedAt(Instant enisaSubmittedAt) { this.enisaSubmittedAt = enisaSubmittedAt; }
+    public String getEnisaStatus() { return enisaStatus; }
+    public void setEnisaStatus(String enisaStatus) { this.enisaStatus = enisaStatus; }
+    public int getRetryCount() { return retryCount; }
+    public void setRetryCount(int retryCount) { this.retryCount = retryCount; }
+    public String getLastError() { return lastError; }
+    public void setLastError(String lastError) { this.lastError = lastError; }
 }

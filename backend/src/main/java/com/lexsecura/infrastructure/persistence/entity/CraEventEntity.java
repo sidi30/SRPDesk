@@ -42,6 +42,15 @@ public class CraEventEntity {
     @Column(name = "resolved_at")
     private Instant resolvedAt;
 
+    @Column(name = "escalation_level", length = 20)
+    private String escalationLevel;
+
+    @Column(name = "escalated_at")
+    private Instant escalatedAt;
+
+    @Column(name = "auto_submitted")
+    private Boolean autoSubmitted;
+
     @Column(name = "created_by", nullable = false)
     private UUID createdBy;
 
@@ -54,6 +63,8 @@ public class CraEventEntity {
     @PrePersist
     void prePersist() {
         if (status == null) status = "DRAFT";
+        if (escalationLevel == null) escalationLevel = "NONE";
+        if (autoSubmitted == null) autoSubmitted = false;
         if (createdAt == null) createdAt = Instant.now();
         if (updatedAt == null) updatedAt = Instant.now();
     }
@@ -91,4 +102,10 @@ public class CraEventEntity {
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
+    public String getEscalationLevel() { return escalationLevel; }
+    public void setEscalationLevel(String escalationLevel) { this.escalationLevel = escalationLevel; }
+    public Instant getEscalatedAt() { return escalatedAt; }
+    public void setEscalatedAt(Instant escalatedAt) { this.escalatedAt = escalatedAt; }
+    public Boolean getAutoSubmitted() { return autoSubmitted; }
+    public void setAutoSubmitted(Boolean autoSubmitted) { this.autoSubmitted = autoSubmitted; }
 }

@@ -51,6 +51,11 @@ public class SrpSubmissionRepositoryAdapter implements SrpSubmissionRepository {
         m.setSubmittedReference(e.getSubmittedReference());
         m.setSubmittedAt(e.getSubmittedAt());
         m.setAcknowledgmentEvidenceId(e.getAcknowledgmentEvidenceId());
+        m.setEnisaReference(e.getEnisaReference());
+        m.setEnisaSubmittedAt(e.getEnisaSubmittedAt());
+        m.setEnisaStatus(e.getEnisaStatus());
+        m.setRetryCount(e.getRetryCount() != null ? e.getRetryCount() : 0);
+        m.setLastError(e.getLastError());
         m.setGeneratedBy(e.getGeneratedBy());
         m.setGeneratedAt(e.getGeneratedAt());
         m.setUpdatedAt(e.getUpdatedAt());
@@ -69,6 +74,11 @@ public class SrpSubmissionRepositoryAdapter implements SrpSubmissionRepository {
         e.setSubmittedReference(m.getSubmittedReference());
         e.setSubmittedAt(m.getSubmittedAt());
         e.setAcknowledgmentEvidenceId(m.getAcknowledgmentEvidenceId());
+        e.setEnisaReference(m.getEnisaReference());
+        e.setEnisaSubmittedAt(m.getEnisaSubmittedAt());
+        e.setEnisaStatus(m.getEnisaStatus());
+        e.setRetryCount(m.getRetryCount());
+        e.setLastError(m.getLastError());
         e.setGeneratedBy(m.getGeneratedBy());
         e.setGeneratedAt(m.getGeneratedAt());
         e.setUpdatedAt(m.getUpdatedAt());

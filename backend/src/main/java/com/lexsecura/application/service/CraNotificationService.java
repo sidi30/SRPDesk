@@ -1,17 +1,24 @@
 package com.lexsecura.application.service;
 
 import com.lexsecura.application.dto.SlaResponse;
+import com.lexsecura.application.port.EmailPort;
 import com.lexsecura.domain.model.CraEvent;
+import com.lexsecura.domain.model.NotificationLog;
 import com.lexsecura.domain.repository.CraEventRepository;
+import com.lexsecura.domain.repository.NotificationLogRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -21,15 +28,27 @@ public class CraNotificationService {
 
     private final CraEventRepository eventRepository;
     private final SlaService slaService;
+    private final NotificationLogRepository notificationLogRepository;
+    private final WebhookService webhookService;
+    private final EmailPort emailPort;
     private final Counter overdueAlertCounter;
     private final AtomicInteger openEventsGauge = new AtomicInteger(0);
     private final AtomicInteger overdueEventsGauge = new AtomicInteger(0);
 
+    @Value("${app.cra.alert-email:}")
+    private String alertEmail;
+
     public CraNotificationService(CraEventRepository eventRepository,
                                   SlaService slaService,
+                                  NotificationLogRepository notificationLogRepository,
+                                  WebhookService webhookService,
+                                  EmailPort emailPort,
                                   MeterRegistry meterRegistry) {
         this.eventRepository = eventRepository;
         this.slaService = slaService;
+        this.notificationLogRepository = notificationLogRepository;
+        this.webhookService = webhookService;
+        this.emailPort = emailPort;
         this.overdueAlertCounter = Counter.builder("cra.notifications.overdue_alerts")
                 .description("Number of overdue deadline alerts sent")
                 .register(meterRegistry);
@@ -41,13 +60,9 @@ public class CraNotificationService {
                 .register(meterRegistry);
     }
 
-    /**
-     * Check deadlines every 15 minutes.
-     * Alerts at J-6h, J-2h, and when overdue.
-     */
     @Scheduled(fixedDelayString = "${app.cra.notification-check-ms:900000}")
     public void checkDeadlines() {
-        List<CraEvent> openEvents = eventRepository.findAllByStatus("DRAFT");
+        List<CraEvent> openEvents = new java.util.ArrayList<>(eventRepository.findAllByStatus("DRAFT"));
         openEvents.addAll(eventRepository.findAllByStatus("IN_REVIEW"));
 
         openEventsGauge.set(openEvents.size());
@@ -74,26 +89,59 @@ public class CraNotificationService {
         if (deadline == null) return 0;
 
         long remainingSecs = deadline.remainingSeconds();
+        String alertLevel;
 
         if (deadline.overdue()) {
-            log.warn("[CRA ALERT] OVERDUE: {} deadline for event '{}' (id={}, org={})",
-                    deadlineName, event.getTitle(), event.getId(), event.getOrgId());
-            overdueAlertCounter.increment();
-            return 1;
+            alertLevel = "OVERDUE";
+        } else if (remainingSecs <= 2 * 3600) {
+            alertLevel = "CRITICAL";
+        } else if (remainingSecs <= 6 * 3600) {
+            alertLevel = "WARNING";
+        } else {
+            return 0;
         }
 
-        long sixHours = 6 * 3600;
-        long twoHours = 2 * 3600;
+        // Deduplicate: don't send same alert within 1 hour
+        boolean alreadySent = notificationLogRepository
+                .existsByCraEventIdAndDeadlineTypeAndAlertLevelAndSentAtAfter(
+                        event.getId(), deadlineName, alertLevel,
+                        Instant.now().minus(1, ChronoUnit.HOURS));
+        if (alreadySent) return deadline.overdue() ? 1 : 0;
 
-        if (remainingSecs <= twoHours) {
-            log.warn("[CRA ALERT] J-2h: {} deadline approaching for event '{}' (id={}, org={})",
-                    deadlineName, event.getTitle(), event.getId(), event.getOrgId());
-            overdueAlertCounter.increment();
-        } else if (remainingSecs <= sixHours) {
-            log.info("[CRA ALERT] J-6h: {} deadline approaching for event '{}' (id={}, org={})",
-                    deadlineName, event.getTitle(), event.getId(), event.getOrgId());
+        String subject = String.format("[CRA %s] %s deadline for '%s'",
+                alertLevel, deadlineName, event.getTitle());
+
+        // Log alert
+        log.warn("[CRA ALERT] {}: {} deadline for event '{}' (id={}, org={})",
+                alertLevel, deadlineName, event.getTitle(), event.getId(), event.getOrgId());
+
+        // Send email
+        if (alertEmail != null && !alertEmail.isBlank()) {
+            emailPort.send(alertEmail, subject,
+                    "<p><strong>" + alertLevel + "</strong>: " + deadlineName +
+                            " deadline for CRA event '" + event.getTitle() + "'</p>" +
+                            "<p>Due: " + deadline.dueAt() + "</p>");
         }
 
-        return 0;
+        // Dispatch webhook
+        webhookService.dispatch(event.getOrgId(), "CRA_SLA_ALERT", Map.of(
+                "eventId", event.getId().toString(),
+                "eventTitle", event.getTitle(),
+                "deadline", deadlineName,
+                "alertLevel", alertLevel,
+                "remainingSeconds", remainingSecs,
+                "dueAt", deadline.dueAt().toString()
+        ));
+
+        // Record notification
+        NotificationLog notifLog = new NotificationLog(
+                event.getOrgId(), event.getId(), "EMAIL+WEBHOOK",
+                alertEmail != null ? alertEmail : "log-only",
+                subject, deadlineName, alertLevel);
+        notificationLogRepository.save(notifLog);
+
+        overdueAlertCounter.increment();
+
+        return deadline.overdue() ? 1 : 0;
     }
 }
