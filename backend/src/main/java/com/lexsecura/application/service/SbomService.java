@@ -67,38 +67,14 @@ public class SbomService {
             byte[] content = file.getBytes();
             JsonNode root = objectMapper.readTree(content);
 
-            // Validate CycloneDX format
-            String bomFormat = root.path("bomFormat").asText("");
-            if (!"CycloneDX".equals(bomFormat)) {
-                throw new IllegalArgumentException("Invalid SBOM format: expected CycloneDX, got '" + bomFormat + "'");
-            }
-
-            // Parse components
-            JsonNode componentsNode = root.path("components");
-            if (!componentsNode.isArray()) {
-                throw new IllegalArgumentException("SBOM has no 'components' array");
-            }
-
-            List<Component> parsed = new ArrayList<>();
-            for (JsonNode cn : componentsNode) {
-                String name = cn.path("name").asText("");
-                String version = cn.path("version").asText(null);
-                String type = cn.path("type").asText("library");
-                String rawPurl = cn.path("purl").asText(null);
-                final String purl = (rawPurl == null || rawPurl.isBlank())
-                        ? "pkg:generic/" + name + (version != null ? "@" + version : "")
-                        : rawPurl;
-
-                Component component = componentRepository.findByPurl(purl)
-                        .orElseGet(() -> {
-                            Component c = new Component(purl, name, version, type);
-                            return componentRepository.save(c);
-                        });
-
-                if (!releaseComponentRepository.existsByReleaseIdAndComponentId(releaseId, component.getId())) {
-                    releaseComponentRepository.save(new ReleaseComponent(releaseId, component.getId()));
-                }
-                parsed.add(component);
+            // Auto-detect format: CycloneDX vs SPDX
+            List<Component> parsed;
+            if (root.has("bomFormat") && "CycloneDX".equals(root.path("bomFormat").asText(""))) {
+                parsed = parseCycloneDx(root, releaseId);
+            } else if (root.has("spdxVersion")) {
+                parsed = parseSpdx(root, releaseId);
+            } else {
+                throw new IllegalArgumentException("Unsupported SBOM format: expected CycloneDX or SPDX JSON");
             }
 
             // Store SBOM as evidence
@@ -131,6 +107,82 @@ public class SbomService {
     @Transactional(readOnly = true)
     public List<Component> getComponentsByRelease(UUID releaseId) {
         return componentRepository.findAllByReleaseId(releaseId);
+    }
+
+    private List<Component> parseCycloneDx(JsonNode root, UUID releaseId) {
+        JsonNode componentsNode = root.path("components");
+        if (!componentsNode.isArray()) {
+            throw new IllegalArgumentException("CycloneDX SBOM has no 'components' array");
+        }
+
+        List<Component> parsed = new ArrayList<>();
+        for (JsonNode cn : componentsNode) {
+            String name = cn.path("name").asText("");
+            String version = cn.path("version").asText(null);
+            String type = cn.path("type").asText("library");
+            String rawPurl = cn.path("purl").asText(null);
+            final String purl = (rawPurl == null || rawPurl.isBlank())
+                    ? "pkg:generic/" + name + (version != null ? "@" + version : "")
+                    : rawPurl;
+
+            Component component = componentRepository.findByPurl(purl)
+                    .orElseGet(() -> {
+                        Component c = new Component(purl, name, version, type);
+                        return componentRepository.save(c);
+                    });
+
+            if (!releaseComponentRepository.existsByReleaseIdAndComponentId(releaseId, component.getId())) {
+                releaseComponentRepository.save(new ReleaseComponent(releaseId, component.getId()));
+            }
+            parsed.add(component);
+        }
+        return parsed;
+    }
+
+    private List<Component> parseSpdx(JsonNode root, UUID releaseId) {
+        JsonNode packagesNode = root.path("packages");
+        if (!packagesNode.isArray()) {
+            throw new IllegalArgumentException("SPDX SBOM has no 'packages' array");
+        }
+
+        List<Component> parsed = new ArrayList<>();
+        for (JsonNode pkg : packagesNode) {
+            String name = pkg.path("name").asText("");
+            String version = pkg.path("versionInfo").asText(null);
+
+            // SPDX externalRefs may contain purl
+            String purl = null;
+            JsonNode externalRefs = pkg.path("externalRefs");
+            if (externalRefs.isArray()) {
+                for (JsonNode ref : externalRefs) {
+                    if ("PACKAGE-MANAGER".equals(ref.path("referenceCategory").asText(""))
+                            || "PACKAGE_MANAGER".equals(ref.path("referenceCategory").asText(""))) {
+                        String refType = ref.path("referenceType").asText("");
+                        if ("purl".equals(refType)) {
+                            purl = ref.path("referenceLocator").asText(null);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (purl == null || purl.isBlank()) {
+                purl = "pkg:generic/" + name + (version != null ? "@" + version : "");
+            }
+
+            final String finalPurl = purl;
+            Component component = componentRepository.findByPurl(finalPurl)
+                    .orElseGet(() -> {
+                        Component c = new Component(finalPurl, name, version, "library");
+                        return componentRepository.save(c);
+                    });
+
+            if (!releaseComponentRepository.existsByReleaseIdAndComponentId(releaseId, component.getId())) {
+                releaseComponentRepository.save(new ReleaseComponent(releaseId, component.getId()));
+            }
+            parsed.add(component);
+        }
+        return parsed;
     }
 
     private String computeSha256(byte[] data) {

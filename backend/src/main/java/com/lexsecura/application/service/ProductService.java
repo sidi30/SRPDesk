@@ -48,6 +48,7 @@ public class ProductService {
         UUID userId = TenantContext.getUserId();
         Product product = new Product(orgId, request.name(), request.type(),
                 request.criticality(), request.contacts());
+        product.setConformityPath(Product.computeConformityPath(product.getType()));
         product = productRepository.save(product);
 
         auditService.record(orgId, "PRODUCT", product.getId(), "CREATE", userId,
@@ -73,6 +74,7 @@ public class ProductService {
         if (request.contacts() != null) {
             product.setContacts(request.contacts());
         }
+        product.setConformityPath(Product.computeConformityPath(product.getType()));
         product.setUpdatedAt(Instant.now());
 
         product = productRepository.save(product);
@@ -105,7 +107,7 @@ public class ProductService {
     private ProductResponse toResponse(Product p) {
         return new ProductResponse(
                 p.getId(), p.getOrgId(), p.getName(), p.getType(),
-                p.getCriticality(), p.getContacts(),
+                p.getCriticality(), p.getConformityPath(), p.getContacts(),
                 p.getCreatedAt(), p.getUpdatedAt());
     }
 }

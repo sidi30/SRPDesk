@@ -30,6 +30,9 @@ public class ProductEntity {
     @Column(columnDefinition = "jsonb", nullable = false)
     private String contacts;
 
+    @Column(name = "conformity_path", length = 100)
+    private String conformityPath;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -48,6 +51,8 @@ public class ProductEntity {
     public void setCriticality(String criticality) { this.criticality = criticality; }
     public String getContacts() { return contacts; }
     public void setContacts(String contacts) { this.contacts = contacts; }
+    public String getConformityPath() { return conformityPath; }
+    public void setConformityPath(String conformityPath) { this.conformityPath = conformityPath; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }

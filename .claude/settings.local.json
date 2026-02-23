@@ -53,7 +53,13 @@
       "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/frontend && npx vitest run 2>&1)",
       "Bash(echo TESTS: OK:*)",
       "Bash(echo LINT: OK:*)",
-      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/frontend && npm run test 2>&1)"
+      "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/frontend && npm run test 2>&1)",
+      "Bash(find:*)",
+      "WebFetch(domain:digital-strategy.ec.europa.eu)",
+      "WebFetch(domain:www.european-cyber-resilience-act.com)",
+      "WebFetch(domain:cybercertlabs.com)",
+      "WebFetch(domain:cyber-resilience-act.com)",
+      "WebFetch(domain:www.eucyberresilience.com)"
     ]
   }
 }

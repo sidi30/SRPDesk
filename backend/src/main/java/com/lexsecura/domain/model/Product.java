@@ -13,6 +13,7 @@ public class Product {
     private String type;
     private String criticality;
     private List<Map<String, String>> contacts;
+    private String conformityPath;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -26,8 +27,19 @@ public class Product {
         this.type = type != null ? type : "SOFTWARE";
         this.criticality = criticality != null ? criticality : "STANDARD";
         this.contacts = contacts != null ? contacts : List.of();
+        this.conformityPath = computeConformityPath(this.type);
         this.createdAt = Instant.now();
         this.updatedAt = Instant.now();
+    }
+
+    public static String computeConformityPath(String productType) {
+        if (productType == null) return "SELF_ASSESSMENT";
+        return switch (productType) {
+            case "CRITICAL" -> "EU_TYPE_EXAMINATION";
+            case "IMPORTANT_CLASS_II", "CLASS_II" -> "THIRD_PARTY_ASSESSMENT";
+            case "IMPORTANT_CLASS_I", "CLASS_I" -> "HARMONISED_STANDARD_OR_THIRD_PARTY";
+            default -> "SELF_ASSESSMENT";
+        };
     }
 
     public UUID getId() { return id; }
@@ -50,6 +62,9 @@ public class Product {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public String getConformityPath() { return conformityPath; }
+    public void setConformityPath(String conformityPath) { this.conformityPath = conformityPath; }
 
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }

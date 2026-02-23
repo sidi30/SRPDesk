@@ -11,6 +11,7 @@ public record ProductResponse(
         String name,
         String type,
         String criticality,
+        String conformityPath,
         List<Map<String, String>> contacts,
         Instant createdAt,
         Instant updatedAt

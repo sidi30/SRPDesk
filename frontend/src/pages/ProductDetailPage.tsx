@@ -3,8 +3,13 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useProduct, useUpdateProduct } from '../hooks/useProducts';
 import { useReleases, useCreateRelease, useExportPack } from '../hooks/useReleases';
 import { useProductFindings } from '../hooks/useFindings';
+import { useReadinessScore, useSnapshotReadiness } from '../hooks/useReadiness';
+import { useCraChecklist, useInitializeCraChecklist, useUpdateCraChecklistItem } from '../hooks/useCraChecklist';
 import { StatusBadge } from '../components/StatusBadge';
+import { ReadinessGauge } from '../components/ReadinessGauge';
+import { CraChecklistTable } from '../components/CraChecklistTable';
 import { useAuth } from '../auth/AuthProvider';
+import { FR } from '../i18n/fr';
 import type { ReleaseCreateRequest, ProductUpdateRequest, Release, Finding } from '../types';
 import { getErrorMessage } from '../types';
 
@@ -21,6 +26,13 @@ export function ProductDetailPage() {
   const [findingStatusFilter, setFindingStatusFilter] = useState<string>('');
   const { data: findings } = useProductFindings(id!, findingStatusFilter || undefined);
 
+  // Readiness & Checklist
+  const { data: readiness } = useReadinessScore(id!);
+  const { data: checklistItems } = useCraChecklist(id!);
+  const initChecklist = useInitializeCraChecklist(id!);
+  const updateChecklistItem = useUpdateCraChecklistItem(id!);
+  const snapshotReadiness = useSnapshotReadiness(id!);
+
   const createRelease = useCreateRelease(id!);
   const updateProduct = useUpdateProduct();
   const exportPack = useExportPack();
@@ -30,6 +42,7 @@ export function ProductDetailPage() {
   const [releaseForm, setReleaseForm] = useState<ReleaseCreateRequest>({ version: '', gitRef: '' });
   const [editForm, setEditForm] = useState<ProductUpdateRequest>({ name: '', type: '', criticality: '' });
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'releases' | 'findings' | 'readiness' | 'checklist'>('releases');
 
   if (productLoading) return <div className="text-gray-500">Loading product...</div>;
   if (!product) return <div className="text-red-500">Product not found</div>;
@@ -70,6 +83,8 @@ export function ProductDetailPage() {
     setShowEditProduct(true);
   };
 
+  const isManager = hasRole('ADMIN') || hasRole('COMPLIANCE_MANAGER');
+
   return (
     <div>
       <button
@@ -87,16 +102,29 @@ export function ProductDetailPage() {
             <div className="mt-2 flex gap-2">
               <StatusBadge status={product.type} />
               <StatusBadge status={product.criticality} />
+              {product.conformityPath && (
+                <span className="px-2 py-0.5 text-xs rounded bg-purple-100 text-purple-700 font-medium">
+                  {FR.conformityPath[product.conformityPath] || product.conformityPath}
+                </span>
+              )}
             </div>
           </div>
-          {(hasRole('ADMIN') || hasRole('COMPLIANCE_MANAGER')) && (
-            <button
-              onClick={openEditForm}
-              className="px-3 py-1.5 text-sm text-primary-600 border border-primary-300 rounded-lg hover:bg-primary-50"
-            >
-              Edit
-            </button>
-          )}
+          <div className="flex items-center gap-4">
+            {/* Mini readiness gauge */}
+            {readiness && (
+              <div className="relative" style={{ width: 64, height: 64 }}>
+                <ReadinessGauge score={readiness.overallScore} size={64} />
+              </div>
+            )}
+            {isManager && (
+              <button
+                onClick={openEditForm}
+                className="px-3 py-1.5 text-sm text-primary-600 border border-primary-300 rounded-lg hover:bg-primary-50"
+              >
+                Edit
+              </button>
+            )}
+          </div>
         </div>
 
         {product.contacts && product.contacts.length > 0 && (
@@ -127,131 +155,262 @@ export function ProductDetailPage() {
         </div>
       </div>
 
-      {/* Releases Section */}
-      <div className="bg-white rounded-lg shadow p-6 mb-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Releases</h2>
-          {(hasRole('ADMIN') || hasRole('COMPLIANCE_MANAGER')) && (
+      {/* Tabs */}
+      <div className="border-b mb-6">
+        <nav className="flex gap-6">
+          {(['releases', 'findings', 'readiness', 'checklist'] as const).map(tab => (
             <button
-              onClick={() => setShowCreateRelease(true)}
-              className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab
+                  ? 'border-primary-600 text-primary-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
             >
-              New Release
+              {tab === 'releases' ? 'Releases' :
+               tab === 'findings' ? 'Findings' :
+               tab === 'readiness' ? FR.readiness.title :
+               FR.checklist.title}
             </button>
+          ))}
+        </nav>
+      </div>
+
+      {/* Releases Tab */}
+      {activeTab === 'releases' && (
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Releases</h2>
+            {isManager && (
+              <button
+                onClick={() => setShowCreateRelease(true)}
+                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                New Release
+              </button>
+            )}
+          </div>
+
+          {releasesLoading ? (
+            <div className="text-gray-500 text-sm">Loading releases...</div>
+          ) : !releases || releases.length === 0 ? (
+            <div className="text-gray-400 text-sm py-4">
+              No releases yet. Create a release to start tracking compliance artifacts.
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {releases.map((release: Release) => (
+                <div
+                  key={release.id}
+                  className="flex items-center justify-between border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-4">
+                    <Link
+                      to={`/releases/${release.id}`}
+                      className="font-medium text-primary-600 hover:text-primary-800"
+                    >
+                      v{release.version}
+                    </Link>
+                    <StatusBadge status={release.status} />
+                    {release.gitRef && (
+                      <span className="text-xs text-gray-400 font-mono">{release.gitRef}</span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-gray-400">
+                      {new Date(release.createdAt).toLocaleDateString()}
+                    </span>
+                    <button
+                      onClick={() => exportPack.mutate(release.id)}
+                      disabled={exportPack.isPending}
+                      className="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
+                      title="Export compliance pack"
+                    >
+                      {exportPack.isPending ? 'Exporting...' : 'Export'}
+                    </button>
+                    <Link
+                      to={`/releases/${release.id}`}
+                      className="px-2 py-1 text-xs text-primary-600 border border-primary-300 rounded hover:bg-primary-50"
+                    >
+                      Details
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
           )}
         </div>
+      )}
 
-        {releasesLoading ? (
-          <div className="text-gray-500 text-sm">Loading releases...</div>
-        ) : !releases || releases.length === 0 ? (
-          <div className="text-gray-400 text-sm py-4">
-            No releases yet. Create a release to start tracking compliance artifacts.
+      {/* Findings Tab */}
+      {activeTab === 'findings' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">Findings</h2>
+            <select
+              value={findingStatusFilter}
+              onChange={(e) => setFindingStatusFilter(e.target.value)}
+              aria-label="Filtrer les vulnérabilités par statut"
+              className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-primary-500 focus:border-primary-500"
+            >
+              {FINDING_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s || 'All Statuses'}
+                </option>
+              ))}
+            </select>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {releases.map((release: Release) => (
-              <div
-                key={release.id}
-                className="flex items-center justify-between border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+
+          {!findings || findings.length === 0 ? (
+            <div className="text-gray-400 text-sm py-4">
+              No findings found{findingStatusFilter ? ` with status ${findingStatusFilter}` : ''}.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vulnerability</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Component</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Severity</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detected</th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {findings.map((f: Finding) => (
+                    <tr key={f.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm">
+                        <div className="font-medium text-gray-900">{f.vulnerabilityId}</div>
+                        {f.osvId && <div className="text-xs text-gray-400">{f.osvId}</div>}
+                        {f.summary && <div className="text-xs text-gray-500 mt-0.5 max-w-xs truncate">{f.summary}</div>}
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">
+                        {f.componentName || f.componentPurl || '-'}
+                      </td>
+                      <td className="px-4 py-3">
+                        {f.severity ? <StatusBadge status={f.severity} /> : <span className="text-gray-400 text-xs">-</span>}
+                      </td>
+                      <td className="px-4 py-3">
+                        <StatusBadge status={f.status} />
+                      </td>
+                      <td className="px-4 py-3 text-xs text-gray-500">
+                        {new Date(f.detectedAt).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Readiness Tab */}
+      {activeTab === 'readiness' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">{FR.readiness.title}</h2>
+              <p className="text-sm text-gray-500">{FR.readiness.subtitle}</p>
+            </div>
+            {isManager && (
+              <button
+                onClick={() => snapshotReadiness.mutate()}
+                disabled={snapshotReadiness.isPending}
+                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
               >
-                <div className="flex items-center gap-4">
-                  <Link
-                    to={`/releases/${release.id}`}
-                    className="font-medium text-primary-600 hover:text-primary-800"
-                  >
-                    v{release.version}
-                  </Link>
-                  <StatusBadge status={release.status} />
-                  {release.gitRef && (
-                    <span className="text-xs text-gray-400 font-mono">{release.gitRef}</span>
-                  )}
+                {snapshotReadiness.isPending ? FR.readiness.snapshotting : FR.readiness.snapshot}
+              </button>
+            )}
+          </div>
+
+          {readiness ? (
+            <div>
+              <div className="flex items-center gap-8 mb-8">
+                <div className="relative" style={{ width: 120, height: 120 }}>
+                  <ReadinessGauge score={readiness.overallScore} size={120} label={FR.readiness.overallScore} />
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400">
-                    {new Date(release.createdAt).toLocaleDateString()}
-                  </span>
-                  <button
-                    onClick={() => exportPack.mutate(release.id)}
-                    disabled={exportPack.isPending}
-                    className="px-2 py-1 text-xs text-gray-600 border border-gray-300 rounded hover:bg-gray-100 disabled:opacity-50"
-                    title="Export compliance pack"
-                  >
-                    {exportPack.isPending ? 'Exporting...' : 'Export'}
-                  </button>
-                  <Link
-                    to={`/releases/${release.id}`}
-                    className="px-2 py-1 text-xs text-primary-600 border border-primary-300 rounded hover:bg-primary-50"
-                  >
-                    Details
-                  </Link>
+                <div className="flex-1 space-y-3">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">{FR.readiness.categories}</h3>
+                  {readiness.categories.map(cat => (
+                    <div key={cat.name} className="flex items-center gap-3">
+                      <span className="text-xs text-gray-600 w-40 truncate">
+                        {FR.readinessCategory[cat.name] || cat.label}
+                      </span>
+                      <div className="flex-1 bg-gray-200 rounded-full h-2">
+                        <div
+                          className={`h-2 rounded-full transition-all duration-500 ${
+                            cat.score >= cat.maxScore * 0.8 ? 'bg-green-500' :
+                            cat.score >= cat.maxScore * 0.6 ? 'bg-yellow-500' :
+                            cat.score >= cat.maxScore * 0.4 ? 'bg-orange-500' : 'bg-red-500'
+                          }`}
+                          style={{ width: `${cat.maxScore > 0 ? (cat.score / cat.maxScore) * 100 : 0}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-gray-700 w-12 text-right">
+                        {cat.score}/{cat.maxScore}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* Findings Section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-gray-900">Findings</h2>
-          <select
-            value={findingStatusFilter}
-            onChange={(e) => setFindingStatusFilter(e.target.value)}
-            aria-label="Filtrer les vulnérabilités par statut"
-            className="text-sm border border-gray-300 rounded-lg px-3 py-1.5 focus:ring-primary-500 focus:border-primary-500"
-          >
-            {FINDING_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s || 'All Statuses'}
-              </option>
-            ))}
-          </select>
+              {readiness.actionItems.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">{FR.readiness.actionItems}</h3>
+                  <ul className="space-y-1.5">
+                    {readiness.actionItems.map((item, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-600">
+                        <span className="text-orange-500 mt-0.5">&#9679;</span>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-gray-400 text-sm py-4">
+              {FR.checklist.noItems}
+            </div>
+          )}
         </div>
+      )}
 
-        {!findings || findings.length === 0 ? (
-          <div className="text-gray-400 text-sm py-4">
-            No findings found{findingStatusFilter ? ` with status ${findingStatusFilter}` : ''}.
+      {/* Checklist Tab */}
+      {activeTab === 'checklist' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">{FR.checklist.title}</h2>
+              <p className="text-sm text-gray-500">{FR.checklist.subtitle}</p>
+            </div>
+            {isManager && (!checklistItems || checklistItems.length === 0) && (
+              <button
+                onClick={() => initChecklist.mutate()}
+                disabled={initChecklist.isPending}
+                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+              >
+                {initChecklist.isPending ? FR.checklist.initializing : FR.checklist.initialize}
+              </button>
+            )}
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Vulnerability</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Component</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Severity</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Detected</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {findings.map((f: Finding) => (
-                  <tr key={f.id} className="hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm">
-                      <div className="font-medium text-gray-900">{f.vulnerabilityId}</div>
-                      {f.osvId && <div className="text-xs text-gray-400">{f.osvId}</div>}
-                      {f.summary && <div className="text-xs text-gray-500 mt-0.5 max-w-xs truncate">{f.summary}</div>}
-                    </td>
-                    <td className="px-4 py-3 text-sm text-gray-600">
-                      {f.componentName || f.componentPurl || '-'}
-                    </td>
-                    <td className="px-4 py-3">
-                      {f.severity ? <StatusBadge status={f.severity} /> : <span className="text-gray-400 text-xs">-</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <StatusBadge status={f.status} />
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
-                      {new Date(f.detectedAt).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
+
+          {checklistItems && checklistItems.length > 0 ? (
+            <CraChecklistTable
+              items={checklistItems}
+              onUpdate={(itemId, data) => updateChecklistItem.mutate({ itemId, data })}
+              isUpdating={updateChecklistItem.isPending}
+            />
+          ) : (
+            <div className="text-gray-400 text-sm py-4">
+              {FR.checklist.noItems}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Create Release Modal */}
       {showCreateRelease && (

@@ -39,6 +39,12 @@ export const findingDecisionSchema = z.object({
   fixReleaseId: z.string().uuid().optional().or(z.literal('')),
 });
 
+export const craChecklistUpdateSchema = z.object({
+  status: z.enum(['NOT_ASSESSED', 'COMPLIANT', 'PARTIALLY_COMPLIANT', 'NON_COMPLIANT', 'NOT_APPLICABLE']),
+  notes: z.string().max(2000, 'Les notes ne peuvent pas dépasser 2000 caractères').optional().or(z.literal('')),
+  evidenceIds: z.array(z.string().uuid()).optional(),
+});
+
 export type ValidationErrors = Record<string, string>;
 
 export function validate<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; errors: ValidationErrors } {

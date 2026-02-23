@@ -127,4 +127,72 @@ export const FR = {
     error: 'Erreur lors de la g\u00e9n\u00e9ration',
     noEvents: 'Aucun \u00e9v\u00e9nement CRA disponible',
   },
+  checklistCategory: {
+    SECURE_BY_DESIGN: 'Secure by Design (Annexe I - Partie I)',
+    VULNERABILITY_MANAGEMENT: 'Gestion des vulnérabilités (Annexe I - Partie II)',
+  } as Record<string, string>,
+
+  checklistStatus: {
+    NOT_ASSESSED: 'Non évalué',
+    COMPLIANT: 'Conforme',
+    PARTIALLY_COMPLIANT: 'Partiellement conforme',
+    NON_COMPLIANT: 'Non conforme',
+    NOT_APPLICABLE: 'Non applicable',
+  } as Record<string, string>,
+
+  checklist: {
+    title: 'Checklist CRA',
+    subtitle: 'Conformité Annexe I du Cyber Resilience Act',
+    initialize: 'Initialiser la checklist',
+    initializing: 'Initialisation...',
+    compliant: 'conformes',
+    notesPlaceholder: 'Notes ou observations...',
+    save: 'Enregistrer',
+    saving: 'Enregistrement...',
+    cancel: 'Annuler',
+    noItems: 'Checklist non initialisée. Cliquez sur "Initialiser la checklist" pour commencer.',
+  },
+
+  readiness: {
+    title: 'Score de préparation CRA',
+    subtitle: 'Évaluation de la conformité au Cyber Resilience Act',
+    overallScore: 'Score global',
+    actionItems: 'Actions recommandées',
+    noActions: 'Aucune action requise',
+    snapshot: 'Sauvegarder le snapshot',
+    snapshotting: 'Sauvegarde...',
+    categories: 'Catégories',
+  },
+
+  readinessCategory: {
+    SECURE_BY_DESIGN: 'Secure by Design',
+    VULNERABILITY_MANAGEMENT: 'Gestion des vulnérabilités',
+    SBOM_MANAGEMENT: 'Gestion SBOM',
+    INCIDENT_REPORTING: 'Reporting incidents',
+    DOCUMENTATION: 'Documentation',
+  } as Record<string, string>,
+
+  conformityPath: {
+    SELF_ASSESSMENT: 'Auto-évaluation',
+    HARMONISED_STANDARD_OR_THIRD_PARTY: 'Standard harmonisé ou tierce partie',
+    THIRD_PARTY_ASSESSMENT: 'Évaluation tierce partie',
+    EU_TYPE_EXAMINATION: 'Examen de type UE',
+  } as Record<string, string>,
+
+  dashboard: {
+    title: 'Tableau de bord',
+    subtitle: 'Vue d\'ensemble de la conformité CRA',
+    products: 'Produits',
+    releases: 'Releases',
+    findings: 'Vulnérabilités',
+    openFindings: 'Ouvertes',
+    criticalHigh: 'Critiques / Hautes',
+    craEvents: 'Événements CRA',
+    activeEvents: 'Événements actifs',
+    avgReadiness: 'Score moyen',
+    productReadiness: 'Préparation par produit',
+    noProducts: 'Aucun produit. Créez un produit pour commencer.',
+    readiness: 'Préparation',
+    checklist: 'Checklist',
+  },
 } as const;

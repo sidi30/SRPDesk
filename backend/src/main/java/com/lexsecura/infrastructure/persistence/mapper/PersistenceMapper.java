@@ -28,6 +28,7 @@ public class PersistenceMapper {
         p.setType(entity.getType());
         p.setCriticality(entity.getCriticality());
         p.setContacts(deserializeContacts(entity.getContacts()));
+        p.setConformityPath(entity.getConformityPath());
         p.setCreatedAt(entity.getCreatedAt());
         p.setUpdatedAt(entity.getUpdatedAt());
         return p;
@@ -41,6 +42,7 @@ public class PersistenceMapper {
         e.setType(domain.getType());
         e.setCriticality(domain.getCriticality());
         e.setContacts(serializeContacts(domain.getContacts()));
+        e.setConformityPath(domain.getConformityPath());
         e.setCreatedAt(domain.getCreatedAt());
         e.setUpdatedAt(domain.getUpdatedAt());
         return e;

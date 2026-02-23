@@ -4,6 +4,7 @@ export interface Product {
   name: string;
   type: string;
   criticality: string;
+  conformityPath?: string;
   contacts: ContactInfo[];
   createdAt: string;
   updatedAt: string;
@@ -268,4 +269,86 @@ export interface AiArtifactResponse {
   kind: string;
   contentJson: unknown;
   createdAt: string;
+}
+
+// ── CRA Checklist ──────────────────────────────────────────
+
+export type ChecklistStatus = 'NOT_ASSESSED' | 'COMPLIANT' | 'PARTIALLY_COMPLIANT' | 'NON_COMPLIANT' | 'NOT_APPLICABLE';
+
+export interface CraChecklistItem {
+  id: string;
+  productId: string;
+  requirementRef: string;
+  category: string;
+  title: string;
+  description?: string;
+  status: ChecklistStatus;
+  evidenceIds: string[];
+  notes?: string;
+  assessedBy?: string;
+  assessedAt?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CraChecklistUpdateRequest {
+  status?: ChecklistStatus;
+  notes?: string;
+  evidenceIds?: string[];
+}
+
+export interface CraChecklistSummary {
+  productId: string;
+  totalItems: number;
+  compliant: number;
+  partiallyCompliant: number;
+  nonCompliant: number;
+  notAssessed: number;
+  categories: Record<string, {
+    total: number;
+    compliant: number;
+    partiallyCompliant: number;
+    nonCompliant: number;
+    notAssessed: number;
+  }>;
+}
+
+// ── Readiness Score ────────────────────────────────────────
+
+export interface ReadinessScore {
+  productId: string;
+  overallScore: number;
+  categories: ReadinessCategoryScore[];
+  actionItems: string[];
+}
+
+export interface ReadinessCategoryScore {
+  name: string;
+  score: number;
+  maxScore: number;
+  label: string;
+}
+
+// ── Dashboard ──────────────────────────────────────────────
+
+export interface DashboardData {
+  totalProducts: number;
+  totalReleases: number;
+  totalFindings: number;
+  openFindings: number;
+  criticalHighFindings: number;
+  totalCraEvents: number;
+  activeCraEvents: number;
+  averageReadinessScore: number;
+  productReadiness: ProductReadiness[];
+}
+
+export interface ProductReadiness {
+  productId: string;
+  productName: string;
+  type: string;
+  conformityPath?: string;
+  readinessScore: number;
+  checklistTotal: number;
+  checklistCompliant: number;
 }
