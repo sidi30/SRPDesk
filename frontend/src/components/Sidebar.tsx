@@ -24,8 +24,17 @@ export function Sidebar() {
 
   return (
     <div className="flex flex-col w-64 bg-gray-900 text-white" role="navigation" aria-label="Navigation principale">
-      <div className="flex items-center h-16 px-6 border-b border-gray-800">
-        <h1 className="text-xl font-bold text-primary-400">SRPDesk</h1>
+      <div className="flex items-center h-16 px-6 border-b border-gray-800 gap-3">
+        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path d="M16 2L4 7v9c0 7.18 5.12 13.9 12 15.4C22.88 29.9 28 23.18 28 16V7L16 2z" fill="#22c55e" fillOpacity="0.15" stroke="#22c55e" strokeWidth="1.5"/>
+          <path d="M16 2L4 7v9c0 7.18 5.12 13.9 12 15.4C22.88 29.9 28 23.18 28 16V7L16 2z" fill="none" stroke="#4ade80" strokeWidth="0.5" strokeOpacity="0.4"/>
+          <path d="M12.5 19.5L15 22l5-7" stroke="#22c55e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+          <circle cx="16" cy="16" r="8" stroke="#22c55e" strokeWidth="0.5" strokeOpacity="0.3" strokeDasharray="2 2"/>
+        </svg>
+        <h1 className="text-xl font-bold">
+          <span className="text-primary-400">SRP</span>
+          <span className="text-white">Desk</span>
+        </h1>
       </div>
 
       <nav className="flex-1 px-4 py-4 space-y-1 overflow-y-auto" role="list">
