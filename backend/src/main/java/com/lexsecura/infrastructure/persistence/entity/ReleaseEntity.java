@@ -36,6 +36,15 @@ public class ReleaseEntity {
     @Column(nullable = false, length = 30)
     private String status;
 
+    @Column(name = "update_type", length = 50)
+    private String updateType;
+
+    @Column(name = "security_impact", length = 50)
+    private String securityImpact;
+
+    @Column(name = "cve_ids", columnDefinition = "TEXT")
+    private String cveIds;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -62,6 +71,12 @@ public class ReleaseEntity {
     public void setStatus(String status) { this.status = status; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+    public String getUpdateType() { return updateType; }
+    public void setUpdateType(String updateType) { this.updateType = updateType; }
+    public String getSecurityImpact() { return securityImpact; }
+    public void setSecurityImpact(String securityImpact) { this.securityImpact = securityImpact; }
+    public String getCveIds() { return cveIds; }
+    public void setCveIds(String cveIds) { this.cveIds = cveIds; }
     public Instant getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(Instant updatedAt) { this.updatedAt = updatedAt; }
 

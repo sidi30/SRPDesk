@@ -20,6 +20,10 @@ public class SrpSubmission {
     private String enisaStatus;
     private int retryCount;
     private String lastError;
+    private String csirtReference;
+    private Instant csirtSubmittedAt;
+    private String csirtStatus;
+    private String csirtCountryCode;
     private UUID generatedBy;
     private Instant generatedAt;
     private Instant updatedAt;
@@ -62,4 +66,12 @@ public class SrpSubmission {
     public void setRetryCount(int retryCount) { this.retryCount = retryCount; }
     public String getLastError() { return lastError; }
     public void setLastError(String lastError) { this.lastError = lastError; }
+    public String getCsirtReference() { return csirtReference; }
+    public void setCsirtReference(String csirtReference) { this.csirtReference = csirtReference; }
+    public Instant getCsirtSubmittedAt() { return csirtSubmittedAt; }
+    public void setCsirtSubmittedAt(Instant csirtSubmittedAt) { this.csirtSubmittedAt = csirtSubmittedAt; }
+    public String getCsirtStatus() { return csirtStatus; }
+    public void setCsirtStatus(String csirtStatus) { this.csirtStatus = csirtStatus; }
+    public String getCsirtCountryCode() { return csirtCountryCode; }
+    public void setCsirtCountryCode(String csirtCountryCode) { this.csirtCountryCode = csirtCountryCode; }
 }

@@ -114,6 +114,13 @@ app:
     base-url: ${ENISA_BASE_URL:https://srp.enisa.europa.eu}
     api-key: ${ENISA_API_KEY:}
     timeout-seconds: ${ENISA_TIMEOUT:30}
+  # National CSIRT connector (CRA Art. 14 parallel notification)
+  csirt:
+    enabled: ${CSIRT_ENABLED:false}
+    base-url: ${CSIRT_BASE_URL:}
+    api-key: ${CSIRT_API_KEY:}
+    timeout-seconds: ${CSIRT_TIMEOUT:30}
+    default-country-code: ${CSIRT_COUNTRY_CODE:FR}
   monitoring:
     interval-ms: ${MONITORING_INTERVAL_MS:21600000}
   extras:

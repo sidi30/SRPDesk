@@ -80,6 +80,7 @@ public class ReleaseService {
                 r.getId(), r.getProductId(), r.getVersion(),
                 r.getGitRef(), r.getBuildId(), r.getReleasedAt(),
                 r.getSupportedUntil(), r.getStatus().name(),
+                r.getUpdateType(), r.getSecurityImpact(), r.getCveIds(),
                 r.getCreatedAt(), r.getUpdatedAt());
     }
 }

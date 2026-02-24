@@ -2,6 +2,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { releasesApi } from '../api/releases';
 import type { ReleaseCreateRequest } from '../types';
 
+export function useRelease(releaseId: string) {
+  return useQuery({
+    queryKey: ['release', releaseId],
+    queryFn: () => releasesApi.getById(releaseId),
+    enabled: !!releaseId,
+  });
+}
+
 export function useReleases(productId: string) {
   return useQuery({
     queryKey: ['releases', productId],

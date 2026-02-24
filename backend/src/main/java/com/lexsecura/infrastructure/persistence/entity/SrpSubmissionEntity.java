@@ -59,6 +59,18 @@ public class SrpSubmissionEntity {
     @Column(name = "last_error", columnDefinition = "TEXT")
     private String lastError;
 
+    @Column(name = "csirt_reference", length = 500)
+    private String csirtReference;
+
+    @Column(name = "csirt_submitted_at")
+    private Instant csirtSubmittedAt;
+
+    @Column(name = "csirt_status", length = 50)
+    private String csirtStatus;
+
+    @Column(name = "csirt_country_code", length = 5)
+    private String csirtCountryCode;
+
     @Column(name = "generated_by", nullable = false)
     private UUID generatedBy;
 
@@ -118,4 +130,12 @@ public class SrpSubmissionEntity {
     public void setRetryCount(Integer retryCount) { this.retryCount = retryCount; }
     public String getLastError() { return lastError; }
     public void setLastError(String lastError) { this.lastError = lastError; }
+    public String getCsirtReference() { return csirtReference; }
+    public void setCsirtReference(String csirtReference) { this.csirtReference = csirtReference; }
+    public Instant getCsirtSubmittedAt() { return csirtSubmittedAt; }
+    public void setCsirtSubmittedAt(Instant csirtSubmittedAt) { this.csirtSubmittedAt = csirtSubmittedAt; }
+    public String getCsirtStatus() { return csirtStatus; }
+    public void setCsirtStatus(String csirtStatus) { this.csirtStatus = csirtStatus; }
+    public String getCsirtCountryCode() { return csirtCountryCode; }
+    public void setCsirtCountryCode(String csirtCountryCode) { this.csirtCountryCode = csirtCountryCode; }
 }

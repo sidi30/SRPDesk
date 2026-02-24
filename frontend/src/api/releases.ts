@@ -2,6 +2,10 @@ import apiClient from './client';
 import type { Release, ReleaseCreateRequest } from '../types';
 
 export const releasesApi = {
+  getById: async (releaseId: string): Promise<Release> => {
+    const { data } = await apiClient.get(`/releases/${releaseId}`);
+    return data;
+  },
   listByProduct: async (productId: string): Promise<Release[]> => {
     const { data } = await apiClient.get(`/products/${productId}/releases`);
     return data;

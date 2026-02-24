@@ -114,8 +114,8 @@
       <a href="#architecture" class="active">Architecture</a>
       <a href="#flow">Pipeline CI/CD</a>
       <a href="#tools">Outils SBOM</a>
-      <a href="#api">API</a>
-      <a href="#config">Configuration</a>
+      <a href="#api">API (15 endpoints)</a>
+      <a href="#config">Config &amp; Metrics</a>
     </nav>
   </div>
 </header>
@@ -129,7 +129,7 @@
     <h1>Architecture Logicielle <span>&amp;</span> Pipeline CI/CD</h1>
     <p class="subtitle" style="margin:0 auto">
       Diagramme d'architecture complet avec liaisons de donnees, flux CI/CD step-by-step,
-      catalogue d'outils de generation SBOM et contrats API.
+      catalogue d'outils SBOM, contrats API (VEX, Quality, Sharing, Monitoring, CI/CD).
     </p>
   </div>
 </section>
@@ -142,11 +142,11 @@
     <div class="section-header sr">
       <div class="badge">Architecture Logicielle</div>
       <h2>Diagramme d'architecture avec liaisons</h2>
-      <p class="subtitle">Vue complete des composants, couches hexagonales et flux de donnees entre chaque brique.</p>
+      <p class="subtitle">Vue complete des composants, couches hexagonales, VEX, monitoring, quality scoring et flux de donnees.</p>
     </div>
 
     <div class="arch-svg-wrap sr">
-      <svg viewBox="0 0 1200 820" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:1200px;height:auto">
+      <svg viewBox="0 0 1200 860" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:1200px;height:auto">
         <defs>
           <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#22c55e"/></marker>
           <marker id="arrow-cyan" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6" fill="#06b6d4"/></marker>
@@ -163,7 +163,7 @@
         <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
           <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(34,197,94,.04)" stroke-width="1"/>
         </pattern>
-        <rect width="1200" height="820" fill="url(#grid)"/>
+        <rect width="1200" height="860" fill="url(#grid)"/>
 
         <!-- ══════════════════════════════════════ -->
         <!-- LEFT COLUMN — External Inputs         -->
@@ -224,67 +224,80 @@
         <!-- API Layer -->
         <rect x="330" y="185" width="480" height="105" rx="10" fill="rgba(6,182,212,.04)" stroke="rgba(6,182,212,.3)" stroke-width="1"/>
         <text x="345" y="207" fill="#06b6d4" font-size="10" font-weight="700" font-family="Inter,sans-serif">API LAYER — REST Controllers</text>
-        <rect x="345" y="215" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="395" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">CiSbomCtrl</text>
-        <rect x="455" y="215" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="505" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">ApiKeyCtrl</text>
-        <rect x="565" y="215" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="615" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">ProductCtrl</text>
-        <rect x="675" y="215" width="120" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="735" y="235" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">ReleaseCtrl</text>
-        <rect x="345" y="253" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="395" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">FindingCtrl</text>
-        <rect x="455" y="253" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="505" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">CraEventCtrl</text>
-        <rect x="565" y="253" width="100" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="615" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">AuditCtrl</text>
-        <rect x="675" y="253" width="120" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="735" y="273" text-anchor="middle" fill="#06b6d4" font-size="8" font-weight="600" font-family="Inter,sans-serif">SbomCtrl</text>
+        <rect x="345" y="215" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="390" y="235" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">CiSbomCtrl</text>
+        <rect x="440" y="215" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="485" y="235" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">ApiKeyCtrl</text>
+        <rect x="535" y="215" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="580" y="235" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">VexCtrl</text>
+        <rect x="630" y="215" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="675" y="235" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">ProductCtrl</text>
+        <rect x="725" y="215" width="70" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="760" y="235" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">ReleaseCtrl</text>
+        <rect x="345" y="253" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="390" y="273" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">ShareCtrl</text>
+        <rect x="440" y="253" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="485" y="273" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">QualityCtrl</text>
+        <rect x="535" y="253" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="580" y="273" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">VulnImpact</text>
+        <rect x="630" y="253" width="90" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="675" y="273" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">WebhookCtrl</text>
+        <rect x="725" y="253" width="70" height="32" rx="5" fill="rgba(6,182,212,.08)" stroke="rgba(6,182,212,.2)"/><text x="760" y="273" text-anchor="middle" fill="#06b6d4" font-size="7" font-weight="600" font-family="Inter,sans-serif">AuditCtrl</text>
 
         <!-- Application Layer -->
         <rect x="330" y="305" width="480" height="130" rx="10" fill="rgba(34,197,94,.04)" stroke="rgba(34,197,94,.3)" stroke-width="1"/>
         <text x="345" y="327" fill="#22c55e" font-size="10" font-weight="700" font-family="Inter,sans-serif">APPLICATION LAYER — Services &amp; DTOs</text>
-        <rect x="345" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="397" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">CiSbomService</text>
-        <text x="397" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">resolve + ingest</text>
+        <rect x="345" y="335" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="392" y="351" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">CiSbomService</text>
+        <text x="392" y="365" text-anchor="middle" fill="#94a3b8" font-size="6" font-family="Inter,sans-serif">resolve + ingest</text>
 
-        <rect x="460" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="512" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ApiKeyService</text>
-        <text x="512" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">create/auth/revoke</text>
+        <rect x="445" y="335" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="492" y="351" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">VexService</text>
+        <text x="492" y="365" text-anchor="middle" fill="#94a3b8" font-size="6" font-family="Inter,sans-serif">OpenVEX/CDX/CSAF</text>
 
-        <rect x="575" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="627" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">SbomService</text>
-        <text x="627" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">parse CycloneDX/SPDX</text>
+        <rect x="545" y="335" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="592" y="351" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">VulnMonitor</text>
+        <text x="592" y="365" text-anchor="middle" fill="#94a3b8" font-size="6" font-family="Inter,sans-serif">KEV/NVD/EUVD @6h</text>
 
-        <rect x="690" y="335" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="742" y="351" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">AuditService</text>
-        <text x="742" y="367" text-anchor="middle" fill="#94a3b8" font-size="7" font-family="Inter,sans-serif">SHA-256 chain</text>
+        <rect x="645" y="335" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="692" y="351" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">SbomQuality</text>
+        <text x="692" y="365" text-anchor="middle" fill="#94a3b8" font-size="6" font-family="Inter,sans-serif">BSI TR-03183-2</text>
 
-        <rect x="345" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="397" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ProductService</text>
-        <rect x="460" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="512" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ReleaseService</text>
-        <rect x="575" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="627" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">VulnScanService</text>
-        <rect x="690" y="385" width="105" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
-        <text x="742" y="401" text-anchor="middle" fill="#22c55e" font-size="8" font-weight="600" font-family="Inter,sans-serif">ReadinessService</text>
+        <rect x="745" y="335" width="55" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="772" y="355" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">Share</text>
+
+        <rect x="345" y="385" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="392" y="401" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">SbomService</text>
+        <text x="392" y="415" text-anchor="middle" fill="#94a3b8" font-size="6" font-family="Inter,sans-serif">CDX/SPDX parse</text>
+        <rect x="445" y="385" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="492" y="401" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">ApiKeyService</text>
+        <rect x="545" y="385" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="592" y="401" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">ProductService</text>
+        <rect x="645" y="385" width="95" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="692" y="401" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">AuditService</text>
+        <rect x="745" y="385" width="55" height="40" rx="5" fill="rgba(34,197,94,.08)" stroke="rgba(34,197,94,.2)"/>
+        <text x="772" y="405" text-anchor="middle" fill="#22c55e" font-size="7" font-weight="600" font-family="Inter,sans-serif">SRP</text>
 
         <!-- Domain Layer -->
         <rect x="330" y="450" width="480" height="115" rx="10" fill="rgba(245,158,11,.04)" stroke="rgba(245,158,11,.3)" stroke-width="1"/>
         <text x="345" y="472" fill="#f59e0b" font-size="10" font-weight="700" font-family="Inter,sans-serif">DOMAIN LAYER — Models &amp; Repository Ports</text>
-        <rect x="345" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="385" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Product</text>
-        <rect x="435" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="475" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Release</text>
-        <rect x="525" y="480" width="90" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="570" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Component</text>
-        <rect x="625" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="665" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Evidence</text>
-        <rect x="715" y="480" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="755" y="498" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">ApiKey</text>
-        <rect x="345" y="515" width="80" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="385" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">Finding</text>
-        <rect x="435" y="515" width="90" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="480" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">AuditEvent</text>
-        <rect x="535" y="515" width="90" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="580" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="600" font-family="Inter,sans-serif">CraEvent</text>
-        <rect x="635" y="515" width="160" height="28" rx="5" fill="rgba(245,158,11,.06)" stroke="rgba(245,158,11,.15)" stroke-dasharray="3,2"/>
-        <text x="715" y="533" text-anchor="middle" fill="#f59e0b" font-size="8" font-family="Inter,sans-serif">Repository Ports (interfaces)</text>
+        <rect x="345" y="480" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="381" y="498" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">Product</text>
+        <rect x="422" y="480" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="458" y="498" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">Release</text>
+        <rect x="499" y="480" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="535" y="498" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">Component</text>
+        <rect x="576" y="480" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="612" y="498" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">VexDoc</text>
+        <rect x="653" y="480" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="689" y="498" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">Evidence</text>
+        <rect x="730" y="480" width="65" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="762" y="498" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">ApiKey</text>
+        <rect x="345" y="515" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="381" y="533" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">Finding</text>
+        <rect x="422" y="515" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="458" y="533" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">CraEvent</text>
+        <rect x="499" y="515" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="535" y="533" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">ShareLink</text>
+        <rect x="576" y="515" width="72" height="28" rx="5" fill="rgba(245,158,11,.08)" stroke="rgba(245,158,11,.15)"/><text x="612" y="533" text-anchor="middle" fill="#f59e0b" font-size="7" font-weight="600" font-family="Inter,sans-serif">SupplierSbom</text>
+        <rect x="653" y="515" width="142" height="28" rx="5" fill="rgba(245,158,11,.06)" stroke="rgba(245,158,11,.15)" stroke-dasharray="3,2"/>
+        <text x="724" y="533" text-anchor="middle" fill="#f59e0b" font-size="7" font-family="Inter,sans-serif">Repository Ports (interfaces)</text>
 
         <!-- Infrastructure Layer -->
         <rect x="330" y="580" width="480" height="105" rx="10" fill="rgba(168,85,247,.04)" stroke="rgba(168,85,247,.3)" stroke-width="1"/>
         <text x="345" y="602" fill="#a855f7" font-size="10" font-weight="700" font-family="Inter,sans-serif">INFRASTRUCTURE LAYER — Adapters</text>
-        <rect x="345" y="610" width="110" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="400" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">JPA Entities</text>
-        <rect x="465" y="610" width="125" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="527" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">Repo Adapters</text>
-        <rect x="600" y="610" width="100" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="650" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">S3 StoragePort</text>
-        <rect x="710" y="610" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="755" y="628" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">OSV Client</text>
-        <rect x="345" y="647" width="110" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="400" y="665" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">PersistenceMapper</text>
-        <rect x="465" y="647" width="125" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="527" y="665" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">Ollama AI Client</text>
-        <rect x="600" y="647" width="100" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="650" y="665" text-anchor="middle" fill="#a855f7" font-size="8" font-weight="600" font-family="Inter,sans-serif">Flyway V001-19</text>
+        <rect x="345" y="610" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="390" y="628" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">JPA Entities</text>
+        <rect x="440" y="610" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="485" y="628" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">Repo Adapters</text>
+        <rect x="535" y="610" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="580" y="628" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">S3 StoragePort</text>
+        <rect x="630" y="610" width="80" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="670" y="628" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">OSV Client</text>
+        <rect x="715" y="610" width="80" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="755" y="628" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">KEV Client</text>
+        <rect x="345" y="647" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="390" y="665" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">NVD Client</text>
+        <rect x="440" y="647" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="485" y="665" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">EUVD Client</text>
+        <rect x="535" y="647" width="90" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="580" y="665" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">Ollama AI</text>
+        <rect x="630" y="647" width="80" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="670" y="665" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">Mapper</text>
+        <rect x="715" y="647" width="80" height="28" rx="5" fill="rgba(168,85,247,.08)" stroke="rgba(168,85,247,.15)"/><text x="755" y="665" text-anchor="middle" fill="#a855f7" font-size="7" font-weight="600" font-family="Inter,sans-serif">Flyway V026</text>
 
         <!-- TenantContext (cross-cutting) -->
         <rect x="340" y="700" width="460" height="32" rx="6" fill="rgba(236,72,153,.06)" stroke="rgba(236,72,153,.25)" stroke-dasharray="4,3"/>
@@ -300,9 +313,9 @@
         <!-- PostgreSQL -->
         <rect x="920" y="70" width="220" height="90" rx="12" fill="#111827" stroke="#a855f7" stroke-width="1.5" filter="url(#glow-p)"/>
         <text x="1030" y="98" text-anchor="middle" fill="#a855f7" font-size="11" font-weight="700" font-family="Inter,sans-serif">POSTGRESQL 16</text>
-        <text x="1030" y="118" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">19 tables (Flyway V001→V019)</text>
+        <text x="1030" y="118" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">26 tables (Flyway V001→V026)</text>
         <text x="1030" y="135" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">JSONB, UUID, org_id partout</text>
-        <text x="1030" y="150" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">api_keys, products, releases...</text>
+        <text x="1030" y="150" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">+ vex_documents, share_links...</text>
 
         <!-- MinIO S3 -->
         <rect x="920" y="200" width="220" height="80" rx="12" fill="#111827" stroke="#a855f7" stroke-width="1.5"/>
@@ -316,17 +329,27 @@
         <text x="1030" y="368" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Scan vulnerabilites par PURL</text>
         <text x="1030" y="383" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Batch 100, rate limit 1s</text>
 
+        <!-- Vuln Sources (KEV, NVD, EUVD) -->
+        <rect x="920" y="430" width="220" height="90" rx="12" fill="#111827" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="1030" y="455" text-anchor="middle" fill="#ef4444" font-size="11" font-weight="700" font-family="Inter,sans-serif">VULN ENRICHMENT</text>
+        <text x="1030" y="475" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">CISA KEV — exploits actifs</text>
+        <text x="1030" y="492" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">NVD — CVSS scores &amp; vectors</text>
+        <text x="1030" y="509" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">EUVD — IDs europeens</text>
+
         <!-- Ollama -->
-        <rect x="920" y="430" width="220" height="70" rx="12" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
-        <text x="1030" y="458" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="700" font-family="Inter,sans-serif">OLLAMA (IA LOCALE)</text>
-        <text x="1030" y="478" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Modele phi3.5 — brouillons SRP</text>
-        <text x="1030" y="493" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Questionnaires, Comm Packs</text>
+        <rect x="920" y="555" width="220" height="60" rx="12" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+        <text x="1030" y="580" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="700" font-family="Inter,sans-serif">OLLAMA (IA LOCALE)</text>
+        <text x="1030" y="598" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">phi3.5 — brouillons SRP</text>
 
         <!-- ENISA SRP -->
-        <rect x="920" y="550" width="220" height="70" rx="12" fill="#111827" stroke="#f59e0b" stroke-width="1.5" filter="url(#glow-a)"/>
-        <text x="1030" y="578" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700" font-family="Inter,sans-serif">ENISA SRP</text>
-        <text x="1030" y="598" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Soumissions CRA (JSON/PDF)</text>
-        <text x="1030" y="613" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Compliance Packs exports</text>
+        <rect x="920" y="650" width="220" height="60" rx="12" fill="#111827" stroke="#f59e0b" stroke-width="1.5" filter="url(#glow-a)"/>
+        <text x="1030" y="675" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700" font-family="Inter,sans-serif">ENISA SRP</text>
+        <text x="1030" y="695" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">Soumissions CRA + EUVD IDs</text>
+
+        <!-- Prometheus -->
+        <rect x="920" y="740" width="220" height="55" rx="12" fill="#111827" stroke="#22c55e" stroke-width="1.5"/>
+        <text x="1030" y="763" text-anchor="middle" fill="#22c55e" font-size="11" font-weight="700" font-family="Inter,sans-serif">PROMETHEUS</text>
+        <text x="1030" y="783" text-anchor="middle" fill="#94a3b8" font-size="10" font-family="Inter,sans-serif">7 compteurs metier custom</text>
 
         <!-- ══════════════════════════════════════ -->
         <!-- ARROWS / LIAISONS                     -->
@@ -377,13 +400,21 @@
         <path d="M810,370 Q870,370 915,355" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
         <text x="860" y="360" fill="#22c55e" font-size="7" font-family="Inter,sans-serif">PURL batch</text>
 
+        <!-- Infrastructure → Vuln Sources -->
+        <path d="M810,650 Q870,520 915,470" fill="none" stroke="#ef4444" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="870" y="555" fill="#ef4444" font-size="7" font-family="Inter,sans-serif">CVE enrich</text>
+
         <!-- Application → Ollama -->
-        <path d="M810,400 Q870,430 915,460" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
-        <text x="855" y="435" fill="#22c55e" font-size="7" font-family="Inter,sans-serif">prompts</text>
+        <path d="M810,400 Q870,530 915,575" fill="none" stroke="#22c55e" stroke-width="1.5" marker-end="url(#arrow-green)"/>
+        <text x="855" y="540" fill="#22c55e" font-size="7" font-family="Inter,sans-serif">prompts</text>
 
         <!-- Application → ENISA -->
-        <path d="M810,410 Q880,530 915,575" fill="none" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-amber)" stroke-dasharray="5,3"/>
-        <text x="860" y="530" fill="#f59e0b" font-size="7" font-family="Inter,sans-serif">SRP exports</text>
+        <path d="M810,410 Q880,620 915,665" fill="none" stroke="#f59e0b" stroke-width="1.5" marker-end="url(#arrow-amber)" stroke-dasharray="5,3"/>
+        <text x="860" y="630" fill="#f59e0b" font-size="7" font-family="Inter,sans-serif">SRP exports</text>
+
+        <!-- Infrastructure → Prometheus -->
+        <path d="M810,660 Q870,730 915,760" fill="none" stroke="#22c55e" stroke-width="1" marker-end="url(#arrow-green)" stroke-dasharray="4,3"/>
+        <text x="855" y="730" fill="#22c55e" font-size="7" font-family="Inter,sans-serif">metrics</text>
 
       </svg>
     </div>
@@ -704,9 +735,9 @@
 <section id="api">
   <div class="container">
     <div class="section-header sr">
-      <div class="badge">Contrats API</div>
-      <h2>Endpoints CI/CD &amp; API Keys</h2>
-      <p class="subtitle">Les contrats d'API pour l'integration CI/CD et la gestion des cles.</p>
+      <div class="badge">Contrats API — 15 endpoints</div>
+      <h2>CI/CD, VEX, Quality, Sharing, Monitoring</h2>
+      <p class="subtitle">Tous les contrats d'API : integration CI/CD, gestion VEX, scoring qualite, partage securise et monitoring vulnerabilites.</p>
     </div>
 
     <div class="api-block sr" style="border:1px solid rgba(34,197,94,.3)">
@@ -762,6 +793,155 @@
       <div class="api-header"><span class="method method-del">DELETE</span><span class="api-path">/api/v1/api-keys/{id}</span><span class="api-auth">Auth: JWT (ADMIN)</span></div>
       <div class="api-body"><pre><span class="key">// Response 204 No Content</span> — Cle revoquee definitivement</pre></div>
     </div>
+
+    <h3 style="color:var(--accent);margin:2.5rem 0 1.25rem;font-size:1.2rem">VEX Document Management</h3>
+
+    <div class="api-block sr" style="border:1px solid rgba(34,197,94,.3)">
+      <div class="api-header" style="background:rgba(34,197,94,.04)">
+        <span class="method method-post">POST</span>
+        <span class="api-path">/api/v1/releases/{releaseId}/vex</span>
+        <span class="api-auth">Auth: JWT</span>
+      </div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Genere un document VEX dans le format choisi (OpenVEX, CycloneDX_VEX, CSAF).</p>
+<pre><span class="key">// Request</span>
+{ <span class="key">"format"</span>: <span class="str">"OPENVEX"</span> }
+
+<span class="key">// Response 201</span>
+{
+  <span class="key">"id"</span>: <span class="str">"880eb700-..."</span>,
+  <span class="key">"format"</span>: <span class="str">"OPENVEX"</span>,
+  <span class="key">"status"</span>: <span class="str">"DRAFT"</span>,
+  <span class="key">"content"</span>: { <span class="key">...</span> },
+  <span class="key">"createdAt"</span>: <span class="str">"2026-02-23T..."</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-get">GET</span><span class="api-path">/api/v1/releases/{releaseId}/vex</span><span class="api-auth">Auth: JWT</span></div>
+      <div class="api-body"><pre><span class="key">// Response 200</span> — Liste des documents VEX pour cette release (tous formats)</pre></div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-post">POST</span><span class="api-path">/api/v1/vex/{id}/publish</span><span class="api-auth">Auth: JWT</span></div>
+      <div class="api-body"><pre><span class="key">// Response 200</span> — Passe le statut de DRAFT a PUBLISHED</pre></div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-get">GET</span><span class="api-path">/api/v1/vex/{id}/download</span><span class="api-auth">Auth: JWT</span></div>
+      <div class="api-body"><pre><span class="key">// Response 200</span> — Retourne le contenu JSON du document VEX</pre></div>
+    </div>
+
+    <h3 style="color:var(--cyan);margin:2.5rem 0 1.25rem;font-size:1.2rem">SBOM Quality &amp; Sharing</h3>
+
+    <div class="api-block sr">
+      <div class="api-header" style="background:rgba(6,182,212,.04)">
+        <span class="method method-get">GET</span>
+        <span class="api-path">/api/v1/releases/{releaseId}/sbom-quality</span>
+        <span class="api-auth">Auth: JWT</span>
+      </div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Score de qualite SBOM selon BSI TR-03183-2 / NTIA Minimum Elements (8 criteres, /100).</p>
+<pre><span class="key">// Response 200</span>
+{
+  <span class="key">"totalScore"</span>: <span class="num">85</span>,
+  <span class="key">"grade"</span>: <span class="str">"A"</span>,
+  <span class="key">"componentCount"</span>: <span class="num">47</span>,
+  <span class="key">"criteria"</span>: [
+    { <span class="key">"id"</span>:<span class="str">"NAMES"</span>, <span class="key">"label"</span>:<span class="str">"Component Names"</span>, <span class="key">"maxScore"</span>:<span class="num">15</span>, <span class="key">"score"</span>:<span class="num">15</span>, <span class="key">"coverage"</span>:<span class="num">100</span> },
+    { <span class="key">"id"</span>:<span class="str">"VERSIONS"</span>, <span class="key">"score"</span>:<span class="num">12</span>, <span class="key">"coverage"</span>:<span class="num">80</span> },
+    <span class="key">...</span>
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-block sr" style="border:1px solid rgba(34,197,94,.3)">
+      <div class="api-header" style="background:rgba(34,197,94,.04)">
+        <span class="method method-post">POST</span>
+        <span class="api-path">/api/v1/releases/{releaseId}/share-links</span>
+        <span class="api-auth">Auth: JWT</span>
+      </div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Cree un lien de partage securise pour le SBOM (token, expiration, limite de telechargements).</p>
+<pre><span class="key">// Request</span>
+{
+  <span class="key">"recipientEmail"</span>: <span class="str">"partner@example.com"</span>,
+  <span class="key">"recipientOrg"</span>: <span class="str">"Partner Inc"</span>,
+  <span class="key">"expiresInHours"</span>: <span class="num">72</span>,
+  <span class="key">"maxDownloads"</span>: <span class="num">5</span>,
+  <span class="key">"includeVex"</span>: <span class="bool">true</span>
+}
+
+<span class="key">// Response 201</span>
+{
+  <span class="key">"id"</span>: <span class="str">"990fc800-..."</span>,
+  <span class="key">"token"</span>: <span class="str">"a1b2c3d4e5f6..."</span>,   <span class="key">// 64 chars hex</span>
+  <span class="key">"downloadUrl"</span>: <span class="str">"/share/sbom/a1b2c3d4..."</span>,
+  <span class="key">"expiresAt"</span>: <span class="str">"2026-02-26T..."</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-get">GET</span><span class="api-path">/share/sbom/{token}</span><span class="api-auth">Public (aucune auth)</span></div>
+      <div class="api-body"><pre><span class="key">// Response 200</span> — Retourne le SBOM JSON. Incremente le compteur de telechargements.
+<span class="key">// 403</span> si token expire, revoque, ou limite atteinte.</pre></div>
+    </div>
+
+    <h3 style="color:var(--purple);margin:2.5rem 0 1.25rem;font-size:1.2rem">Vulnerability Monitoring &amp; Supplier SBOM</h3>
+
+    <div class="api-block sr">
+      <div class="api-header" style="background:rgba(168,85,247,.04)">
+        <span class="method method-get">GET</span>
+        <span class="api-path">/api/v1/vulnerabilities/impact?cve=CVE-xxxx</span>
+        <span class="api-auth">Auth: JWT</span>
+      </div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Vue d'impact cross-produit : quelles releases sont affectees par un CVE donne.</p>
+<pre><span class="key">// Response 200</span>
+{
+  <span class="key">"cveId"</span>: <span class="str">"CVE-2024-1234"</span>,
+  <span class="key">"activelyExploited"</span>: <span class="bool">true</span>,
+  <span class="key">"cvssScore"</span>: <span class="num">9.8</span>,
+  <span class="key">"affectedReleases"</span>: [
+    { <span class="key">"releaseId"</span>:<span class="str">"..."</span>, <span class="key">"productName"</span>:<span class="str">"Mon Produit"</span>, <span class="key">"version"</span>:<span class="str">"1.0.0"</span>, <span class="key">"hasDecision"</span>:<span class="bool">false</span> }
+  ]
+}</pre>
+      </div>
+    </div>
+
+    <div class="api-block sr" style="border:1px solid rgba(34,197,94,.3)">
+      <div class="api-header" style="background:rgba(34,197,94,.04)">
+        <span class="method method-post">POST</span>
+        <span class="api-path">/api/v1/releases/{releaseId}/supplier-sboms</span>
+        <span class="api-auth">Auth: JWT</span>
+      </div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Importe le SBOM d'un fournisseur et l'associe a la release.</p>
+<pre><span class="key">// Request (multipart/form-data)</span>
+<span class="key">file:</span>         <span class="str">@supplier-sbom.cdx.json</span>
+<span class="key">supplierName:</span> <span class="str">Acme Corp</span>
+<span class="key">supplierUrl:</span>  <span class="str">https://acme.com</span>
+
+<span class="key">// Response 201</span>
+{ <span class="key">"id"</span>:<span class="str">"..."</span>, <span class="key">"supplierName"</span>:<span class="str">"Acme Corp"</span>, <span class="key">"componentCount"</span>:<span class="num">23</span> }</pre>
+      </div>
+    </div>
+
+    <div class="api-block sr">
+      <div class="api-header"><span class="method method-post">POST</span><span class="api-path">/integrations/github/webhook</span><span class="api-auth">HMAC-SHA256</span></div>
+      <div class="api-body">
+        <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1rem">Webhook GitHub : recoit les evenements <code>workflow_run</code>, <code>release</code>, <code>ping</code>. Verification signature HMAC-SHA256.</p>
+<pre><span class="key">Headers:</span>
+  X-Hub-Signature-256: <span class="str">sha256=abc123...</span>
+  X-GitHub-Event: <span class="str">workflow_run</span>
+
+<span class="key">// Response 200</span> — Evenement traite</pre>
+      </div>
+    </div>
+
   </div>
 </section>
 
@@ -806,6 +986,17 @@
         <tr><td><code>OLLAMA_MODEL</code></td><td>Modele IA</td><td class="dv">phi3.5</td></tr>
         <tr><td><code>RATE_LIMIT_ENABLED</code></td><td>Rate limiting</td><td class="dv">true</td></tr>
         <tr><td><code>RATE_LIMIT_RPM</code></td><td>Requetes/minute</td><td class="dv">120</td></tr>
+        <tr><td colspan="3" style="color:var(--red);font-weight:700;padding-top:1rem">Monitoring Vulnerabilites</td></tr>
+        <tr><td><code>MONITORING_INTERVAL_MS</code></td><td>Intervalle enrichissement CVE (ms)</td><td class="dv">21600000 (6h)</td></tr>
+        <tr><td><code>GITHUB_WEBHOOK_SECRET</code></td><td>Secret HMAC pour webhooks GitHub</td><td class="dv">(vide)</td></tr>
+        <tr><td colspan="3" style="color:var(--cyan);font-weight:700;padding-top:1rem">Metriques Prometheus</td></tr>
+        <tr><td><code>vex.documents.generated</code></td><td>Nombre de documents VEX generes</td><td class="dv">Counter</td></tr>
+        <tr><td><code>vulnerabilities.enriched</code></td><td>Vulns enrichies par monitoring</td><td class="dv">Counter</td></tr>
+        <tr><td><code>vulnerabilities.actively_exploited.detected</code></td><td>Vulns activement exploitees detectees</td><td class="dv">Counter</td></tr>
+        <tr><td><code>sbom.share_links.created</code></td><td>Liens de partage crees</td><td class="dv">Counter</td></tr>
+        <tr><td><code>sbom.share_links.downloads</code></td><td>Telechargements via liens de partage</td><td class="dv">Counter</td></tr>
+        <tr><td><code>sbom.quality.scored</code></td><td>Scores de qualite SBOM calcules</td><td class="dv">Counter</td></tr>
+        <tr><td><code>evidences.uploaded</code></td><td>Preuves uploadees</td><td class="dv">Counter</td></tr>
         <tr><td colspan="3" style="color:var(--pink);font-weight:700;padding-top:1rem">Frontend</td></tr>
         <tr><td><code>VITE_KEYCLOAK_URL</code></td><td>URL Keycloak</td><td class="dv">http://localhost:8180</td></tr>
         <tr><td><code>VITE_KEYCLOAK_REALM</code></td><td>Realm</td><td class="dv">lexsecura</td></tr>

@@ -8,6 +8,7 @@ import { useCraChecklist, useInitializeCraChecklist, useUpdateCraChecklistItem }
 import { StatusBadge } from '../components/StatusBadge';
 import { ReadinessGauge } from '../components/ReadinessGauge';
 import { CraChecklistTable } from '../components/CraChecklistTable';
+import { CvdPolicyCard } from '../components/CvdPolicyCard';
 import { useAuth } from '../auth/AuthProvider';
 import { FR } from '../i18n/fr';
 import { FEATURES } from '../config/features';
@@ -155,6 +156,11 @@ export function ProductDetailPage() {
             <span className="text-gray-900">{new Date(product.updatedAt).toLocaleString()}</span>
           </div>
         </div>
+      </div>
+
+      {/* CVD Policy (CRA Annexe I §2(5)) */}
+      <div className="mb-6">
+        <CvdPolicyCard productId={id!} />
       </div>
 
       {/* Tabs */}

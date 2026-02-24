@@ -38,4 +38,10 @@ public class ReleaseController {
     public ResponseEntity<List<ReleaseResponse>> listByProduct(@PathVariable UUID productId) {
         return ResponseEntity.ok(releaseService.findAllByProductId(productId));
     }
+
+    @GetMapping("/api/v1/releases/{id}")
+    @Operation(summary = "Get a release by ID")
+    public ResponseEntity<ReleaseResponse> findById(@PathVariable UUID id) {
+        return ResponseEntity.ok(releaseService.findById(id));
+    }
 }

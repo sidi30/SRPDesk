@@ -14,6 +14,15 @@ public record SrpSubmissionResponse(
         String submittedReference,
         Instant submittedAt,
         UUID acknowledgmentEvidenceId,
+        // ENISA SRP fields
+        String enisaReference,
+        Instant enisaSubmittedAt,
+        String enisaStatus,
+        // CSIRT fields (Art. 14 parallel notification)
+        String csirtReference,
+        Instant csirtSubmittedAt,
+        String csirtStatus,
+        String csirtCountryCode,
         UUID generatedBy,
         Instant generatedAt,
         Instant updatedAt

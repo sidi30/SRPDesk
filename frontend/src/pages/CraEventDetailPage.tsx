@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
   useCraEvent, useCraEventSla, useUpdateCraEvent, useCloseCraEvent,
   useSubmissions, useCreateSubmission, useValidateSubmission,
-  useMarkReady, useExportBundle, useMarkSubmitted,
+  useMarkReady, useExportBundle, useMarkSubmitted, useSubmitParallel,
 } from '../hooks/useCraEvents';
 import { StatusBadge } from '../components/StatusBadge';
 import { SlaCountdown } from '../components/SlaCountdown';
@@ -29,6 +29,7 @@ export function CraEventDetailPage() {
   const markReady = useMarkReady();
   const exportBundle = useExportBundle();
   const markSubmitted = useMarkSubmitted();
+  const submitParallel = useSubmitParallel();
 
   const [activeTab, setActiveTab] = useState<TabId>('overview');
   const [editing, setEditing] = useState(false);
@@ -272,6 +273,31 @@ export function CraEventDetailPage() {
                         {sub.submittedAt && ` | Submitted: ${new Date(sub.submittedAt).toLocaleString()}`}
                         {sub.submittedReference && ` | Ref: ${sub.submittedReference}`}
                       </p>
+                      {/* ENISA + CSIRT Status (Art. 14 parallel notification) */}
+                      {(sub.enisaStatus || sub.csirtStatus) && (
+                        <div className="flex gap-3 mt-2">
+                          {sub.enisaStatus && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              sub.enisaStatus === 'SUBMITTED' ? 'bg-green-100 text-green-700' :
+                              sub.enisaStatus === 'FAILED' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              ENISA: {sub.enisaStatus}
+                              {sub.enisaReference && ` (${sub.enisaReference})`}
+                            </span>
+                          )}
+                          {sub.csirtStatus && (
+                            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                              sub.csirtStatus === 'SUBMITTED' ? 'bg-green-100 text-green-700' :
+                              sub.csirtStatus === 'FAILED' ? 'bg-red-100 text-red-700' :
+                              'bg-yellow-100 text-yellow-700'
+                            }`}>
+                              CSIRT ({sub.csirtCountryCode || 'N/A'}): {sub.csirtStatus}
+                              {sub.csirtReference && ` (${sub.csirtReference})`}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
                     <div className="flex gap-2">
                       {sub.status === 'DRAFT' && (
@@ -299,6 +325,16 @@ export function CraEventDetailPage() {
                             className="px-2 py-1 text-xs text-primary-600 border border-primary-300 rounded hover:bg-primary-50"
                           >
                             Download Bundle
+                          </button>
+                          <button
+                            onClick={() => submitParallel.mutate(
+                              { eventId, subId: sub.id },
+                              { onError: (err: unknown) => setError(getErrorMessage(err)) }
+                            )}
+                            disabled={submitParallel.isPending}
+                            className="px-2 py-1 text-xs text-emerald-700 border border-emerald-400 rounded hover:bg-emerald-50 font-medium"
+                          >
+                            {submitParallel.isPending ? 'Submitting...' : 'Submit ENISA + CSIRT'}
                           </button>
                           <button
                             onClick={() => setSubmitForm({ subId: sub.id, reference: '' })}

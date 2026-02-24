@@ -30,6 +30,8 @@ export interface ProductUpdateRequest {
   contacts?: ContactInfo[];
 }
 
+export type SecurityUpdateType = 'SECURITY_CRITICAL' | 'SECURITY_HIGH' | 'SECURITY' | 'FUNCTIONALITY' | 'MAINTENANCE';
+
 export interface Release {
   id: string;
   productId: string;
@@ -39,6 +41,9 @@ export interface Release {
   releasedAt?: string;
   supportedUntil?: string;
   status: ReleaseStatus;
+  updateType?: SecurityUpdateType;
+  securityImpact?: string;
+  cveIds?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -262,6 +267,15 @@ export interface SrpSubmission {
   submittedReference?: string;
   submittedAt?: string;
   acknowledgmentEvidenceId?: string;
+  // ENISA SRP fields
+  enisaReference?: string;
+  enisaSubmittedAt?: string;
+  enisaStatus?: string;
+  // CSIRT fields (Art. 14 parallel notification)
+  csirtReference?: string;
+  csirtSubmittedAt?: string;
+  csirtStatus?: string;
+  csirtCountryCode?: string;
   generatedBy: string;
   generatedAt: string;
   updatedAt: string;
@@ -426,4 +440,39 @@ export interface ProductReadiness {
   readinessScore: number;
   checklistTotal: number;
   checklistCompliant: number;
+}
+
+// ── CVD Policy (CRA Annexe I §2(5)) ───────────────────
+
+export type CvdPolicyStatus = 'DRAFT' | 'PUBLISHED';
+
+export interface CvdPolicy {
+  id: string;
+  productId: string;
+  contactEmail: string;
+  contactUrl?: string;
+  pgpKeyUrl?: string;
+  policyUrl?: string;
+  disclosureTimelineDays: number;
+  acceptsAnonymous: boolean;
+  bugBountyUrl?: string;
+  acceptedLanguages?: string;
+  scopeDescription?: string;
+  status: CvdPolicyStatus;
+  publishedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CvdPolicyRequest {
+  contactEmail: string;
+  contactUrl?: string;
+  pgpKeyUrl?: string;
+  policyUrl?: string;
+  disclosureTimelineDays?: number;
+  acceptsAnonymous?: boolean;
+  bugBountyUrl?: string;
+  acceptedLanguages?: string;
+  scopeDescription?: string;
 }

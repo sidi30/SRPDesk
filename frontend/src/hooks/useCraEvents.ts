@@ -126,3 +126,13 @@ export function useMarkSubmitted() {
     onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: ['cra-events', vars.eventId, 'submissions'] }),
   });
 }
+
+export function useSubmitParallel() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ eventId, subId, csirtCountryCode }: {
+      eventId: string; subId: string; csirtCountryCode?: string
+    }) => craEventsApi.submitParallel(eventId, subId, csirtCountryCode),
+    onSuccess: (_, vars) => qc.invalidateQueries({ queryKey: ['cra-events', vars.eventId, 'submissions'] }),
+  });
+}

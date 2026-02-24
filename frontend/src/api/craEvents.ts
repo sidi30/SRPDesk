@@ -93,4 +93,10 @@ export const craEventsApi = {
     const { data } = await apiClient.post(`/cra-events/${eventId}/submissions/${subId}/mark-submitted${params}`, req);
     return data;
   },
+
+  submitParallel: async (eventId: string, subId: string, csirtCountryCode?: string): Promise<SrpSubmission> => {
+    const params = csirtCountryCode ? `?csirtCountryCode=${csirtCountryCode}` : '';
+    const { data } = await apiClient.post(`/cra-events/${eventId}/submissions/${subId}/submit-parallel${params}`);
+    return data;
+  },
 };

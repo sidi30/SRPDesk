@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEvidences, useUploadEvidence, useUploadSbom, useComponents } from '../hooks/useEvidences';
 import { useReleaseFindings, useAddDecision, useTriggerScan } from '../hooks/useFindings';
-import { useExportPack } from '../hooks/useReleases';
+import { useRelease, useExportPack } from '../hooks/useReleases';
 import { evidencesApi } from '../api/evidences';
+import apiClient from '../api/client';
 import { StatusBadge } from '../components/StatusBadge';
 import { FileUpload } from '../components/FileUpload';
 import { FindingsTable } from '../components/FindingsTable';
@@ -45,6 +46,7 @@ export function ReleaseDetailPage() {
   });
   const [error, setError] = useState<string | null>(null);
 
+  const { data: release } = useRelease(releaseId);
   const { data: evidences, isLoading: evidencesLoading } = useEvidences(releaseId);
   const { data: components, isLoading: componentsLoading } = useComponents(releaseId);
   const { data: findings, isLoading: findingsLoading } = useReleaseFindings(releaseId, findingStatusFilter || undefined);
@@ -131,10 +133,60 @@ export function ReleaseDetailPage() {
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <div className="flex justify-between items-start">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Release {releaseId.slice(0, 8)}...</h1>
-            <p className="text-sm text-gray-500 mt-1">Release ID: {releaseId}</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Release {release?.version || releaseId.slice(0, 8) + '...'}
+            </h1>
+            <p className="text-sm text-gray-500 mt-1">ID: {releaseId}</p>
+            {release && (release.updateType || release.securityImpact || release.cveIds) && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {release.updateType && (
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    release.updateType === 'SECURITY_CRITICAL' ? 'bg-red-100 text-red-800' :
+                    release.updateType === 'SECURITY_HIGH' ? 'bg-orange-100 text-orange-800' :
+                    release.updateType === 'SECURITY' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-gray-100 text-gray-700'
+                  }`}>
+                    {release.updateType.replace(/_/g, ' ')}
+                  </span>
+                )}
+                {release.securityImpact && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                    Impact: {release.securityImpact}
+                  </span>
+                )}
+                {release.cveIds && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800" title={release.cveIds}>
+                    CVE: {release.cveIds.split(',').length} ref(s)
+                  </span>
+                )}
+              </div>
+            )}
           </div>
           <div className="flex gap-2">
+            <button
+              onClick={async () => {
+                const { data } = await apiClient.get(`/releases/${releaseId}/sbom/export?format=spdx`, { responseType: 'blob' });
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const a = document.createElement('a'); a.href = url;
+                a.setAttribute('download', `sbom_${releaseId.slice(0,8)}_spdx.json`);
+                document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+              }}
+              className="px-3 py-1.5 text-sm text-cyan-700 border border-cyan-300 rounded-lg hover:bg-cyan-50"
+            >
+              Export SPDX
+            </button>
+            <button
+              onClick={async () => {
+                const { data } = await apiClient.get(`/releases/${releaseId}/sbom/export?format=cyclonedx`, { responseType: 'blob' });
+                const url = window.URL.createObjectURL(new Blob([data]));
+                const a = document.createElement('a'); a.href = url;
+                a.setAttribute('download', `sbom_${releaseId.slice(0,8)}_cyclonedx.json`);
+                document.body.appendChild(a); a.click(); a.remove(); window.URL.revokeObjectURL(url);
+              }}
+              className="px-3 py-1.5 text-sm text-indigo-700 border border-indigo-300 rounded-lg hover:bg-indigo-50"
+            >
+              Export CycloneDX
+            </button>
             <button
               onClick={() => exportPack.mutate(releaseId)}
               disabled={exportPack.isPending}

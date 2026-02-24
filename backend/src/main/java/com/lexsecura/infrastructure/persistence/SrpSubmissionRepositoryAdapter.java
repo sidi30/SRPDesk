@@ -56,6 +56,10 @@ public class SrpSubmissionRepositoryAdapter implements SrpSubmissionRepository {
         m.setEnisaStatus(e.getEnisaStatus());
         m.setRetryCount(e.getRetryCount() != null ? e.getRetryCount() : 0);
         m.setLastError(e.getLastError());
+        m.setCsirtReference(e.getCsirtReference());
+        m.setCsirtSubmittedAt(e.getCsirtSubmittedAt());
+        m.setCsirtStatus(e.getCsirtStatus());
+        m.setCsirtCountryCode(e.getCsirtCountryCode());
         m.setGeneratedBy(e.getGeneratedBy());
         m.setGeneratedAt(e.getGeneratedAt());
         m.setUpdatedAt(e.getUpdatedAt());
@@ -79,6 +83,10 @@ public class SrpSubmissionRepositoryAdapter implements SrpSubmissionRepository {
         e.setEnisaStatus(m.getEnisaStatus());
         e.setRetryCount(m.getRetryCount());
         e.setLastError(m.getLastError());
+        e.setCsirtReference(m.getCsirtReference());
+        e.setCsirtSubmittedAt(m.getCsirtSubmittedAt());
+        e.setCsirtStatus(m.getCsirtStatus());
+        e.setCsirtCountryCode(m.getCsirtCountryCode());
         e.setGeneratedBy(m.getGeneratedBy());
         e.setGeneratedAt(m.getGeneratedAt());
         e.setUpdatedAt(m.getUpdatedAt());

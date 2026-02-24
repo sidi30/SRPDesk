@@ -60,6 +60,9 @@ public class PersistenceMapper {
         r.setReleasedAt(entity.getReleasedAt());
         r.setSupportedUntil(entity.getSupportedUntil());
         r.setStatus(ReleaseStatus.valueOf(entity.getStatus()));
+        r.setUpdateType(entity.getUpdateType());
+        r.setSecurityImpact(entity.getSecurityImpact());
+        r.setCveIds(entity.getCveIds());
         r.setCreatedAt(entity.getCreatedAt());
         r.setUpdatedAt(entity.getUpdatedAt());
         return r;
@@ -76,6 +79,9 @@ public class PersistenceMapper {
         e.setReleasedAt(domain.getReleasedAt());
         e.setSupportedUntil(domain.getSupportedUntil());
         e.setStatus(domain.getStatus().name());
+        e.setUpdateType(domain.getUpdateType());
+        e.setSecurityImpact(domain.getSecurityImpact());
+        e.setCveIds(domain.getCveIds());
         e.setCreatedAt(domain.getCreatedAt());
         e.setUpdatedAt(domain.getUpdatedAt());
         return e;

@@ -14,6 +14,9 @@ public class Release {
     private Instant releasedAt;
     private Instant supportedUntil;
     private ReleaseStatus status;
+    private String updateType;
+    private String securityImpact;
+    private String cveIds;
     private Instant createdAt;
     private Instant updatedAt;
 
@@ -54,6 +57,15 @@ public class Release {
 
     public ReleaseStatus getStatus() { return status; }
     public void setStatus(ReleaseStatus status) { this.status = status; }
+
+    public String getUpdateType() { return updateType; }
+    public void setUpdateType(String updateType) { this.updateType = updateType; }
+
+    public String getSecurityImpact() { return securityImpact; }
+    public void setSecurityImpact(String securityImpact) { this.securityImpact = securityImpact; }
+
+    public String getCveIds() { return cveIds; }
+    public void setCveIds(String cveIds) { this.cveIds = cveIds; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

@@ -194,6 +194,11 @@ public class SrpSubmissionService {
                 .orElseThrow(() -> new EntityNotFoundException("Submission not found: " + subId));
     }
 
+    public SrpSubmissionResponse saveAndReturn(SrpSubmission sub) {
+        sub = submissionRepository.save(sub);
+        return toResponse(sub);
+    }
+
     public void markExported(SrpSubmission sub) {
         if ("DRAFT".equals(sub.getStatus())) {
             return;
@@ -381,6 +386,8 @@ public class SrpSubmissionService {
                 s.getId(), s.getCraEventId(), s.getSubmissionType(), s.getStatus(),
                 content, s.getSchemaVersion(), valErrors,
                 s.getSubmittedReference(), s.getSubmittedAt(), s.getAcknowledgmentEvidenceId(),
+                s.getEnisaReference(), s.getEnisaSubmittedAt(), s.getEnisaStatus(),
+                s.getCsirtReference(), s.getCsirtSubmittedAt(), s.getCsirtStatus(), s.getCsirtCountryCode(),
                 s.getGeneratedBy(), s.getGeneratedAt(), s.getUpdatedAt()
         );
     }

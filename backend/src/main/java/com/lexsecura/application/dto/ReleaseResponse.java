@@ -12,6 +12,9 @@ public record ReleaseResponse(
         Instant releasedAt,
         Instant supportedUntil,
         String status,
+        String updateType,
+        String securityImpact,
+        String cveIds,
         Instant createdAt,
         Instant updatedAt
 ) {}
