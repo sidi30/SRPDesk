@@ -49,6 +49,8 @@ public class ComponentRepositoryAdapter implements ComponentRepository {
         c.setName(e.getName());
         c.setVersion(e.getVersion());
         c.setType(e.getType());
+        c.setLicense(e.getLicense());
+        c.setSupplier(e.getSupplier());
         return c;
     }
 
@@ -59,6 +61,8 @@ public class ComponentRepositoryAdapter implements ComponentRepository {
         e.setName(c.getName());
         e.setVersion(c.getVersion());
         e.setType(c.getType());
+        e.setLicense(c.getLicense());
+        e.setSupplier(c.getSupplier());
         return e;
     }
 }

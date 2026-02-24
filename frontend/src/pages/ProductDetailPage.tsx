@@ -12,7 +12,11 @@ import { CvdPolicyCard } from '../components/CvdPolicyCard';
 import { useAuth } from '../auth/AuthProvider';
 import { FR } from '../i18n/fr';
 import { FEATURES } from '../config/features';
-import type { ReleaseCreateRequest, ProductUpdateRequest, Release, Finding } from '../types';
+import { useEuDocs, useCreateEuDoc, useSignEuDoc, usePublishEuDoc } from '../hooks/useEuDoc';
+import { useConformityAssessment, useInitiateAssessment, useCompleteStep, useApproveAssessment } from '../hooks/useConformityAssessment';
+import { useRiskAssessments, useCreateRiskAssessment } from '../hooks/useRiskAssessment';
+import { useAppliedStandards, useCreateStandard, useDeleteStandard } from '../hooks/useAppliedStandards';
+import type { ReleaseCreateRequest, ProductUpdateRequest, Release, Finding, EuDocRequest, ConformityStep, AppliedStandardRequest } from '../types';
 import { getErrorMessage } from '../types';
 
 const PRODUCT_TYPES = ['DEFAULT', 'CLASS_I', 'CLASS_II', 'IMPORTANT_CLASS_I', 'IMPORTANT_CLASS_II', 'CRITICAL'] as const;
@@ -35,6 +39,22 @@ export function ProductDetailPage() {
   const updateChecklistItem = useUpdateCraChecklistItem(id!);
   const snapshotReadiness = useSnapshotReadiness(id!);
 
+  // New CRA modules
+  const { data: euDocs } = useEuDocs(id!);
+  const createEuDoc = useCreateEuDoc(id!);
+  const signEuDoc = useSignEuDoc(id!);
+  const publishEuDoc = usePublishEuDoc(id!);
+  const conformityModule = product?.conformityPath?.includes('THIRD_PARTY') ? 'MODULE_H' : 'MODULE_A';
+  const { data: conformityAssessment } = useConformityAssessment(id!, conformityModule);
+  const initiateAssessment = useInitiateAssessment(id!);
+  const completeStep = useCompleteStep(id!);
+  const approveAssessment = useApproveAssessment(id!);
+  const { data: riskAssessments } = useRiskAssessments(id!);
+  const createRiskAssessment = useCreateRiskAssessment(id!);
+  const { data: appliedStandards } = useAppliedStandards(id!);
+  const createStandard = useCreateStandard(id!);
+  const deleteStandard = useDeleteStandard(id!);
+
   const createRelease = useCreateRelease(id!);
   const updateProduct = useUpdateProduct();
   const exportPack = useExportPack();
@@ -44,8 +64,8 @@ export function ProductDetailPage() {
   const [releaseForm, setReleaseForm] = useState<ReleaseCreateRequest>({ version: '', gitRef: '' });
   const [editForm, setEditForm] = useState<ProductUpdateRequest>({ name: '', type: '', criticality: '' });
   const [error, setError] = useState<string | null>(null);
-  type TabType = 'releases' | 'findings' | 'readiness' | (typeof FEATURES.REQUIREMENTS extends true ? 'checklist' : never);
-  const [activeTab, setActiveTab] = useState<'releases' | 'findings' | 'readiness' | 'checklist'>('releases');
+  type TabType = 'releases' | 'findings' | 'readiness' | 'checklist' | 'eu-doc' | 'conformity' | 'risk' | 'standards';
+  const [activeTab, setActiveTab] = useState<TabType>('releases');
 
   if (productLoading) return <div className="text-gray-500">Loading product...</div>;
   if (!product) return <div className="text-red-500">Product not found</div>;
@@ -166,11 +186,15 @@ export function ProductDetailPage() {
       {/* Tabs */}
       <div className="border-b mb-6">
         <nav className="flex gap-6">
-          {(['releases', 'findings', 'readiness', ...(FEATURES.REQUIREMENTS ? ['checklist'] : [])] as const).map(tab => (
+          {([
+            'releases', 'findings', 'readiness',
+            ...(FEATURES.REQUIREMENTS ? ['checklist'] : []),
+            'eu-doc', 'conformity', 'risk', 'standards',
+          ] as TabType[]).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`pb-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === tab
                   ? 'border-primary-600 text-primary-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -179,7 +203,11 @@ export function ProductDetailPage() {
               {tab === 'releases' ? 'Releases' :
                tab === 'findings' ? 'Findings' :
                tab === 'readiness' ? FR.readiness.title :
-               FR.checklist.title}
+               tab === 'checklist' ? FR.checklist.title :
+               tab === 'eu-doc' ? 'EU DoC' :
+               tab === 'conformity' ? 'Conformity' :
+               tab === 'risk' ? 'Risk Assessment' :
+               'Standards'}
             </button>
           ))}
         </nav>
@@ -415,6 +443,299 @@ export function ProductDetailPage() {
           ) : (
             <div className="text-gray-400 text-sm py-4">
               {FR.checklist.noItems}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* EU Declaration of Conformity Tab */}
+      {activeTab === 'eu-doc' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">EU Declaration of Conformity</h2>
+              <p className="text-sm text-gray-500">CRA Annexe V — Generate and manage your EU DoC</p>
+            </div>
+            {isManager && (
+              <button
+                onClick={() => {
+                  const docReq: EuDocRequest = {
+                    declarationNumber: `DoC-${product.name}-${Date.now()}`,
+                    manufacturerName: product.name,
+                    manufacturerAddress: 'To be completed',
+                    productName: product.name,
+                    productIdentification: `Product ID: ${product.id}`,
+                    conformityAssessmentModule: conformityModule,
+                    declarationText: `The manufacturer hereby declares that the product "${product.name}" conforms to the essential requirements of the EU Cyber Resilience Act (Regulation (EU) 2024/2847).`,
+                    signedBy: 'To be completed',
+                    signedRole: 'To be completed',
+                  };
+                  createEuDoc.mutate(docReq);
+                }}
+                disabled={createEuDoc.isPending}
+                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+              >
+                {createEuDoc.isPending ? 'Creating...' : 'New EU DoC'}
+              </button>
+            )}
+          </div>
+
+          {!euDocs || euDocs.length === 0 ? (
+            <div className="text-gray-400 text-sm py-4">No EU Declaration of Conformity yet.</div>
+          ) : (
+            <div className="space-y-3">
+              {euDocs.map(doc => (
+                <div key={doc.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-gray-900">{doc.declarationNumber}</h3>
+                      <p className="text-sm text-gray-500 mt-1">{doc.manufacturerName} - {doc.conformityAssessmentModule.replace('_', ' ')}</p>
+                      <p className="text-xs text-gray-400 mt-1">Signed by: {doc.signedBy} ({doc.signedRole})</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                        doc.status === 'PUBLISHED' ? 'bg-green-100 text-green-800' :
+                        doc.status === 'SIGNED' ? 'bg-blue-100 text-blue-800' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>{doc.status}</span>
+                      {doc.status === 'DRAFT' && isManager && (
+                        <button onClick={() => signEuDoc.mutate(doc.id)} className="px-2 py-1 text-xs text-blue-600 border border-blue-300 rounded hover:bg-blue-50">Sign</button>
+                      )}
+                      {doc.status === 'SIGNED' && isManager && (
+                        <button onClick={() => publishEuDoc.mutate(doc.id)} className="px-2 py-1 text-xs text-green-600 border border-green-300 rounded hover:bg-green-50">Publish</button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Conformity Assessment Tab */}
+      {activeTab === 'conformity' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Conformity Assessment</h2>
+              <p className="text-sm text-gray-500">CRA Art. 32 — {conformityModule.replace('_', ' ')} procedure</p>
+            </div>
+            {!conformityAssessment && isManager && (
+              <button
+                onClick={() => initiateAssessment.mutate(conformityModule)}
+                disabled={initiateAssessment.isPending}
+                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+              >
+                {initiateAssessment.isPending ? 'Initiating...' : 'Start Assessment'}
+              </button>
+            )}
+          </div>
+
+          {!conformityAssessment ? (
+            <div className="text-gray-400 text-sm py-4">No conformity assessment started yet.</div>
+          ) : (
+            <div>
+              <div className="flex items-center gap-4 mb-6">
+                <span className={`px-2.5 py-0.5 text-xs rounded-full font-medium ${
+                  conformityAssessment.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                  conformityAssessment.status === 'COMPLETED' ? 'bg-blue-100 text-blue-800' :
+                  conformityAssessment.status === 'IN_PROGRESS' ? 'bg-yellow-100 text-yellow-800' :
+                  'bg-gray-100 text-gray-700'
+                }`}>{conformityAssessment.status}</span>
+                <span className="text-sm text-gray-500">Step {conformityAssessment.currentStep + 1} of {conformityAssessment.totalSteps}</span>
+                <div className="flex-1 bg-gray-200 rounded-full h-2">
+                  <div className="bg-primary-500 h-2 rounded-full transition-all" style={{ width: `${(conformityAssessment.currentStep / conformityAssessment.totalSteps) * 100}%` }} />
+                </div>
+                {conformityAssessment.status === 'COMPLETED' && isManager && (
+                  <button onClick={() => approveAssessment.mutate(conformityAssessment.id)} className="px-3 py-1 text-xs text-green-600 border border-green-300 rounded hover:bg-green-50">Approve</button>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                {(() => {
+                  try {
+                    const steps: ConformityStep[] = JSON.parse(conformityAssessment.stepsData);
+                    return steps.map((step, i) => (
+                      <div key={i} className={`flex items-center justify-between p-3 rounded-lg border ${step.status === 'COMPLETED' ? 'bg-green-50 border-green-200' : i === conformityAssessment.currentStep ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-200'}`}>
+                        <div className="flex items-center gap-3">
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${step.status === 'COMPLETED' ? 'bg-green-500 text-white' : i === conformityAssessment.currentStep ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'}`}>
+                            {step.status === 'COMPLETED' ? '\u2713' : i + 1}
+                          </span>
+                          <div>
+                            <span className="text-sm font-medium text-gray-900">{step.name}</span>
+                            {step.notes && <p className="text-xs text-gray-500 mt-0.5">{step.notes}</p>}
+                          </div>
+                        </div>
+                        {step.status === 'PENDING' && i === conformityAssessment.currentStep && isManager && (
+                          <button
+                            onClick={() => completeStep.mutate({ assessmentId: conformityAssessment.id, stepIndex: i })}
+                            disabled={completeStep.isPending}
+                            className="px-2 py-1 text-xs text-primary-600 border border-primary-300 rounded hover:bg-primary-50"
+                          >
+                            Complete
+                          </button>
+                        )}
+                      </div>
+                    ));
+                  } catch { return <div className="text-gray-400 text-sm">Unable to parse steps data.</div>; }
+                })()}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Risk Assessment Tab */}
+      {activeTab === 'risk' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Risk Assessment</h2>
+              <p className="text-sm text-gray-500">CRA Art. 13(1) — Cybersecurity risk analysis</p>
+            </div>
+            {isManager && (
+              <button
+                onClick={() => createRiskAssessment.mutate({ title: `Risk Assessment - ${product.name}`, methodology: 'STRIDE' })}
+                disabled={createRiskAssessment.isPending}
+                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+              >
+                {createRiskAssessment.isPending ? 'Creating...' : 'New Assessment'}
+              </button>
+            )}
+          </div>
+
+          {!riskAssessments || riskAssessments.length === 0 ? (
+            <div className="text-gray-400 text-sm py-4">No risk assessments yet.</div>
+          ) : (
+            <div className="space-y-4">
+              {riskAssessments.map(ra => (
+                <div key={ra.id} className="border rounded-lg p-4">
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="font-medium text-gray-900">{ra.title}</h3>
+                      <div className="flex gap-2 mt-1">
+                        <span className="text-xs text-gray-500">{ra.methodology}</span>
+                        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                          ra.status === 'APPROVED' ? 'bg-green-100 text-green-800' :
+                          ra.status === 'IN_REVIEW' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>{ra.status}</span>
+                        {ra.overallRiskLevel && (
+                          <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                            ra.overallRiskLevel === 'CRITICAL' ? 'bg-red-100 text-red-800' :
+                            ra.overallRiskLevel === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                            ra.overallRiskLevel === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-green-100 text-green-800'
+                          }`}>Risk: {ra.overallRiskLevel}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {ra.items && ra.items.length > 0 && (
+                    <div className="mt-3 overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200 text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Threat</th>
+                            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500">Asset</th>
+                            <th className="px-3 py-2 text-xs font-medium text-gray-500">L</th>
+                            <th className="px-3 py-2 text-xs font-medium text-gray-500">I</th>
+                            <th className="px-3 py-2 text-xs font-medium text-gray-500">Risk</th>
+                            <th className="px-3 py-2 text-xs font-medium text-gray-500">Mitigation</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                          {ra.items.map(item => (
+                            <tr key={item.id}>
+                              <td className="px-3 py-2"><span className="text-xs font-medium text-gray-600">{item.threatCategory}</span><br/><span className="text-xs text-gray-500">{item.threatDescription.slice(0, 60)}</span></td>
+                              <td className="px-3 py-2 text-xs text-gray-500">{item.affectedAsset || '-'}</td>
+                              <td className="px-3 py-2 text-xs text-center">{item.likelihood.slice(0, 1)}</td>
+                              <td className="px-3 py-2 text-xs text-center">{item.impact.slice(0, 1)}</td>
+                              <td className="px-3 py-2 text-center"><span className={`px-1.5 py-0.5 text-xs rounded ${
+                                item.riskLevel === 'CRITICAL' ? 'bg-red-100 text-red-800' :
+                                item.riskLevel === 'HIGH' ? 'bg-orange-100 text-orange-800' :
+                                item.riskLevel === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' :
+                                'bg-green-100 text-green-800'
+                              }`}>{item.riskLevel}</span></td>
+                              <td className="px-3 py-2 text-xs text-gray-500">{item.mitigationStatus}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Applied Standards Tab */}
+      {activeTab === 'standards' && (
+        <div className="bg-white rounded-lg shadow p-6">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900">Applied Standards</h2>
+              <p className="text-sm text-gray-500">CRA Art. 27 — Harmonised standards presumption of conformity</p>
+            </div>
+            {isManager && (
+              <button
+                onClick={() => {
+                  const req: AppliedStandardRequest = {
+                    standardCode: 'EN 303 645',
+                    standardTitle: 'Cyber Security for Consumer IoT: Baseline Requirements',
+                    version: '2.1.1',
+                    complianceStatus: 'CLAIMED',
+                  };
+                  createStandard.mutate(req);
+                }}
+                disabled={createStandard.isPending}
+                className="px-3 py-1.5 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+              >
+                {createStandard.isPending ? 'Adding...' : 'Add Standard'}
+              </button>
+            )}
+          </div>
+
+          {!appliedStandards || appliedStandards.length === 0 ? (
+            <div className="text-gray-400 text-sm py-4">No harmonised standards applied yet.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Standard</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Version</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {appliedStandards.map(std => (
+                    <tr key={std.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{std.standardCode}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{std.standardTitle}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{std.version || '-'}</td>
+                      <td className="px-4 py-3">
+                        <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${
+                          std.complianceStatus === 'FULL' ? 'bg-green-100 text-green-800' :
+                          std.complianceStatus === 'PARTIAL' ? 'bg-yellow-100 text-yellow-800' :
+                          std.complianceStatus === 'CLAIMED' ? 'bg-blue-100 text-blue-800' :
+                          'bg-gray-100 text-gray-700'
+                        }`}>{std.complianceStatus}</span>
+                      </td>
+                      <td className="px-4 py-3">
+                        {isManager && (
+                          <button onClick={() => deleteStandard.mutate(std.id)} className="text-xs text-red-500 hover:text-red-700">Remove</button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>

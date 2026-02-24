@@ -9,6 +9,8 @@ public class Component {
     private String name;
     private String version;
     private String type;
+    private String license;
+    private String supplier;
 
     public Component() {}
 
@@ -29,4 +31,8 @@ public class Component {
     public void setVersion(String version) { this.version = version; }
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+    public String getLicense() { return license; }
+    public void setLicense(String license) { this.license = license; }
+    public String getSupplier() { return supplier; }
+    public void setSupplier(String supplier) { this.supplier = supplier; }
 }

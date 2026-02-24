@@ -20,5 +20,7 @@ public interface ReleaseRepository {
 
     Optional<Release> findByProductIdAndVersionAndOrgId(UUID productId, String version, UUID orgId);
 
+    List<Release> findAllWithSupportEndingBefore(java.time.Instant deadline);
+
     void deleteById(UUID id);
 }

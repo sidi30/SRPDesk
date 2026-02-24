@@ -6,10 +6,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Activates the CRA Requirements / Checklist module.
- * Enable with: app.extras.requirements.enabled=true
+ * Enabled by default. Disable with: app.extras.requirements.enabled=false
  */
 @Configuration
-@ConditionalOnProperty(name = "app.extras.requirements.enabled", havingValue = "true")
+@ConditionalOnProperty(name = "app.extras.requirements.enabled", havingValue = "true", matchIfMissing = true)
 @ComponentScan(basePackages = {
         "com.lexsecura.extras.requirements.controller",
         "com.lexsecura.extras.requirements.service"

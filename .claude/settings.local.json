@@ -64,7 +64,9 @@
       "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/infra && docker-compose up -d 2>&1)",
       "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/infra && docker-compose ps 2>&1)",
       "Bash(cd /c/Users/ramzi/Desktop/devs/lexsecura/infra && docker-compose stop backend frontend 2>&1)",
-      "Bash(taskkill:*)"
+      "Bash(taskkill:*)",
+      "Bash(grep Tests run::*)",
+      "Bash(wc:*)"
     ]
   }
 }

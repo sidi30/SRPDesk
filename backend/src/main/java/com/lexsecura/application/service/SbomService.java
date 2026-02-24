@@ -150,18 +150,35 @@ public class SbomService {
 
         List<Component> parsed = new ArrayList<>();
         for (JsonNode pkg : packagesNode) {
-            String name = pkg.path("name").asText("");
-            String version = pkg.path("versionInfo").asText(null);
+            // Skip SPDXRef-DOCUMENT — it represents the document itself, not a software component
+            String spdxId = pkg.path("SPDXID").asText("");
+            if ("SPDXRef-DOCUMENT".equals(spdxId)) {
+                continue;
+            }
 
-            // SPDX externalRefs may contain purl
+            String name = pkg.path("name").asText("");
+            String version = spdxNullable(pkg.path("versionInfo").asText(null));
+
+            // Extract license: concludedLicense → declaredLicense fallback
+            String license = spdxNullable(pkg.path("licenseConcluded").asText(null));
+            if (license == null) {
+                license = spdxNullable(pkg.path("licenseDeclared").asText(null));
+            }
+
+            // Extract supplier — strip "Organization: " prefix
+            String supplier = spdxNullable(pkg.path("supplier").asText(null));
+            if (supplier != null && supplier.startsWith("Organization: ")) {
+                supplier = supplier.substring("Organization: ".length());
+            }
+
+            // Extract PURL from externalRefs (PACKAGE-MANAGER / purl)
             String purl = null;
             JsonNode externalRefs = pkg.path("externalRefs");
             if (externalRefs.isArray()) {
                 for (JsonNode ref : externalRefs) {
-                    if ("PACKAGE-MANAGER".equals(ref.path("referenceCategory").asText(""))
-                            || "PACKAGE_MANAGER".equals(ref.path("referenceCategory").asText(""))) {
-                        String refType = ref.path("referenceType").asText("");
-                        if ("purl".equals(refType)) {
+                    String cat = ref.path("referenceCategory").asText("");
+                    if ("PACKAGE-MANAGER".equals(cat) || "PACKAGE_MANAGER".equals(cat)) {
+                        if ("purl".equals(ref.path("referenceType").asText(""))) {
                             purl = ref.path("referenceLocator").asText(null);
                             break;
                         }
@@ -174,9 +191,13 @@ public class SbomService {
             }
 
             final String finalPurl = purl;
+            final String finalLicense = license;
+            final String finalSupplier = supplier;
             Component component = componentRepository.findByPurl(finalPurl)
                     .orElseGet(() -> {
                         Component c = new Component(finalPurl, name, version, "library");
+                        c.setLicense(finalLicense);
+                        c.setSupplier(finalSupplier);
                         return componentRepository.save(c);
                     });
 
@@ -186,6 +207,24 @@ public class SbomService {
             parsed.add(component);
         }
         return parsed;
+    }
+
+    /**
+     * Checks if a JSON document is a valid SPDX format.
+     */
+    public static boolean isSpdx(JsonNode root) {
+        return root.has("spdxVersion")
+                && root.path("spdxVersion").asText("").startsWith("SPDX-");
+    }
+
+    /**
+     * Treats SPDX NOASSERTION and NONE as null (absent values).
+     */
+    private static String spdxNullable(String value) {
+        if (value == null || "NOASSERTION".equals(value) || "NONE".equals(value)) {
+            return null;
+        }
+        return value;
     }
 
     private String computeSha256(byte[] data) {

@@ -6,6 +6,7 @@ import com.lexsecura.infrastructure.persistence.jpa.JpaReleaseRepository;
 import com.lexsecura.infrastructure.persistence.mapper.PersistenceMapper;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -54,6 +55,12 @@ public class ReleaseRepositoryAdapter implements ReleaseRepository {
     @Override
     public Optional<Release> findByProductIdAndVersionAndOrgId(UUID productId, String version, UUID orgId) {
         return jpa.findByProductIdAndVersionAndOrgId(productId, version, orgId).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Release> findAllWithSupportEndingBefore(Instant deadline) {
+        return jpa.findAllBySupportedUntilNotNullAndSupportedUntilBefore(deadline).stream()
+                .map(mapper::toDomain).collect(Collectors.toList());
     }
 
     @Override

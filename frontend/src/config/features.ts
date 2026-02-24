@@ -1,7 +1,7 @@
 /** Centralised feature flags — controlled via Vite env variables (.env) */
 export const FEATURES = {
   /** CRA Annex I checklist & requirements module */
-  REQUIREMENTS: import.meta.env.VITE_FEATURE_REQUIREMENTS === 'true',
+  REQUIREMENTS: import.meta.env.VITE_FEATURE_REQUIREMENTS !== 'false',
 
   /** AI Questionnaire parser & auto-fill module */
   AI_QUESTIONNAIRE: import.meta.env.VITE_FEATURE_AI_QUESTIONNAIRE === 'true',

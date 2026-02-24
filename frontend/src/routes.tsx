@@ -16,6 +16,7 @@ import { AiQuestionnairePage } from './pages/AiQuestionnairePage';
 import { IntegrationsPage } from './pages/IntegrationsPage';
 import { WebhooksPage } from './pages/WebhooksPage';
 import { AdvisoriesPage } from './pages/AdvisoriesPage';
+import { CvdReportsPage } from './pages/CvdReportsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 
 export function AppRoutes() {
@@ -38,6 +39,7 @@ export function AppRoutes() {
         <Route path="/integrations" element={<ProtectedRoute requiredRoles={['ADMIN']}><IntegrationsPage /></ProtectedRoute>} />
         <Route path="/webhooks" element={<ProtectedRoute requiredRoles={['ADMIN']}><WebhooksPage /></ProtectedRoute>} />
         <Route path="/advisories" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><AdvisoriesPage /></ProtectedRoute>} />
+        <Route path="/cvd-reports" element={<ProtectedRoute requiredRoles={['ADMIN', 'COMPLIANCE_MANAGER']}><CvdReportsPage /></ProtectedRoute>} />
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Layout>

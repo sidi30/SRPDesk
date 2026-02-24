@@ -23,6 +23,12 @@ public class ComponentEntity {
     @Column(nullable = false, length = 100)
     private String type;
 
+    @Column(length = 500)
+    private String license;
+
+    @Column(length = 500)
+    private String supplier;
+
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
     public String getPurl() { return purl; }
@@ -33,4 +39,8 @@ public class ComponentEntity {
     public void setVersion(String version) { this.version = version; }
     public String getType() { return type; }
     public void setType(String type) { this.type = type; }
+    public String getLicense() { return license; }
+    public void setLicense(String license) { this.license = license; }
+    public String getSupplier() { return supplier; }
+    public void setSupplier(String supplier) { this.supplier = supplier; }
 }

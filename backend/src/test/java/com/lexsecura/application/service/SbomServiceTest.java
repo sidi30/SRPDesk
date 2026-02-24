@@ -158,12 +158,51 @@ class SbomServiceTest {
 
     @Test
     void ingest_validSpdx_shouldParse() throws Exception {
-        String spdxJson = "{\"spdxVersion\":\"SPDX-2.3\",\"packages\":["
-                + "{\"name\":\"lodash\",\"versionInfo\":\"4.17.21\",\"externalRefs\":["
-                + "{\"referenceCategory\":\"PACKAGE_MANAGER\",\"referenceType\":\"purl\",\"referenceLocator\":\"pkg:npm/lodash@4.17.21\"}"
-                + "]},"
-                + "{\"name\":\"express\",\"versionInfo\":\"4.18.2\"}"
-                + "]}";
+        // Comprehensive SPDX 2.3 with 3 packages: complete, NOASSERTION, no PURL + SPDXRef-DOCUMENT to skip
+        String spdxJson = """
+                {
+                  "spdxVersion": "SPDX-2.3",
+                  "SPDXID": "SPDXRef-DOCUMENT",
+                  "name": "test-sbom",
+                  "packages": [
+                    {
+                      "SPDXID": "SPDXRef-DOCUMENT",
+                      "name": "test-sbom",
+                      "versionInfo": "1.0"
+                    },
+                    {
+                      "SPDXID": "SPDXRef-Package-lodash",
+                      "name": "lodash",
+                      "versionInfo": "4.17.21",
+                      "licenseConcluded": "MIT",
+                      "licenseDeclared": "MIT",
+                      "supplier": "Organization: Lodash Contributors",
+                      "externalRefs": [
+                        {
+                          "referenceCategory": "PACKAGE_MANAGER",
+                          "referenceType": "purl",
+                          "referenceLocator": "pkg:npm/lodash@4.17.21"
+                        }
+                      ]
+                    },
+                    {
+                      "SPDXID": "SPDXRef-Package-express",
+                      "name": "express",
+                      "versionInfo": "NOASSERTION",
+                      "licenseConcluded": "NOASSERTION",
+                      "licenseDeclared": "Apache-2.0",
+                      "supplier": "NOASSERTION"
+                    },
+                    {
+                      "SPDXID": "SPDXRef-Package-custom",
+                      "name": "custom-lib",
+                      "versionInfo": "NONE",
+                      "licenseConcluded": "NONE",
+                      "licenseDeclared": "NONE"
+                    }
+                  ]
+                }
+                """;
         byte[] content = spdxJson.getBytes();
 
         when(multipartFile.getBytes()).thenReturn(content);
@@ -190,13 +229,46 @@ class SbomServiceTest {
 
         SbomUploadResponse response = service.ingest(releaseId, multipartFile);
 
-        assertEquals(2, response.componentCount());
+        // 3 real packages (SPDXRef-DOCUMENT skipped)
+        assertEquals(3, response.componentCount());
         assertNotNull(response.sha256());
 
-        // Verify lodash used purl from externalRefs
+        // lodash: full PURL from externalRefs
         verify(componentRepository).findByPurl("pkg:npm/lodash@4.17.21");
-        // Verify express got synthetic purl
-        verify(componentRepository).findByPurl("pkg:generic/express@4.18.2");
+        // express: NOASSERTION versionInfo → null → synthetic purl without version
+        verify(componentRepository).findByPurl("pkg:generic/express");
+        // custom-lib: NONE versionInfo → null → synthetic purl without version
+        verify(componentRepository).findByPurl("pkg:generic/custom-lib");
+
+        // Verify license & supplier extraction
+        ArgumentCaptor<Component> captor = ArgumentCaptor.forClass(Component.class);
+        verify(componentRepository, times(3)).save(captor.capture());
+
+        Component lodash = captor.getAllValues().stream()
+                .filter(c -> "lodash".equals(c.getName())).findFirst().orElseThrow();
+        assertEquals("MIT", lodash.getLicense());
+        assertEquals("Lodash Contributors", lodash.getSupplier()); // "Organization: " stripped
+
+        Component express = captor.getAllValues().stream()
+                .filter(c -> "express".equals(c.getName())).findFirst().orElseThrow();
+        assertEquals("Apache-2.0", express.getLicense()); // fallback to declaredLicense
+        assertNull(express.getSupplier()); // NOASSERTION → null
+
+        Component custom = captor.getAllValues().stream()
+                .filter(c -> "custom-lib".equals(c.getName())).findFirst().orElseThrow();
+        assertNull(custom.getLicense()); // NONE → null
+        assertNull(custom.getSupplier()); // not present → null
+    }
+
+    @Test
+    void isSpdx_shouldDetectFormat() throws Exception {
+        com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
+
+        assertTrue(SbomService.isSpdx(om.readTree("{\"spdxVersion\":\"SPDX-2.3\"}")));
+        assertTrue(SbomService.isSpdx(om.readTree("{\"spdxVersion\":\"SPDX-2.2\"}")));
+        assertFalse(SbomService.isSpdx(om.readTree("{\"bomFormat\":\"CycloneDX\"}")));
+        assertFalse(SbomService.isSpdx(om.readTree("{\"spdxVersion\":\"invalid\"}")));
+        assertFalse(SbomService.isSpdx(om.readTree("{}")));
     }
 
     @Test

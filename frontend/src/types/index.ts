@@ -476,3 +476,209 @@ export interface CvdPolicyRequest {
   acceptedLanguages?: string;
   scopeDescription?: string;
 }
+
+// ── EU Declaration of Conformity (CRA Annexe V) ─────────
+
+export type EuDocStatus = 'DRAFT' | 'SIGNED' | 'PUBLISHED';
+
+export interface EuDeclarationOfConformity {
+  id: string;
+  productId: string;
+  declarationNumber: string;
+  manufacturerName: string;
+  manufacturerAddress: string;
+  authorizedRepName?: string;
+  authorizedRepAddress?: string;
+  productName: string;
+  productIdentification: string;
+  conformityAssessmentModule: string;
+  notifiedBodyName?: string;
+  notifiedBodyNumber?: string;
+  notifiedBodyCertificate?: string;
+  harmonisedStandards?: string;
+  additionalInfo?: string;
+  declarationText: string;
+  signedBy: string;
+  signedRole: string;
+  signedAt: string;
+  status: EuDocStatus;
+  publishedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface EuDocRequest {
+  declarationNumber: string;
+  manufacturerName: string;
+  manufacturerAddress: string;
+  authorizedRepName?: string;
+  authorizedRepAddress?: string;
+  productName: string;
+  productIdentification: string;
+  conformityAssessmentModule?: string;
+  notifiedBodyName?: string;
+  notifiedBodyNumber?: string;
+  notifiedBodyCertificate?: string;
+  harmonisedStandards?: string;
+  additionalInfo?: string;
+  declarationText: string;
+  signedBy: string;
+  signedRole: string;
+}
+
+// ── Conformity Assessment (CRA Art. 32) ──────────────────
+
+export type ConformityAssessmentStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'APPROVED';
+
+export interface ConformityAssessment {
+  id: string;
+  productId: string;
+  module: string;
+  status: ConformityAssessmentStatus;
+  currentStep: number;
+  totalSteps: number;
+  stepsData: string; // JSON string
+  startedAt?: string;
+  completedAt?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ConformityStep {
+  name: string;
+  description: string;
+  status: 'PENDING' | 'COMPLETED';
+  completedAt?: string;
+  notes?: string;
+  evidenceIds: string[];
+}
+
+// ── Risk Assessment (CRA Art. 13(1)) ─────────────────────
+
+export type RiskLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+export type RiskAssessmentStatus = 'DRAFT' | 'IN_REVIEW' | 'APPROVED';
+
+export interface RiskAssessment {
+  id: string;
+  productId: string;
+  title: string;
+  methodology: string;
+  status: RiskAssessmentStatus;
+  overallRiskLevel?: RiskLevel;
+  summary?: string;
+  approvedBy?: string;
+  approvedAt?: string;
+  createdBy: string;
+  createdAt: string;
+  updatedAt: string;
+  items: RiskItem[];
+}
+
+export interface RiskItem {
+  id: string;
+  riskAssessmentId: string;
+  threatCategory: string;
+  threatDescription: string;
+  affectedAsset?: string;
+  likelihood: string;
+  impact: string;
+  riskLevel: RiskLevel;
+  existingControls?: string;
+  mitigationPlan?: string;
+  mitigationStatus: string;
+  residualRiskLevel?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RiskAssessmentRequest {
+  title: string;
+  methodology?: string;
+  summary?: string;
+}
+
+export interface RiskItemRequest {
+  threatCategory: string;
+  threatDescription: string;
+  affectedAsset?: string;
+  likelihood: string;
+  impact: string;
+  existingControls?: string;
+  mitigationPlan?: string;
+}
+
+// ── Applied Standards (CRA Art. 27) ──────────────────────
+
+export type ComplianceStatus = 'CLAIMED' | 'PARTIAL' | 'FULL' | 'NOT_APPLICABLE';
+
+export interface AppliedStandard {
+  id: string;
+  productId: string;
+  standardCode: string;
+  standardTitle: string;
+  version?: string;
+  complianceStatus: ComplianceStatus;
+  notes?: string;
+  evidenceIds?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AppliedStandardRequest {
+  standardCode: string;
+  standardTitle: string;
+  version?: string;
+  complianceStatus?: string;
+  notes?: string;
+  evidenceIds?: string;
+}
+
+// ── CVD Vulnerability Reports (CRA Art. 13(6)) ──────────
+
+export type VulnerabilityReportStatus =
+  | 'NEW' | 'ACKNOWLEDGED' | 'TRIAGING' | 'CONFIRMED'
+  | 'REJECTED' | 'FIXING' | 'FIXED' | 'DISCLOSED';
+
+export interface VulnerabilityReportResponse {
+  id: string;
+  orgId: string;
+  productId?: string;
+  trackingId: string;
+  status: VulnerabilityReportStatus;
+  reporterName?: string;
+  reporterEmail?: string;
+  anonymous: boolean;
+  title: string;
+  description: string;
+  severityEstimate?: string;
+  affectedComponent?: string;
+  affectedVersions?: string;
+  stepsToReproduce?: string;
+  assignedTo?: string;
+  internalNotes?: string;
+  internalSeverity?: string;
+  cvssScore?: number;
+  cveId?: string;
+  submittedAt: string;
+  acknowledgedAt?: string;
+  triagedAt?: string;
+  fixedAt?: string;
+  disclosedAt?: string;
+  disclosureDeadline?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VulnerabilityReportTriageRequest {
+  action: string;
+  productId?: string;
+  assignedTo?: string;
+  internalNotes?: string;
+  internalSeverity?: string;
+  cvssScore?: number;
+  cveId?: string;
+}
