@@ -21,7 +21,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -135,7 +134,7 @@ public class AuditService {
         return auditEventRepository.findAllByEntityTypeAndEntityIdOrderByCreatedAt(entityType, entityId)
                 .stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -143,7 +142,7 @@ public class AuditService {
         return auditEventRepository.findAllByOrgIdOrderByCreatedAt(orgId)
                 .stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public String computeHash(String prevHash, String payloadJson,

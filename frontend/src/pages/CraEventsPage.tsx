@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCraEvents, useCreateCraEvent } from '../hooks/useCraEvents';
 import { useProducts } from '../hooks/useProducts';
 import { StatusBadge } from '../components/StatusBadge';
+import { Modal } from '../components/Modal';
 import type { CraEvent, CraEventCreateRequest, CraEventType } from '../types';
 import { getErrorMessage } from '../types';
 import { validate, craEventCreateSchema } from '../validation/schemas';
@@ -51,11 +52,14 @@ export function CraEventsPage() {
     );
   };
 
-  const overdueCount = events?.filter((e) => {
-    // Simple overdue check: DRAFT/IN_REVIEW older than 24h from detectedAt
-    const hoursSinceDetection = (Date.now() - new Date(e.detectedAt).getTime()) / 3600000;
-    return (e.status === 'DRAFT' || e.status === 'IN_REVIEW') && hoursSinceDetection > 24;
-  }).length || 0;
+  const overdueCount = useMemo(
+    () => events?.filter((e) => {
+      // Simple overdue check: DRAFT/IN_REVIEW older than 24h from detectedAt
+      const hoursSinceDetection = (Date.now() - new Date(e.detectedAt).getTime()) / 3600000;
+      return (e.status === 'DRAFT' || e.status === 'IN_REVIEW') && hoursSinceDetection > 24;
+    }).length || 0,
+    [events]
+  );
 
   return (
     <div>
@@ -179,9 +183,8 @@ export function CraEventsPage() {
       )}
 
       {/* Create Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="create-event-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+      <Modal open={showCreate} onClose={() => { setShowCreate(false); setError(null); }} maxWidth="max-w-md">
+          <div className="p-6">
             <h2 id="create-event-title" className="text-lg font-semibold mb-4">New CRA Event</h2>
             {error && (
               <div id="event-error-msg" role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
@@ -270,8 +273,7 @@ export function CraEventsPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

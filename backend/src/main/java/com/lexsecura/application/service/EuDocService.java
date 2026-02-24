@@ -16,7 +16,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Service for managing EU Declarations of Conformity (Annex V).
@@ -132,7 +131,7 @@ public class EuDocService {
     public List<EuDocResponse> findByProductId(UUID productId) {
         UUID orgId = TenantContext.getOrgId();
         return euDocRepository.findAllByProductIdAndOrgId(productId, orgId).stream()
-                .map(this::toResponse).collect(Collectors.toList());
+                .map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)

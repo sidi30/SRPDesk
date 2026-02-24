@@ -2,94 +2,41 @@ package com.lexsecura.infrastructure.persistence;
 
 import com.lexsecura.domain.model.SrpSubmission;
 import com.lexsecura.domain.repository.SrpSubmissionRepository;
-import com.lexsecura.infrastructure.persistence.entity.SrpSubmissionEntity;
+import com.lexsecura.infrastructure.persistence.mapper.PersistenceMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class SrpSubmissionRepositoryAdapter implements SrpSubmissionRepository {
 
     private final JpaSrpSubmissionRepository jpa;
+    private final PersistenceMapper mapper;
 
-    public SrpSubmissionRepositoryAdapter(JpaSrpSubmissionRepository jpa) {
+    public SrpSubmissionRepositoryAdapter(JpaSrpSubmissionRepository jpa, PersistenceMapper mapper) {
         this.jpa = jpa;
+        this.mapper = mapper;
     }
 
     @Override
     public SrpSubmission save(SrpSubmission s) {
-        return toDomain(jpa.save(toEntity(s)));
+        return mapper.toDomain(jpa.save(mapper.toEntity(s)));
     }
 
     @Override
     public Optional<SrpSubmission> findById(UUID id) {
-        return jpa.findById(id).map(this::toDomain);
+        return jpa.findById(id).map(mapper::toDomain);
     }
 
     @Override
     public Optional<SrpSubmission> findByIdAndCraEventId(UUID id, UUID craEventId) {
-        return jpa.findByIdAndCraEventId(id, craEventId).map(this::toDomain);
+        return jpa.findByIdAndCraEventId(id, craEventId).map(mapper::toDomain);
     }
 
     @Override
     public List<SrpSubmission> findAllByCraEventId(UUID craEventId) {
-        return jpa.findAllByCraEventIdOrderByGeneratedAtDesc(craEventId).stream().map(this::toDomain).collect(Collectors.toList());
-    }
-
-    private SrpSubmission toDomain(SrpSubmissionEntity e) {
-        SrpSubmission m = new SrpSubmission();
-        m.setId(e.getId());
-        m.setCraEventId(e.getCraEventId());
-        m.setSubmissionType(e.getSubmissionType());
-        m.setStatus(e.getStatus());
-        m.setContentJson(e.getContentJson());
-        m.setSchemaVersion(e.getSchemaVersion());
-        m.setValidationErrors(e.getValidationErrors());
-        m.setSubmittedReference(e.getSubmittedReference());
-        m.setSubmittedAt(e.getSubmittedAt());
-        m.setAcknowledgmentEvidenceId(e.getAcknowledgmentEvidenceId());
-        m.setEnisaReference(e.getEnisaReference());
-        m.setEnisaSubmittedAt(e.getEnisaSubmittedAt());
-        m.setEnisaStatus(e.getEnisaStatus());
-        m.setRetryCount(e.getRetryCount() != null ? e.getRetryCount() : 0);
-        m.setLastError(e.getLastError());
-        m.setCsirtReference(e.getCsirtReference());
-        m.setCsirtSubmittedAt(e.getCsirtSubmittedAt());
-        m.setCsirtStatus(e.getCsirtStatus());
-        m.setCsirtCountryCode(e.getCsirtCountryCode());
-        m.setGeneratedBy(e.getGeneratedBy());
-        m.setGeneratedAt(e.getGeneratedAt());
-        m.setUpdatedAt(e.getUpdatedAt());
-        return m;
-    }
-
-    private SrpSubmissionEntity toEntity(SrpSubmission m) {
-        SrpSubmissionEntity e = new SrpSubmissionEntity();
-        e.setId(m.getId());
-        e.setCraEventId(m.getCraEventId());
-        e.setSubmissionType(m.getSubmissionType());
-        e.setStatus(m.getStatus());
-        e.setContentJson(m.getContentJson());
-        e.setSchemaVersion(m.getSchemaVersion());
-        e.setValidationErrors(m.getValidationErrors());
-        e.setSubmittedReference(m.getSubmittedReference());
-        e.setSubmittedAt(m.getSubmittedAt());
-        e.setAcknowledgmentEvidenceId(m.getAcknowledgmentEvidenceId());
-        e.setEnisaReference(m.getEnisaReference());
-        e.setEnisaSubmittedAt(m.getEnisaSubmittedAt());
-        e.setEnisaStatus(m.getEnisaStatus());
-        e.setRetryCount(m.getRetryCount());
-        e.setLastError(m.getLastError());
-        e.setCsirtReference(m.getCsirtReference());
-        e.setCsirtSubmittedAt(m.getCsirtSubmittedAt());
-        e.setCsirtStatus(m.getCsirtStatus());
-        e.setCsirtCountryCode(m.getCsirtCountryCode());
-        e.setGeneratedBy(m.getGeneratedBy());
-        e.setGeneratedAt(m.getGeneratedAt());
-        e.setUpdatedAt(m.getUpdatedAt());
-        return e;
+        return jpa.findAllByCraEventIdOrderByGeneratedAtDesc(craEventId).stream().map(mapper::toDomain).toList();
     }
 }

@@ -18,13 +18,6 @@ export const riskAssessmentApi = {
     const { data } = await apiClient.post(`/products/${productId}/risk-assessments/${assessmentId}/items`, req);
     return data;
   },
-  updateItem: async (productId: string, assessmentId: string, itemId: string, req: RiskItemRequest): Promise<RiskAssessment> => {
-    const { data } = await apiClient.put(`/products/${productId}/risk-assessments/${assessmentId}/items/${itemId}`, req);
-    return data;
-  },
-  deleteItem: async (productId: string, assessmentId: string, itemId: string): Promise<void> => {
-    await apiClient.delete(`/products/${productId}/risk-assessments/${assessmentId}/items/${itemId}`);
-  },
   submitForReview: async (productId: string, assessmentId: string): Promise<RiskAssessment> => {
     const { data } = await apiClient.post(`/products/${productId}/risk-assessments/${assessmentId}/submit-review`);
     return data;

@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -32,7 +31,7 @@ public class ProductService {
         UUID orgId = TenantContext.getOrgId();
         return productRepository.findAllByOrgId(orgId).stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)

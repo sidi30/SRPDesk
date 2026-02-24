@@ -1,19 +1,14 @@
 import { useState } from 'react';
 import { useAdvisories, useCreateAdvisory, usePublishAdvisory, useNotifyAdvisoryUsers } from '../hooks/useAdvisories';
 import { useCraEvents } from '../hooks/useCraEvents';
+import { Modal } from '../components/Modal';
 import type { SecurityAdvisoryCreateRequest, AdvisoryStatus } from '../types';
+import { SEVERITY_BADGE_COLORS } from '@/constants';
 
 const STATUS_COLORS: Record<AdvisoryStatus, string> = {
   DRAFT: 'bg-gray-100 text-gray-800',
   PUBLISHED: 'bg-green-100 text-green-800',
   NOTIFIED: 'bg-blue-100 text-blue-800',
-};
-
-const SEVERITY_COLORS: Record<string, string> = {
-  CRITICAL: 'bg-red-100 text-red-800',
-  HIGH: 'bg-orange-100 text-orange-800',
-  MEDIUM: 'bg-yellow-100 text-yellow-800',
-  LOW: 'bg-blue-100 text-blue-800',
 };
 
 export function AdvisoriesPage() {
@@ -63,9 +58,8 @@ export function AdvisoriesPage() {
       </div>
 
       {/* Create Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
+      <Modal open={showCreate} onClose={() => setShowCreate(false)}>
+          <div className="p-6 space-y-4">
             <h2 className="text-lg font-semibold">Nouvel advisory de securite</h2>
             <div className="space-y-3">
               <div>
@@ -117,13 +111,11 @@ export function AdvisoriesPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Notify Modal */}
-      {showNotify && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
+      <Modal open={!!showNotify} onClose={() => { setShowNotify(null); setRecipients(''); }}>
+          <div className="p-6 space-y-4">
             <h2 className="text-lg font-semibold">Notifier les utilisateurs</h2>
             <p className="text-sm text-gray-500">
               Envoyer l'advisory par email aux utilisateurs affectes (Art.14.3 CRA)
@@ -138,14 +130,13 @@ export function AdvisoriesPage() {
             </div>
             <div className="flex justify-end gap-3">
               <button onClick={() => setShowNotify(null)} className="px-4 py-2 text-sm text-gray-600">Annuler</button>
-              <button onClick={() => handleNotify(showNotify)} disabled={!recipients.trim() || notifyMutation.isPending}
+              <button onClick={() => showNotify && handleNotify(showNotify)} disabled={!recipients.trim() || notifyMutation.isPending}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium disabled:opacity-50">
                 {notifyMutation.isPending ? 'Envoi...' : 'Envoyer les notifications'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Advisories list */}
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">
@@ -163,7 +154,7 @@ export function AdvisoriesPage() {
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${SEVERITY_COLORS[a.severity] || 'bg-gray-100'}`}>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${SEVERITY_BADGE_COLORS[a.severity] || 'bg-gray-100'}`}>
                         {a.severity}
                       </span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${STATUS_COLORS[a.status]}`}>

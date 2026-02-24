@@ -8,24 +8,11 @@ import apiClient from '../api/client';
 import { StatusBadge } from '../components/StatusBadge';
 import { FileUpload } from '../components/FileUpload';
 import { FindingsTable } from '../components/FindingsTable';
+import { Modal } from '../components/Modal';
 import { FR } from '../i18n/fr';
 import type { Evidence, ComponentItem, Finding, EvidenceType, FindingDecisionRequest } from '../types';
 import { getErrorMessage } from '../types';
-
-const EVIDENCE_TYPES: EvidenceType[] = [
-  'SBOM',
-  'TEST_REPORT',
-  'VULNERABILITY_SCAN',
-  'PENTEST_REPORT',
-  'DESIGN_DOC',
-  'INCIDENT_RESPONSE_PLAN',
-  'UPDATE_POLICY',
-  'CONFORMITY_DECLARATION',
-  'OTHER',
-];
-
-const DECISION_TYPES = ['NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
-const FINDING_STATUSES = ['', 'OPEN', 'NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
+import { EVIDENCE_TYPES, DECISION_TYPES, FINDING_STATUSES } from '@/constants';
 
 type TabId = 'evidences' | 'components' | 'findings';
 
@@ -501,9 +488,8 @@ export function ReleaseDetailPage() {
       )}
 
       {/* Decision Modal */}
-      {decisionFindingId && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="release-decision-modal-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+      <Modal open={!!decisionFindingId} onClose={() => { setDecisionFindingId(null); setError(null); }} maxWidth="max-w-md">
+          <div className="p-6">
             <h2 id="release-decision-modal-title" className="text-lg font-semibold mb-4">{FR.decisionModal.title}</h2>
 
             {error && (
@@ -572,8 +558,7 @@ export function ReleaseDetailPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class EvidenceRepositoryAdapter implements EvidenceRepository {
@@ -37,7 +36,7 @@ public class EvidenceRepositoryAdapter implements EvidenceRepository {
     @Override
     public List<Evidence> findAllByReleaseIdAndOrgId(UUID releaseId, UUID orgId) {
         return jpa.findAllByReleaseIdAndOrgId(releaseId, orgId).stream()
-                .map(mapper::toDomain).collect(Collectors.toList());
+                .map(mapper::toDomain).toList();
     }
 
     @Override

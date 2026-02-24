@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -101,7 +100,7 @@ public class SrpSubmissionService {
                 .orElseThrow(() -> new EntityNotFoundException("CRA Event not found: " + craEventId));
 
         return submissionRepository.findAllByCraEventId(craEventId).stream()
-                .map(this::toResponse).collect(Collectors.toList());
+                .map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)

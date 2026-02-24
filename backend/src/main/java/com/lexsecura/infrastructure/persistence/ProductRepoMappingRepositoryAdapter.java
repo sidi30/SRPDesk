@@ -3,6 +3,7 @@ package com.lexsecura.infrastructure.persistence;
 import com.lexsecura.domain.model.ProductRepoMapping;
 import com.lexsecura.domain.repository.ProductRepoMappingRepository;
 import com.lexsecura.infrastructure.persistence.jpa.JpaProductRepoMappingRepository;
+import com.lexsecura.infrastructure.persistence.mapper.PersistenceMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -12,54 +13,32 @@ import java.util.UUID;
 public class ProductRepoMappingRepositoryAdapter implements ProductRepoMappingRepository {
 
     private final JpaProductRepoMappingRepository jpa;
+    private final PersistenceMapper mapper;
 
-    public ProductRepoMappingRepositoryAdapter(JpaProductRepoMappingRepository jpa) {
+    public ProductRepoMappingRepositoryAdapter(JpaProductRepoMappingRepository jpa, PersistenceMapper mapper) {
         this.jpa = jpa;
+        this.mapper = mapper;
     }
 
     @Override
     public ProductRepoMapping save(ProductRepoMapping mapping) {
-        var entity = toEntity(mapping);
+        var entity = mapper.toEntity(mapping);
         entity = jpa.save(entity);
-        return toDomain(entity);
+        return mapper.toDomain(entity);
     }
 
     @Override
     public Optional<ProductRepoMapping> findByForgeAndProjectId(String forge, long projectId) {
-        return jpa.findByForgeAndProjectId(forge, projectId).map(this::toDomain);
+        return jpa.findByForgeAndProjectId(forge, projectId).map(mapper::toDomain);
     }
 
     @Override
     public Optional<ProductRepoMapping> findById(UUID id) {
-        return jpa.findById(id).map(this::toDomain);
+        return jpa.findById(id).map(mapper::toDomain);
     }
 
     @Override
     public void deleteById(UUID id) {
         jpa.deleteById(id);
-    }
-
-    private ProductRepoMapping toDomain(com.lexsecura.infrastructure.persistence.entity.ProductRepoMappingEntity e) {
-        ProductRepoMapping m = new ProductRepoMapping();
-        m.setId(e.getId());
-        m.setOrgId(e.getOrgId());
-        m.setProductId(e.getProductId());
-        m.setForge(e.getForge());
-        m.setProjectId(e.getProjectId());
-        m.setRepoUrl(e.getRepoUrl());
-        m.setCreatedAt(e.getCreatedAt());
-        return m;
-    }
-
-    private com.lexsecura.infrastructure.persistence.entity.ProductRepoMappingEntity toEntity(ProductRepoMapping m) {
-        var e = new com.lexsecura.infrastructure.persistence.entity.ProductRepoMappingEntity();
-        e.setId(m.getId());
-        e.setOrgId(m.getOrgId());
-        e.setProductId(m.getProductId());
-        e.setForge(m.getForge());
-        e.setProjectId(m.getProjectId());
-        e.setRepoUrl(m.getRepoUrl());
-        e.setCreatedAt(m.getCreatedAt());
-        return e;
     }
 }

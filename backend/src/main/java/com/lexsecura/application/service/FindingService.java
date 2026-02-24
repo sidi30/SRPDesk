@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -69,7 +68,7 @@ public class FindingService {
                 ? findingRepository.findAllByReleaseIdAndStatus(releaseId, status)
                 : findingRepository.findAllByReleaseId(releaseId);
 
-        return findings.stream().map(this::toResponse).collect(Collectors.toList());
+        return findings.stream().map(this::toResponse).toList();
     }
 
     public FindingDecisionResponse addDecision(UUID findingId, FindingDecisionRequest request) {
@@ -133,7 +132,7 @@ public class FindingService {
                 publishedAt,
                 osvUrl,
                 f.getStatus(), f.getDetectedAt(), f.getSource(),
-                decisions.stream().map(this::toDecisionResponse).collect(Collectors.toList()));
+                decisions.stream().map(this::toDecisionResponse).toList());
     }
 
     private List<String> parseAliases(String aliasesJson) {

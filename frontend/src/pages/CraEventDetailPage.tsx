@@ -7,6 +7,7 @@ import {
 } from '../hooks/useCraEvents';
 import { StatusBadge } from '../components/StatusBadge';
 import { SlaCountdown } from '../components/SlaCountdown';
+import { Modal } from '../components/Modal';
 import type { CraEventUpdateRequest, CraEventStatus, SrpSubmission, SubmissionType, MarkSubmittedRequest } from '../types';
 import { getErrorMessage } from '../types';
 
@@ -384,10 +385,9 @@ export function CraEventDetailPage() {
       )}
 
       {/* Edit Modal */}
-      {editing && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="edit-event-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 id="edit-event-title" className="text-lg font-semibold mb-4">Edit Event</h2>
+      <Modal open={editing} onClose={() => setEditing(false)} maxWidth="max-w-md">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold mb-4">Edit Event</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
@@ -451,21 +451,19 @@ export function CraEventDetailPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Mark Submitted Modal */}
-      {submitForm && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="submit-modal-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 id="submit-modal-title" className="text-lg font-semibold mb-4">Mark as Submitted</h2>
+      <Modal open={!!submitForm} onClose={() => setSubmitForm(null)} maxWidth="max-w-md">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold mb-4">Mark as Submitted</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">External Reference *</label>
                 <input
                   type="text"
-                  value={submitForm.reference}
-                  onChange={(e) => setSubmitForm({ ...submitForm, reference: e.target.value })}
+                  value={submitForm?.reference ?? ''}
+                  onChange={(e) => submitForm && setSubmitForm({ ...submitForm, reference: e.target.value })}
                   placeholder="e.g. SRP-2026-001234"
                   aria-label="Référence externe"
                   aria-required="true"
@@ -477,15 +475,14 @@ export function CraEventDetailPage() {
               <button onClick={() => setSubmitForm(null)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200">Cancel</button>
               <button
                 onClick={handleMarkSubmitted}
-                disabled={!submitForm.reference || markSubmitted.isPending}
+                disabled={!submitForm?.reference || markSubmitted.isPending}
                 className="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
               >
                 {markSubmitted.isPending ? 'Saving...' : 'Confirm Submission'}
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

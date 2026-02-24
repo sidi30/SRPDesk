@@ -19,7 +19,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HexFormat;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -77,7 +76,7 @@ public class SbomShareService {
     public List<ShareLinkResponse> listByRelease(UUID releaseId) {
         UUID orgId = TenantContext.getOrgId();
         return shareLinkRepository.findAllByReleaseIdAndOrgId(releaseId, orgId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     public void revoke(UUID linkId) {

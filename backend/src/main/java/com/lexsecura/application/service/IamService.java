@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -64,7 +63,7 @@ public class IamService {
         UUID userId = TenantContext.getUserId();
         return organizationRepository.findAllByUserId(userId).stream()
                 .map(this::toOrgResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public OrgMemberResponse addMember(UUID orgId, OrgMemberCreateRequest request) {
@@ -123,7 +122,7 @@ public class IamService {
         List<String> roles = memberships.stream()
                 .filter(m -> m.getOrgId().equals(orgId))
                 .map(OrgMember::getRole)
-                .collect(Collectors.toList());
+                .toList();
 
         return new MeResponse(userId, email, orgId, roles, orgSummaries);
     }

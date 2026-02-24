@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 interface ReadinessGaugeProps {
   score: number;
   size?: number;
@@ -11,7 +13,7 @@ function getScoreColor(score: number): string {
   return '#ef4444';
 }
 
-export function ReadinessGauge({ score, size = 120, label }: ReadinessGaugeProps) {
+export const ReadinessGauge = memo(function ReadinessGauge({ score, size = 120, label }: ReadinessGaugeProps) {
   const strokeWidth = 8;
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
@@ -50,4 +52,4 @@ export function ReadinessGauge({ score, size = 120, label }: ReadinessGaugeProps
       {label && <p className="mt-2 text-sm text-gray-600">{label}</p>}
     </div>
   );
-}
+});

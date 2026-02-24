@@ -2,59 +2,40 @@ package com.lexsecura.infrastructure.persistence;
 
 import com.lexsecura.domain.model.CraEventLink;
 import com.lexsecura.domain.repository.CraEventLinkRepository;
-import com.lexsecura.infrastructure.persistence.entity.CraEventLinkEntity;
+import com.lexsecura.infrastructure.persistence.mapper.PersistenceMapper;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class CraEventLinkRepositoryAdapter implements CraEventLinkRepository {
 
     private final JpaCraEventLinkRepository jpa;
+    private final PersistenceMapper mapper;
 
-    public CraEventLinkRepositoryAdapter(JpaCraEventLinkRepository jpa) {
+    public CraEventLinkRepositoryAdapter(JpaCraEventLinkRepository jpa, PersistenceMapper mapper) {
         this.jpa = jpa;
+        this.mapper = mapper;
     }
 
     @Override
     public CraEventLink save(CraEventLink link) {
-        return toDomain(jpa.save(toEntity(link)));
+        return mapper.toDomain(jpa.save(mapper.toEntity(link)));
     }
 
     @Override
     public List<CraEventLink> findAllByCraEventId(UUID craEventId) {
-        return jpa.findAllByCraEventId(craEventId).stream().map(this::toDomain).collect(Collectors.toList());
+        return jpa.findAllByCraEventId(craEventId).stream().map(mapper::toDomain).toList();
     }
 
     @Override
     public List<CraEventLink> findAllByCraEventIdAndLinkType(UUID craEventId, String linkType) {
-        return jpa.findAllByCraEventIdAndLinkType(craEventId, linkType).stream().map(this::toDomain).collect(Collectors.toList());
+        return jpa.findAllByCraEventIdAndLinkType(craEventId, linkType).stream().map(mapper::toDomain).toList();
     }
 
     @Override
     public void deleteByCraEventIdAndLinkTypeAndTargetId(UUID craEventId, String linkType, UUID targetId) {
         jpa.deleteByCraEventIdAndLinkTypeAndTargetId(craEventId, linkType, targetId);
-    }
-
-    private CraEventLink toDomain(CraEventLinkEntity e) {
-        CraEventLink m = new CraEventLink();
-        m.setId(e.getId());
-        m.setCraEventId(e.getCraEventId());
-        m.setLinkType(e.getLinkType());
-        m.setTargetId(e.getTargetId());
-        m.setCreatedAt(e.getCreatedAt());
-        return m;
-    }
-
-    private CraEventLinkEntity toEntity(CraEventLink m) {
-        CraEventLinkEntity e = new CraEventLinkEntity();
-        e.setId(m.getId());
-        e.setCraEventId(m.getCraEventId());
-        e.setLinkType(m.getLinkType());
-        e.setTargetId(m.getTargetId());
-        e.setCreatedAt(m.getCreatedAt());
-        return e;
     }
 }

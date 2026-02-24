@@ -14,10 +14,4 @@ export const auditApi = {
     return data;
   },
 
-  getEventsByEntity: async (entityType: string, entityId: string): Promise<AuditEvent[]> => {
-    const { data } = await apiClient.get('/audit/events', {
-      params: { entityType, entityId },
-    });
-    return data;
-  },
 };

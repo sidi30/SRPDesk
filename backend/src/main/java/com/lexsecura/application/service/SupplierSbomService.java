@@ -17,7 +17,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -82,7 +81,7 @@ public class SupplierSbomService {
     public List<SupplierSbomResponse> listByRelease(UUID releaseId) {
         UUID orgId = TenantContext.getOrgId();
         return supplierSbomRepository.findAllByReleaseIdAndOrgId(releaseId, orgId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     public void delete(UUID id) {

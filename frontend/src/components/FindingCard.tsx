@@ -1,21 +1,14 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { StatusBadge } from './StatusBadge';
 import type { Finding } from '../types';
-
-const SEVERITY_COLORS: Record<string, string> = {
-  CRITICAL: 'bg-red-600',
-  HIGH: 'bg-orange-500',
-  MEDIUM: 'bg-yellow-500',
-  LOW: 'bg-blue-500',
-  UNKNOWN: 'bg-gray-400',
-};
+import { SEVERITY_COLORS } from '@/constants';
 
 interface FindingCardProps {
   finding: Finding;
   onAddDecision: (findingId: string) => void;
 }
 
-export function FindingCard({ finding, onAddDecision }: FindingCardProps) {
+export const FindingCard = memo(function FindingCard({ finding, onAddDecision }: FindingCardProps) {
   const [expanded, setExpanded] = useState(false);
   const f = finding;
 
@@ -153,4 +146,4 @@ export function FindingCard({ finding, onAddDecision }: FindingCardProps) {
       </div>
     </div>
   );
-}
+});

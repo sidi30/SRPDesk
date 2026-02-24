@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useApiKeys, useCreateApiKey, useRevokeApiKey } from '../hooks/useApiKeys';
+import { Modal } from '../components/Modal';
 import { getErrorMessage } from '../types';
 
 const CI_TABS = ['GitHub Actions', 'GitLab CI', 'Script'] as const;
@@ -157,9 +158,8 @@ export function IntegrationsPage() {
         )}
 
         {/* Create modal */}
-        {showCreate && !createdKey && (
-          <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+        <Modal open={showCreate && !createdKey} onClose={() => setShowCreate(false)} maxWidth="max-w-md">
+            <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">Nouvelle cle API</h3>
               <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
               <input
@@ -186,8 +186,7 @@ export function IntegrationsPage() {
                 </button>
               </div>
             </div>
-          </div>
-        )}
+        </Modal>
 
         {/* Keys table */}
         {isLoading ? (

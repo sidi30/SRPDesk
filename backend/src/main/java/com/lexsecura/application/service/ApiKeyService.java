@@ -19,7 +19,6 @@ import java.util.HexFormat;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -62,7 +61,7 @@ public class ApiKeyService {
         UUID orgId = TenantContext.getOrgId();
         return apiKeyRepository.findAllByOrgId(orgId).stream()
                 .map(this::toResponse)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void revoke(UUID id) {

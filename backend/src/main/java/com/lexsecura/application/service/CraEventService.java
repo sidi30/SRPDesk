@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -92,7 +91,7 @@ public class CraEventService {
             events = eventRepository.findAllByOrgId(orgId);
         }
 
-        return events.stream().map(this::toResponse).collect(Collectors.toList());
+        return events.stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -254,10 +253,10 @@ public class CraEventService {
                 e.getCreatedBy(), e.getCreatedAt(), e.getUpdatedAt(),
                 participants.stream().map(p -> new CraEventParticipantResponse(
                         p.getId(), p.getUserId(), p.getRole(), p.getCreatedAt()
-                )).collect(Collectors.toList()),
+                )).toList(),
                 links.stream().map(l -> new CraEventLinkResponse(
                         l.getId(), l.getLinkType(), l.getTargetId(), l.getCreatedAt()
-                )).collect(Collectors.toList())
+                )).toList()
         );
     }
 }

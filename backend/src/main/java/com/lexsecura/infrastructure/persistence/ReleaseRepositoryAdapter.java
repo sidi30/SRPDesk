@@ -10,7 +10,6 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class ReleaseRepositoryAdapter implements ReleaseRepository {
@@ -41,15 +40,20 @@ public class ReleaseRepositoryAdapter implements ReleaseRepository {
     }
 
     @Override
+    public List<Release> findAll() {
+        return jpa.findAll().stream().map(mapper::toDomain).toList();
+    }
+
+    @Override
     public List<Release> findAllByProductId(UUID productId) {
         return jpa.findAllByProductId(productId).stream()
-                .map(mapper::toDomain).collect(Collectors.toList());
+                .map(mapper::toDomain).toList();
     }
 
     @Override
     public List<Release> findAllByProductIdAndOrgId(UUID productId, UUID orgId) {
         return jpa.findAllByProductIdAndOrgId(productId, orgId).stream()
-                .map(mapper::toDomain).collect(Collectors.toList());
+                .map(mapper::toDomain).toList();
     }
 
     @Override
@@ -60,7 +64,7 @@ public class ReleaseRepositoryAdapter implements ReleaseRepository {
     @Override
     public List<Release> findAllWithSupportEndingBefore(Instant deadline) {
         return jpa.findAllBySupportedUntilNotNullAndSupportedUntilBefore(deadline).stream()
-                .map(mapper::toDomain).collect(Collectors.toList());
+                .map(mapper::toDomain).toList();
     }
 
     @Override

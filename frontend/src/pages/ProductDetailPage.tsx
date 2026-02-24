@@ -9,6 +9,7 @@ import { StatusBadge } from '../components/StatusBadge';
 import { ReadinessGauge } from '../components/ReadinessGauge';
 import { CraChecklistTable } from '../components/CraChecklistTable';
 import { CvdPolicyCard } from '../components/CvdPolicyCard';
+import { Modal } from '../components/Modal';
 import { useAuth } from '../auth/AuthProvider';
 import { FR } from '../i18n/fr';
 import { FEATURES } from '../config/features';
@@ -18,10 +19,7 @@ import { useRiskAssessments, useCreateRiskAssessment } from '../hooks/useRiskAss
 import { useAppliedStandards, useCreateStandard, useDeleteStandard } from '../hooks/useAppliedStandards';
 import type { ReleaseCreateRequest, ProductUpdateRequest, Release, Finding, EuDocRequest, ConformityStep, AppliedStandardRequest } from '../types';
 import { getErrorMessage } from '../types';
-
-const PRODUCT_TYPES = ['DEFAULT', 'CLASS_I', 'CLASS_II', 'IMPORTANT_CLASS_I', 'IMPORTANT_CLASS_II', 'CRITICAL'] as const;
-const CRITICALITY_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
-const FINDING_STATUSES = ['', 'OPEN', 'NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
+import { PRODUCT_TYPES, CRITICALITY_LEVELS, FINDING_STATUSES } from '@/constants';
 
 export function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -742,9 +740,8 @@ export function ProductDetailPage() {
       )}
 
       {/* Create Release Modal */}
-      {showCreateRelease && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="create-release-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+      <Modal open={showCreateRelease} onClose={() => { setShowCreateRelease(false); setError(null); }} maxWidth="max-w-md">
+          <div className="p-6">
             <h2 id="create-release-title" className="text-lg font-semibold mb-4">New Release</h2>
 
             {error && (
@@ -809,14 +806,12 @@ export function ProductDetailPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Edit Product Modal */}
-      {showEditProduct && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="edit-product-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
-            <h2 id="edit-product-title" className="text-lg font-semibold mb-4">Edit Product</h2>
+      <Modal open={showEditProduct} onClose={() => { setShowEditProduct(false); setError(null); }} maxWidth="max-w-md">
+          <div className="p-6">
+            <h2 className="text-lg font-semibold mb-4">Edit Product</h2>
 
             {error && (
               <div id="edit-product-error-msg" role="alert" className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
@@ -887,8 +882,7 @@ export function ProductDetailPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

@@ -1,14 +1,13 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useProducts } from '../hooks/useProducts';
 import { useProductFindings, useAddDecision } from '../hooks/useFindings';
 import { FindingsTable } from '../components/FindingsTable';
+import { Modal } from '../components/Modal';
 import { FR } from '../i18n/fr';
 import { getErrorMessage } from '../types';
 import type { FindingDecisionRequest } from '../types';
 import { validate, findingDecisionSchema } from '../validation/schemas';
-
-const FINDING_STATUSES = ['', 'OPEN', 'NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
-const DECISION_TYPES = ['NOT_AFFECTED', 'PATCH_PLANNED', 'MITIGATED', 'FIXED'] as const;
+import { FINDING_STATUSES, DECISION_TYPES } from '@/constants';
 
 export function FindingsPage() {
   const { data: products, isLoading: productsLoading } = useProducts();
@@ -59,8 +58,14 @@ export function FindingsPage() {
 
   if (productsLoading) return <div className="text-gray-500">{t.loading}</div>;
 
-  const openCount = findings?.filter((f) => f.status === 'OPEN').length || 0;
-  const criticalCount = findings?.filter((f) => f.severity === 'CRITICAL' || f.severity === 'HIGH').length || 0;
+  const openCount = useMemo(
+    () => findings?.filter((f) => f.status === 'OPEN').length || 0,
+    [findings]
+  );
+  const criticalCount = useMemo(
+    () => findings?.filter((f) => f.severity === 'CRITICAL' || f.severity === 'HIGH').length || 0,
+    [findings]
+  );
 
   return (
     <div>
@@ -145,9 +150,8 @@ export function FindingsPage() {
       )}
 
       {/* Decision Modal */}
-      {decisionFindingId && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="decision-modal-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+      <Modal open={!!decisionFindingId} onClose={() => { setDecisionFindingId(null); setError(null); }} maxWidth="max-w-md">
+          <div className="p-6">
             <h2 id="decision-modal-title" className="text-lg font-semibold mb-4">{tm.title}</h2>
 
             {error && (
@@ -216,8 +220,7 @@ export function FindingsPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
     </div>
   );
 }

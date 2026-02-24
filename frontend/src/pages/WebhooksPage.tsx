@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useWebhooks, useCreateWebhook, useDeleteWebhook, useToggleWebhook } from '../hooks/useWebhooks';
+import { Modal } from '../components/Modal';
 import type { WebhookCreateRequest } from '../types';
 
 const CHANNEL_TYPES = [
@@ -49,9 +50,8 @@ export function WebhooksPage() {
       </div>
 
       {/* Create Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6 space-y-4">
+      <Modal open={showCreate} onClose={() => setShowCreate(false)}>
+          <div className="p-6 space-y-4">
             <h2 className="text-lg font-semibold">Nouveau webhook</h2>
             <div className="space-y-3">
               <div>
@@ -92,8 +92,7 @@ export function WebhooksPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
 
       {/* Webhooks list */}
       <div className="bg-white rounded-xl shadow-sm border overflow-hidden">

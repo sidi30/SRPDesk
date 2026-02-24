@@ -14,6 +14,8 @@ public interface ReleaseRepository {
 
     Optional<Release> findByIdAndOrgId(UUID id, UUID orgId);
 
+    List<Release> findAll();
+
     List<Release> findAllByProductId(UUID productId);
 
     List<Release> findAllByProductIdAndOrgId(UUID productId, UUID orgId);

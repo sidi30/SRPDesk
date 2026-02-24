@@ -1,3 +1,5 @@
+import { memo } from 'react';
+
 const statusColors: Record<string, string> = {
   // Release statuses
   DRAFT: 'bg-gray-100 text-gray-800',
@@ -48,11 +50,11 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-export function StatusBadge({ status, label, className = '' }: StatusBadgeProps) {
+export const StatusBadge = memo(function StatusBadge({ status, label, className = '' }: StatusBadgeProps) {
   const colors = statusColors[status] || 'bg-gray-100 text-gray-800';
   return (
     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${colors} ${className}`}>
       {label ?? status.replace(/_/g, ' ')}
     </span>
   );
-}
+});

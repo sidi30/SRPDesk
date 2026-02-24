@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Repository
 public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
@@ -36,7 +35,7 @@ public class ApiKeyRepositoryAdapter implements ApiKeyRepository {
 
     @Override
     public List<ApiKey> findAllByOrgId(UUID orgId) {
-        return jpa.findAllByOrgId(orgId).stream().map(mapper::toDomain).collect(Collectors.toList());
+        return jpa.findAllByOrgId(orgId).stream().map(mapper::toDomain).toList();
     }
 
     @Override

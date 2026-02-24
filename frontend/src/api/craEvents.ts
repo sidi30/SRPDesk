@@ -54,11 +54,6 @@ export const craEventsApi = {
     return data;
   },
 
-  getSubmission: async (eventId: string, subId: string): Promise<SrpSubmission> => {
-    const { data } = await apiClient.get(`/cra-events/${eventId}/submissions/${subId}`);
-    return data;
-  },
-
   createSubmission: async (eventId: string, req: SrpSubmissionCreateRequest): Promise<SrpSubmission> => {
     const { data } = await apiClient.post(`/cra-events/${eventId}/submissions`, req);
     return data;

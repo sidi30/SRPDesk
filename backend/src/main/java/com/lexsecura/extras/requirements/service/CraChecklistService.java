@@ -117,14 +117,14 @@ public class CraChecklistService {
         auditService.record(orgId, "CRA_CHECKLIST", productId, "INITIALIZE", userId,
                 Map.of("items", items.size()));
 
-        return items.stream().map(this::toResponse).collect(Collectors.toList());
+        return items.stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
     public List<CraChecklistItemResponse> findAll(UUID productId) {
         UUID orgId = TenantContext.getOrgId();
         return checklistRepository.findAllByProductIdAndOrgId(productId, orgId)
-                .stream().map(this::toResponse).collect(Collectors.toList());
+                .stream().map(this::toResponse).toList();
     }
 
     public CraChecklistItemResponse update(UUID itemId, CraChecklistUpdateRequest request) {

@@ -26,9 +26,7 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Configuration
 @EnableWebSecurity
@@ -150,8 +148,8 @@ public class SecurityConfig {
             Object rolesClaim = jwt.getClaim("roles");
             if (rolesClaim instanceof List<?> roles) {
                 return roles.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString()))
-                        .collect(Collectors.toList());
+                        .<GrantedAuthority>map(role -> new SimpleGrantedAuthority("ROLE_" + role.toString()))
+                        .toList();
             }
 
             // Fallback: realm_access.roles (default Keycloak structure)
@@ -159,11 +157,11 @@ public class SecurityConfig {
             if (realmAccess != null && realmAccess.containsKey("roles")) {
                 List<String> roles = (List<String>) realmAccess.get("roles");
                 return roles.stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                        .collect(Collectors.toList());
+                        .<GrantedAuthority>map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .toList();
             }
 
-            return Collections.emptyList();
+            return List.of();
         }
     }
 }

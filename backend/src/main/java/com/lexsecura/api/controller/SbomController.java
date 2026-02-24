@@ -18,7 +18,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/releases/{releaseId}")
@@ -48,7 +47,7 @@ public class SbomController {
     public ResponseEntity<List<ComponentResponse>> listComponents(@PathVariable UUID releaseId) {
         List<ComponentResponse> components = sbomService.getComponentsByRelease(releaseId).stream()
                 .map(c -> new ComponentResponse(c.getId(), c.getPurl(), c.getName(), c.getVersion(), c.getType()))
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(components);
     }
 

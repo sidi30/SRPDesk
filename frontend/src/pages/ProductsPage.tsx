@@ -4,13 +4,12 @@ import { useProducts, useCreateProduct, useDeleteProduct } from '../hooks/usePro
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { ConfirmDialog } from '../components/ConfirmDialog';
+import { Modal } from '../components/Modal';
 import { useAuth } from '../auth/AuthProvider';
 import type { Product, ProductCreateRequest } from '../types';
 import { getErrorMessage } from '../types';
 import { validate, productCreateSchema } from '../validation/schemas';
-
-const PRODUCT_TYPES = ['DEFAULT', 'CLASS_I', 'CLASS_II', 'IMPORTANT_CLASS_I', 'IMPORTANT_CLASS_II', 'CRITICAL'] as const;
-const CRITICALITY_LEVELS = ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'] as const;
+import { PRODUCT_TYPES, CRITICALITY_LEVELS } from '@/constants';
 
 export function ProductsPage() {
   const navigate = useNavigate();
@@ -118,9 +117,8 @@ export function ProductsPage() {
       />
 
       {/* Create Product Modal */}
-      {showCreate && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50" role="dialog" aria-modal="true" aria-labelledby="create-product-title">
-          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-md">
+      <Modal open={showCreate} onClose={() => { setShowCreate(false); setError(null); }} maxWidth="max-w-md">
+          <div className="p-6">
             <h2 id="create-product-title" className="text-lg font-semibold mb-4">New Product</h2>
 
             {error && (
@@ -197,8 +195,7 @@ export function ProductsPage() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+      </Modal>
 
       <ConfirmDialog
         isOpen={!!deleteId}

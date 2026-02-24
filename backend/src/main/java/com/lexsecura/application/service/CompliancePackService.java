@@ -145,7 +145,7 @@ public class CompliancePackService {
                 "filename", e.getFilename(),
                 "sha256", e.getSha256(),
                 "createdAt", e.getCreatedAt().toString()
-        )).collect(Collectors.toList()));
+        )).toList());
 
         // Components
         data.put("components", components.stream().map(c -> Map.of(
@@ -153,7 +153,7 @@ public class CompliancePackService {
                 "name", c.getName(),
                 "version", c.getVersion() != null ? c.getVersion() : "",
                 "type", c.getType()
-        )).collect(Collectors.toList()));
+        )).toList());
 
         // Findings
         data.put("findings", enrichedFindings.stream().map(ef -> {
@@ -172,10 +172,10 @@ public class CompliancePackService {
                     "rationale", d.getRationale(),
                     "decidedBy", d.getDecidedBy().toString(),
                     "createdAt", d.getCreatedAt().toString()
-            )).collect(Collectors.toList()));
+            )).toList());
 
             return fm;
-        }).collect(Collectors.toList()));
+        }).toList());
 
         return data;
     }

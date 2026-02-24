@@ -20,7 +20,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 /**
  * Service for managing cybersecurity risk assessments.
@@ -202,7 +201,7 @@ public class RiskAssessmentService {
                     List<RiskItem> items = riskItemRepository.findAllByRiskAssessmentId(a.getId());
                     return toResponse(a, items);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -248,7 +247,7 @@ public class RiskAssessmentService {
     private RiskAssessmentResponse toResponse(RiskAssessment a, List<RiskItem> items) {
         List<RiskItemResponse> itemResponses = items.stream()
                 .map(this::toItemResponse)
-                .collect(Collectors.toList());
+                .toList();
 
         return new RiskAssessmentResponse(
                 a.getId(), a.getProductId(), a.getTitle(), a.getMethodology(),

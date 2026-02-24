@@ -2,14 +2,7 @@ import { useState } from 'react';
 import { StatusBadge } from './StatusBadge';
 import { FR } from '../i18n/fr';
 import type { Finding } from '../types';
-
-const SEVERITY_COLORS: Record<string, string> = {
-  CRITICAL: 'bg-red-600',
-  HIGH: 'bg-orange-500',
-  MEDIUM: 'bg-yellow-500',
-  LOW: 'bg-blue-500',
-  UNKNOWN: 'bg-gray-400',
-};
+import { SEVERITY_COLORS } from '@/constants';
 
 interface FindingsTableProps {
   findings: Finding[];
