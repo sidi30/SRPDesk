@@ -1,5 +1,14 @@
 import { useState } from 'react';
-import { useCvdReports, useCvdReportTriage } from '../hooks/useCvdReports';
+import {
+  useCvdReports,
+  useCvdAcknowledge,
+  useCvdStartTriage,
+  useCvdConfirm,
+  useCvdReject,
+  useCvdStartFix,
+  useCvdMarkFixed,
+  useCvdDisclose,
+} from '../hooks/useCvdReports';
 import { getErrorMessage } from '../types';
 import type { VulnerabilityReportResponse, VulnerabilityReportStatus } from '../types';
 
@@ -25,15 +34,6 @@ const STATUS_LABELS: Record<VulnerabilityReportStatus, string> = {
   DISCLOSED: 'Divulgué',
 };
 
-const WORKFLOW_ACTIONS: Record<string, { label: string; next: string }> = {
-  NEW: { label: 'Acquitter', next: 'ACKNOWLEDGE' },
-  ACKNOWLEDGED: { label: 'Démarrer le triage', next: 'START_TRIAGE' },
-  TRIAGING: { label: 'Confirmer', next: 'CONFIRM' },
-  CONFIRMED: { label: 'Démarrer la correction', next: 'START_FIX' },
-  FIXING: { label: 'Marquer corrigé', next: 'MARK_FIXED' },
-  FIXED: { label: 'Divulguer', next: 'DISCLOSE' },
-};
-
 const ALL_STATUSES: VulnerabilityReportStatus[] = [
   'NEW', 'ACKNOWLEDGED', 'TRIAGING', 'CONFIRMED', 'REJECTED', 'FIXING', 'FIXED', 'DISCLOSED',
 ];
@@ -42,23 +42,60 @@ export function CvdReportsPage() {
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [selectedReport, setSelectedReport] = useState<VulnerabilityReportResponse | null>(null);
   const { data: reports, isLoading, error } = useCvdReports(statusFilter || undefined);
-  const triageMut = useCvdReportTriage();
 
-  const handleAction = (report: VulnerabilityReportResponse, action: string) => {
-    triageMut.mutate({ id: report.id, req: { action } }, {
-      onSuccess: (updated) => {
-        setSelectedReport(updated);
-      },
-    });
+  const acknowledgeMut = useCvdAcknowledge();
+  const startTriageMut = useCvdStartTriage();
+  const confirmMut = useCvdConfirm();
+  const rejectMut = useCvdReject();
+  const startFixMut = useCvdStartFix();
+  const markFixedMut = useCvdMarkFixed();
+  const discloseMut = useCvdDisclose();
+
+  const isPending = acknowledgeMut.isPending || startTriageMut.isPending || confirmMut.isPending
+    || rejectMut.isPending || startFixMut.isPending || markFixedMut.isPending || discloseMut.isPending;
+
+  const mutError = acknowledgeMut.error || startTriageMut.error || confirmMut.error
+    || rejectMut.error || startFixMut.error || markFixedMut.error || discloseMut.error;
+
+  const onSuccess = (updated: VulnerabilityReportResponse) => setSelectedReport(updated);
+
+  const handleAction = (report: VulnerabilityReportResponse) => {
+    switch (report.status) {
+      case 'NEW':
+        acknowledgeMut.mutate(report.id, { onSuccess });
+        break;
+      case 'ACKNOWLEDGED':
+        startTriageMut.mutate(report.id, { onSuccess });
+        break;
+      case 'TRIAGING':
+        confirmMut.mutate(report.id, { onSuccess });
+        break;
+      case 'CONFIRMED':
+        startFixMut.mutate(report.id, { onSuccess });
+        break;
+      case 'FIXING':
+        markFixedMut.mutate(report.id, { onSuccess });
+        break;
+      case 'FIXED':
+        discloseMut.mutate(report.id, { onSuccess });
+        break;
+    }
   };
 
   const handleReject = (report: VulnerabilityReportResponse) => {
     const reason = prompt('Raison du rejet :');
     if (reason) {
-      triageMut.mutate({ id: report.id, req: { action: 'REJECT', internalNotes: reason } }, {
-        onSuccess: (updated) => setSelectedReport(updated),
-      });
+      rejectMut.mutate({ id: report.id, reason }, { onSuccess });
     }
+  };
+
+  const WORKFLOW_LABELS: Partial<Record<VulnerabilityReportStatus, string>> = {
+    NEW: 'Acquitter',
+    ACKNOWLEDGED: 'Démarrer le triage',
+    TRIAGING: 'Confirmer',
+    CONFIRMED: 'Démarrer la correction',
+    FIXING: 'Marquer corrigé',
+    FIXED: 'Divulguer',
   };
 
   return (
@@ -205,28 +242,37 @@ export function CvdReportsPage() {
 
                 {/* Workflow actions */}
                 <div className="flex flex-wrap gap-2 pt-2 border-t">
-                  {WORKFLOW_ACTIONS[selectedReport.status] && (
+                  {WORKFLOW_LABELS[selectedReport.status] && (
                     <button
-                      onClick={() => handleAction(selectedReport, WORKFLOW_ACTIONS[selectedReport.status].next)}
-                      disabled={triageMut.isPending}
+                      onClick={() => handleAction(selectedReport)}
+                      disabled={isPending}
                       className="px-3 py-1.5 bg-primary-600 text-white text-sm rounded-lg hover:bg-primary-700 disabled:opacity-50"
                     >
-                      {triageMut.isPending ? '...' : WORKFLOW_ACTIONS[selectedReport.status].label}
+                      {isPending ? '...' : WORKFLOW_LABELS[selectedReport.status]}
                     </button>
                   )}
                   {selectedReport.status === 'TRIAGING' && (
                     <button
                       onClick={() => handleReject(selectedReport)}
-                      disabled={triageMut.isPending}
+                      disabled={isPending}
                       className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 disabled:opacity-50"
                     >
                       Rejeter
                     </button>
                   )}
+                  {selectedReport.status === 'REJECTED' && (
+                    <button
+                      onClick={() => discloseMut.mutate(selectedReport.id, { onSuccess })}
+                      disabled={isPending}
+                      className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 disabled:opacity-50"
+                    >
+                      Divulguer
+                    </button>
+                  )}
                 </div>
 
-                {triageMut.error && (
-                  <div className="text-xs text-red-600">{getErrorMessage(triageMut.error)}</div>
+                {mutError && (
+                  <div className="text-xs text-red-600">{getErrorMessage(mutError)}</div>
                 )}
               </div>
             ) : (

@@ -9,6 +9,7 @@ import java.util.UUID;
 public class RiskItemEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "risk_assessment_id", nullable = false)

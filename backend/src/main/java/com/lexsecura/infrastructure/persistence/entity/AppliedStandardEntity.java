@@ -9,6 +9,7 @@ import java.util.UUID;
 public class AppliedStandardEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "org_id", nullable = false)

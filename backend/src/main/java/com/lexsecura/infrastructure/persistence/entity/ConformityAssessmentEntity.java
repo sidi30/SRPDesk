@@ -1,6 +1,8 @@
 package com.lexsecura.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -9,6 +11,7 @@ import java.util.UUID;
 public class ConformityAssessmentEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "org_id", nullable = false)
@@ -29,7 +32,8 @@ public class ConformityAssessmentEntity {
     @Column(name = "total_steps", nullable = false)
     private int totalSteps;
 
-    @Column(name = "steps_data", columnDefinition = "TEXT", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "steps_data", columnDefinition = "jsonb", nullable = false)
     private String stepsData;
 
     @Column(name = "started_at")

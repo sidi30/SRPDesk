@@ -21,14 +21,18 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RateLimitFilter extends OncePerRequestFilter {
 
     private final Map<String, Bucket> buckets = new ConcurrentHashMap<>();
+    private final Map<String, Bucket> cvdBuckets = new ConcurrentHashMap<>();
     private final boolean enabled;
     private final int requestsPerMinute;
+    private final int cvdRequestsPerMinute;
 
     public RateLimitFilter(
             @Value("${app.rate-limit.enabled:false}") boolean enabled,
-            @Value("${app.rate-limit.requests-per-minute:120}") int requestsPerMinute) {
+            @Value("${app.rate-limit.requests-per-minute:120}") int requestsPerMinute,
+            @Value("${app.rate-limit.cvd-requests-per-minute:5}") int cvdRequestsPerMinute) {
         this.enabled = enabled;
         this.requestsPerMinute = requestsPerMinute;
+        this.cvdRequestsPerMinute = cvdRequestsPerMinute;
     }
 
     @Override
@@ -40,6 +44,19 @@ public class RateLimitFilter extends OncePerRequestFilter {
         }
 
         String clientIp = getClientIp(request);
+
+        // Stricter rate limiting for public CVD submission (5 req/min/IP)
+        if ("POST".equals(request.getMethod()) && request.getRequestURI().equals("/api/v1/cvd/reports")) {
+            Bucket cvdBucket = cvdBuckets.computeIfAbsent(clientIp, k -> createCvdBucket());
+            if (!cvdBucket.tryConsume(1)) {
+                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                response.setContentType("application/problem+json");
+                response.getWriter().write("""
+                    {"type":"https://lexsecura.com/problems/rate-limit","title":"Too Many Requests","status":429,"detail":"CVD submission rate limit exceeded (max 5/min). Try again later."}""");
+                return;
+            }
+        }
+
         Bucket bucket = buckets.computeIfAbsent(clientIp, k -> createBucket());
 
         if (bucket.tryConsume(1)) {
@@ -55,6 +72,12 @@ public class RateLimitFilter extends OncePerRequestFilter {
     private Bucket createBucket() {
         return Bucket.builder()
                 .addLimit(Bandwidth.classic(requestsPerMinute, Refill.greedy(requestsPerMinute, Duration.ofMinutes(1))))
+                .build();
+    }
+
+    private Bucket createCvdBucket() {
+        return Bucket.builder()
+                .addLimit(Bandwidth.classic(cvdRequestsPerMinute, Refill.greedy(cvdRequestsPerMinute, Duration.ofMinutes(1))))
                 .build();
     }
 

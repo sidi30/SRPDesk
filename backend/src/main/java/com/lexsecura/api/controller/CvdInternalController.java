@@ -14,10 +14,17 @@ import java.util.UUID;
 
 /**
  * Internal CVD management endpoints — requires authentication.
- * GET    /api/v1/cvd/reports           — list all reports
- * GET    /api/v1/cvd/reports/{id}      — get report details
- * PUT    /api/v1/cvd/reports/{id}/triage — workflow transition
- * GET    /api/v1/cvd/reports/count/new  — count NEW reports (for badge)
+ * GET    /api/v1/cvd/reports                 — list all reports
+ * GET    /api/v1/cvd/reports/{id}            — get report details
+ * PUT    /api/v1/cvd/reports/{id}/triage     — workflow transition (generic)
+ * POST   /api/v1/cvd/reports/{id}/acknowledge — acknowledge a NEW report
+ * POST   /api/v1/cvd/reports/{id}/start-triage — start triage
+ * POST   /api/v1/cvd/reports/{id}/confirm    — confirm vulnerability
+ * POST   /api/v1/cvd/reports/{id}/reject     — reject report
+ * POST   /api/v1/cvd/reports/{id}/start-fix  — start fixing
+ * POST   /api/v1/cvd/reports/{id}/mark-fixed — mark as fixed
+ * POST   /api/v1/cvd/reports/{id}/disclose   — disclose
+ * GET    /api/v1/cvd/reports/count/new       — count NEW reports (for badge)
  */
 @RestController
 @RequestMapping("/api/v1/cvd/reports")
@@ -52,6 +59,44 @@ public class CvdInternalController {
             @PathVariable UUID id,
             @Valid @RequestBody VulnerabilityReportTriageRequest request) {
         return ResponseEntity.ok(reportService.triage(id, request));
+    }
+
+    @PostMapping("/{id}/acknowledge")
+    public ResponseEntity<VulnerabilityReportResponse> acknowledge(@PathVariable UUID id) {
+        return ResponseEntity.ok(reportService.acknowledge(id));
+    }
+
+    @PostMapping("/{id}/start-triage")
+    public ResponseEntity<VulnerabilityReportResponse> startTriage(@PathVariable UUID id) {
+        return ResponseEntity.ok(reportService.startTriage(id));
+    }
+
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<VulnerabilityReportResponse> confirm(@PathVariable UUID id) {
+        return ResponseEntity.ok(reportService.confirmReport(id));
+    }
+
+    @PostMapping("/{id}/reject")
+    public ResponseEntity<VulnerabilityReportResponse> reject(
+            @PathVariable UUID id,
+            @RequestBody(required = false) Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : null;
+        return ResponseEntity.ok(reportService.rejectReport(id, reason));
+    }
+
+    @PostMapping("/{id}/start-fix")
+    public ResponseEntity<VulnerabilityReportResponse> startFix(@PathVariable UUID id) {
+        return ResponseEntity.ok(reportService.startFix(id));
+    }
+
+    @PostMapping("/{id}/mark-fixed")
+    public ResponseEntity<VulnerabilityReportResponse> markFixed(@PathVariable UUID id) {
+        return ResponseEntity.ok(reportService.markFixed(id));
+    }
+
+    @PostMapping("/{id}/disclose")
+    public ResponseEntity<VulnerabilityReportResponse> disclose(@PathVariable UUID id) {
+        return ResponseEntity.ok(reportService.discloseReport(id));
     }
 
     @GetMapping("/count/new")

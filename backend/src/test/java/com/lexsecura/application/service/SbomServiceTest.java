@@ -264,11 +264,11 @@ class SbomServiceTest {
     void isSpdx_shouldDetectFormat() throws Exception {
         com.fasterxml.jackson.databind.ObjectMapper om = new com.fasterxml.jackson.databind.ObjectMapper();
 
-        assertTrue(SbomService.isSpdx(om.readTree("{\"spdxVersion\":\"SPDX-2.3\"}")));
-        assertTrue(SbomService.isSpdx(om.readTree("{\"spdxVersion\":\"SPDX-2.2\"}")));
-        assertFalse(SbomService.isSpdx(om.readTree("{\"bomFormat\":\"CycloneDX\"}")));
-        assertFalse(SbomService.isSpdx(om.readTree("{\"spdxVersion\":\"invalid\"}")));
-        assertFalse(SbomService.isSpdx(om.readTree("{}")));
+        assertTrue(SpdxParser.isSpdx(om.readTree("{\"spdxVersion\":\"SPDX-2.3\"}")));
+        assertTrue(SpdxParser.isSpdx(om.readTree("{\"spdxVersion\":\"SPDX-2.2\"}")));
+        assertFalse(SpdxParser.isSpdx(om.readTree("{\"bomFormat\":\"CycloneDX\"}")));
+        assertFalse(SpdxParser.isSpdx(om.readTree("{\"spdxVersion\":\"invalid\"}")));
+        assertFalse(SpdxParser.isSpdx(om.readTree("{}")));
     }
 
     @Test

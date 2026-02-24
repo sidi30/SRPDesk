@@ -9,6 +9,7 @@ import java.util.UUID;
 public class EuDocEntity {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @Column(name = "org_id", nullable = false)
@@ -65,7 +66,7 @@ public class EuDocEntity {
     @Column(name = "signed_role", length = 200, nullable = false)
     private String signedRole;
 
-    @Column(name = "signed_at", nullable = false)
+    @Column(name = "signed_at")
     private Instant signedAt;
 
     @Column(length = 50, nullable = false)
