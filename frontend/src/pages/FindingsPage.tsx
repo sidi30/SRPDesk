@@ -34,6 +34,15 @@ export function FindingsPage() {
     statusFilter || undefined
   );
 
+  const openCount = useMemo(
+    () => findings?.filter((f) => f.status === 'OPEN').length || 0,
+    [findings]
+  );
+  const criticalCount = useMemo(
+    () => findings?.filter((f) => f.severity === 'CRITICAL' || f.severity === 'HIGH').length || 0,
+    [findings]
+  );
+
   const handleAddDecision = () => {
     if (!decisionFindingId) return;
     setError(null);
@@ -57,15 +66,6 @@ export function FindingsPage() {
   };
 
   if (productsLoading) return <div className="text-gray-500">{t.loading}</div>;
-
-  const openCount = useMemo(
-    () => findings?.filter((f) => f.status === 'OPEN').length || 0,
-    [findings]
-  );
-  const criticalCount = useMemo(
-    () => findings?.filter((f) => f.severity === 'CRITICAL' || f.severity === 'HIGH').length || 0,
-    [findings]
-  );
 
   return (
     <div>

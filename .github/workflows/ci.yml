@@ -43,7 +43,9 @@ jobs:
 
       - name: Compile
         working-directory: backend
-        run: ./mvnw compile -B -q
+        run: |
+          chmod +x ./mvnw
+          ./mvnw compile -B -q
 
       - name: Run tests
         working-directory: backend

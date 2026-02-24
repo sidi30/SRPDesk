@@ -67,7 +67,7 @@ curl -sSf -X POST "\${SRPDESK_URL}/integrations/ci/sbom" \\
   -F "file=@\${SBOM_FILE}" \\
   -F "productName=\${PRODUCT_NAME}" \\
   -F "version=\${VERSION}" \\
-  -F "gitRef=\$(git rev-parse HEAD)"`;
+  -F "gitRef=$(git rev-parse HEAD)"`;
 }
 
 export function IntegrationsPage() {
