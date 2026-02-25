@@ -74,8 +74,7 @@ services:
       S3_BUCKET: ${S3_BUCKET}
 
   backend:
-    # For GHCR deployment, use:
-    # image: ${IMAGE_PREFIX:-ghcr.io/your-org/srpdesk}-backend:${IMAGE_TAG:-latest}
+    image: ${IMAGE_PREFIX}-backend:${IMAGE_TAG:-latest}
     build:
       context: ./backend
     restart: unless-stopped
@@ -116,8 +115,7 @@ services:
       start_period: 30s
 
   frontend:
-    # For GHCR deployment, use:
-    # image: ${IMAGE_PREFIX:-ghcr.io/your-org/srpdesk}-frontend:${IMAGE_TAG:-latest}
+    image: ${IMAGE_PREFIX}-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
     restart: unless-stopped
@@ -128,8 +126,7 @@ services:
         condition: service_healthy
 
   landing:
-    # For GHCR deployment, use:
-    # image: ${IMAGE_PREFIX:-ghcr.io/your-org/srpdesk}-landing:${IMAGE_TAG:-latest}
+    image: ${IMAGE_PREFIX}-landing:${IMAGE_TAG:-latest}
     build:
       context: ./landing
     restart: unless-stopped
