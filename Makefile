@@ -1,4 +1,4 @@
-.PHONY: up down logs test build clean help
+.PHONY: up down logs test build clean help prod-up prod-down prod-logs prod-pull
 
 INFRA_DIR=infra
 
@@ -64,3 +64,20 @@ init: ## First-time setup (install deps, start infra)
 	@echo "Infrastructure started. Wait for services to be healthy, then run:"
 	@echo "  make backend-run   (in terminal 1)"
 	@echo "  make frontend-dev  (in terminal 2)"
+
+# --- Production ---
+
+prod-up: ## Start production stack
+	docker compose -f docker-compose.prod.yml up -d
+
+prod-down: ## Stop production stack
+	docker compose -f docker-compose.prod.yml down
+
+prod-logs: ## Show production logs
+	docker compose -f docker-compose.prod.yml logs -f
+
+prod-pull: ## Pull latest production images
+	docker compose -f docker-compose.prod.yml pull
+
+prod-build: ## Build production images locally
+	docker compose -f docker-compose.prod.yml build
