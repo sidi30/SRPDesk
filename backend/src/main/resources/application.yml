@@ -1,6 +1,6 @@
 spring:
   application:
-    name: lexsecura-backend
+    name: ${APP_NAME:srpdesk}-backend
   threads:
     virtual:
       enabled: true
@@ -10,8 +10,8 @@ spring:
     username: ${DB_USER:lexsecura}
     password: ${DB_PASSWORD:lexsecura}
     hikari:
-      maximum-pool-size: 20
-      minimum-idle: 5
+      maximum-pool-size: ${DB_POOL_MAX:20}
+      minimum-idle: ${DB_POOL_MIN:5}
 
   jpa:
     open-in-view: false
@@ -46,11 +46,11 @@ spring:
 
   servlet:
     multipart:
-      max-file-size: 50MB
-      max-request-size: 55MB
+      max-file-size: ${MAX_FILE_SIZE:50MB}
+      max-request-size: ${MAX_REQUEST_SIZE:55MB}
 
 server:
-  port: 8080
+  port: ${SERVER_PORT:8080}
   shutdown: graceful
 
 management:
@@ -66,7 +66,7 @@ management:
       probability: ${OTEL_SAMPLING_PROBABILITY:0.1}
   metrics:
     tags:
-      application: lexsecura
+      application: ${APP_NAME:srpdesk}
 
 app:
   cors:
@@ -80,6 +80,7 @@ app:
   rate-limit:
     enabled: ${RATE_LIMIT_ENABLED:true}
     requests-per-minute: ${RATE_LIMIT_RPM:120}
+    cvd-requests-per-minute: ${RATE_LIMIT_CVD_RPM:5}
   gitlab:
     webhook-secret: ${GITLAB_WEBHOOK_SECRET:}
   github:
@@ -123,6 +124,12 @@ app:
     default-country-code: ${CSIRT_COUNTRY_CODE:FR}
   monitoring:
     interval-ms: ${MONITORING_INTERVAL_MS:21600000}
+  # CVD contact
+  cvd:
+    contact-email: ${CVD_CONTACT_EMAIL:security@srpdesk.com}
+  # Support end-of-life monitoring
+  support-monitor:
+    warning-days: ${SUPPORT_MONITOR_WARNING_DAYS:90}
   extras:
     requirements:
       enabled: ${EXTRAS_REQUIREMENTS_ENABLED:false}
