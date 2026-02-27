@@ -70,7 +70,8 @@
       "Bash(echo No mvn found:*)",
       "Bash(echo no mvn found:*)",
       "Bash(cd \"C:\\\\Users\\\\ramzi\\\\Desktop\\\\devs\\\\lexsecura\" && gh run list --limit 5 2>&1)",
-      "Bash(echo gh CLI not found:*)"
+      "Bash(echo gh CLI not found:*)",
+      "Bash(chmod +x:*)"
     ]
   }
 }

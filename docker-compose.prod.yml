@@ -1,4 +1,44 @@
 services:
+  # ==========================================================================
+  # REVERSE PROXY — Caddy (HTTPS automatique via Let's Encrypt)
+  # ==========================================================================
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"   # HTTP/3
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN:-app.localhost}
+      AUTH_DOMAIN: ${AUTH_DOMAIN:-auth.localhost}
+      LANDING_DOMAIN: ${LANDING_DOMAIN:-www.localhost}
+      MONITORING_DOMAIN: ${MONITORING_DOMAIN:-monitoring.localhost}
+      MONITORING_USER: ${MONITORING_USER:-admin}
+      MONITORING_PASSWORD_HASH: ${MONITORING_PASSWORD_HASH}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@srpdesk.com}
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      frontend:
+        condition: service_started
+      landing:
+        condition: service_started
+    deploy:
+      resources:
+        limits:
+          memory: ${CADDY_MEMORY_LIMIT:-128m}
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ==========================================================================
+  # BASE DE DONNEES — PostgreSQL 16
+  # ==========================================================================
   postgres:
     image: postgres:16
     restart: unless-stopped
@@ -19,6 +59,9 @@ services:
       timeout: 5s
       retries: 5
 
+  # ==========================================================================
+  # AUTHENTIFICATION — Keycloak 24 (OIDC)
+  # ==========================================================================
   keycloak:
     image: quay.io/keycloak/keycloak:24.0
     restart: unless-stopped
@@ -30,7 +73,7 @@ services:
       KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       KC_DB_USERNAME: ${POSTGRES_USER}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
-      KC_HOSTNAME: ${KC_HOSTNAME}
+      KC_HOSTNAME: ${AUTH_DOMAIN}
       KC_PROXY_HEADERS: xforwarded
       KC_HTTP_ENABLED: "true"
     volumes:
@@ -49,6 +92,9 @@ services:
       retries: 15
       start_period: 60s
 
+  # ==========================================================================
+  # STOCKAGE S3 — MinIO
+  # ==========================================================================
   minio:
     image: minio/minio:latest
     restart: unless-stopped
@@ -85,6 +131,9 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       S3_BUCKET: ${S3_BUCKET}
 
+  # ==========================================================================
+  # BACKEND — Spring Boot (Java 21)
+  # ==========================================================================
   backend:
     image: ${IMAGE_PREFIX}-backend:${IMAGE_TAG:-latest}
     build:
@@ -93,7 +142,7 @@ services:
     environment:
       # --- Spring profile ---
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-prod}
-      # --- Base de données ---
+      # --- Base de donnees ---
       DB_HOST: postgres
       DB_PORT: "5432"
       DB_NAME: ${DB_NAME:-srpdesk}
@@ -149,7 +198,7 @@ services:
       CSIRT_API_KEY: ${CSIRT_API_KEY:-}
       CSIRT_TIMEOUT: ${CSIRT_TIMEOUT:-30}
       CSIRT_COUNTRY_CODE: ${CSIRT_COUNTRY_CODE:-FR}
-      # --- Monitoring vulnérabilités ---
+      # --- Monitoring vulnerabilites ---
       MONITORING_INTERVAL_MS: ${MONITORING_INTERVAL_MS:-21600000}
       OSV_BASE_URL: ${OSV_BASE_URL:-https://api.osv.dev}
       OSV_BATCH_SIZE: ${OSV_BATCH_SIZE:-100}
@@ -179,7 +228,7 @@ services:
       # --- Feature flags ---
       EXTRAS_REQUIREMENTS_ENABLED: ${EXTRAS_REQUIREMENTS_ENABLED:-false}
       EXTRAS_QUESTIONNAIRE_ENABLED: ${EXTRAS_QUESTIONNAIRE_ENABLED:-false}
-      # --- Observabilité ---
+      # --- Observabilite ---
       OTEL_SAMPLING_PROBABILITY: ${OTEL_SAMPLING_PROBABILITY:-1.0}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://localhost:4318/v1/traces}
       # --- JVM ---
@@ -202,25 +251,108 @@ services:
       retries: 5
       start_period: 30s
 
+  # ==========================================================================
+  # FRONTEND — React + nginx (proxy API vers backend)
+  # ==========================================================================
   frontend:
     image: ${IMAGE_PREFIX}-frontend:${IMAGE_TAG:-latest}
     build:
       context: ./frontend
     restart: unless-stopped
-    ports:
-      - "${FRONTEND_PORT:-80}:80"
+    # Pas de ports exposes — Caddy fait le reverse proxy
     depends_on:
       backend:
         condition: service_healthy
 
+  # ==========================================================================
+  # LANDING — Site vitrine Next.js (static export + nginx)
+  # ==========================================================================
   landing:
     image: ${IMAGE_PREFIX}-landing:${IMAGE_TAG:-latest}
     build:
       context: ./landing
     restart: unless-stopped
-    ports:
-      - "${LANDING_PORT:-3001}:80"
+    # Pas de ports exposes — Caddy fait le reverse proxy
+
+  # ==========================================================================
+  # MONITORING — Prometheus
+  # ==========================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    restart: unless-stopped
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}'
+      - '--web.enable-lifecycle'
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./infra/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus-data:/prometheus
+    deploy:
+      resources:
+        limits:
+          memory: ${PROMETHEUS_MEMORY_LIMIT:-256m}
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  # ==========================================================================
+  # MONITORING — PostgreSQL Exporter (metriques BDD pour Prometheus)
+  # ==========================================================================
+  postgres-exporter:
+    image: prometheuscommunity/postgres-exporter:latest
+    restart: unless-stopped
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ==========================================================================
+  # BACKUP — Sauvegarde PostgreSQL automatisee (cron quotidien)
+  # ==========================================================================
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - |
+        echo "Backup service started — schedule: ${BACKUP_CRON:-0 2 * * *}"
+        # Installer cron dans le conteneur PostgreSQL
+        apt-get update -qq && apt-get install -y -qq cron > /dev/null 2>&1
+        # Ecrire le cron job
+        echo "${BACKUP_CRON:-0 2 * * *} /scripts/backup.sh >> /var/log/backup.log 2>&1" > /etc/cron.d/backup
+        chmod 0644 /etc/cron.d/backup
+        crontab /etc/cron.d/backup
+        # Executer un backup initial au demarrage
+        /scripts/backup.sh
+        # Lancer cron en foreground
+        cron -f
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+    volumes:
+      - ./infra/backup/backup.sh:/scripts/backup.sh:ro
+      - srpdesk-backups:/backups
+    deploy:
+      resources:
+        limits:
+          memory: ${BACKUP_MEMORY_LIMIT:-128m}
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pgdata:
   minio-data:
+  caddy-data:
+  caddy-config:
+  prometheus-data:
+  srpdesk-backups:

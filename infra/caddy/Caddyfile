@@ -1,0 +1,65 @@
+{
+	email {$ACME_EMAIL}
+	admin :2019
+}
+
+# Application principale
+{$APP_DOMAIN} {
+	reverse_proxy frontend:80
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		-Server
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
+
+# Keycloak (authentification OIDC)
+{$AUTH_DOMAIN} {
+	reverse_proxy keycloak:8080 {
+		# Keycloak envoie des headers volumineux (tokens JWT)
+		flush_interval -1
+		header_up X-Forwarded-Proto {scheme}
+		header_up X-Forwarded-Host {host}
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}
+
+# Site vitrine
+{$LANDING_DOMAIN} {
+	reverse_proxy landing:80
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		-Server
+	}
+}
+
+# Prometheus (acces protege par basicauth)
+{$MONITORING_DOMAIN} {
+	basicauth /* {
+		{$MONITORING_USER} {$MONITORING_PASSWORD_HASH}
+	}
+	reverse_proxy prometheus:9090
+
+	header {
+		-Server
+	}
+}

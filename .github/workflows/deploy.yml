@@ -28,6 +28,9 @@ jobs:
             # Set the version to pull
             export IMAGE_TAG=${{ inputs.version }}
 
+            # Update IMAGE_TAG in .env
+            sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG}/" .env
+
             # Pull specific version
             docker pull ${{ env.IMAGE_PREFIX }}-backend:${IMAGE_TAG}
             docker pull ${{ env.IMAGE_PREFIX }}-frontend:${IMAGE_TAG}
@@ -38,10 +41,19 @@ jobs:
             docker tag ${{ env.IMAGE_PREFIX }}-frontend:${IMAGE_TAG} ${{ env.IMAGE_PREFIX }}-frontend:current
             docker tag ${{ env.IMAGE_PREFIX }}-landing:${IMAGE_TAG} ${{ env.IMAGE_PREFIX }}-landing:current
 
-            # Restart services
+            # Restart application services (infra stays up)
             docker compose -f docker-compose.prod.yml up -d --no-deps backend frontend landing
 
-            # Cleanup
+            # Wait for backend health check
+            for i in $(seq 1 30); do
+              if curl -sf http://localhost:8080/actuator/health > /dev/null 2>&1; then
+                echo "Backend healthy after ${i}s"
+                break
+              fi
+              sleep 1
+            done
+
+            # Cleanup old images
             docker image prune -f
 
       - name: Deployment summary

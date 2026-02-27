@@ -603,7 +603,14 @@ cd infra && docker compose logs -f backend  # Logs backend
 
 ## Configuration
 
-### Variables d'environnement (Backend)
+SRPDesk se configure entierement via variables d'environnement. Un fichier `.env.example` documente toutes les ~75 variables disponibles.
+
+```bash
+cp .env.example .env
+# Editez les 5 secrets obligatoires + domaine + CORS
+```
+
+### Variables principales (Backend)
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -612,6 +619,9 @@ cd infra && docker compose logs -f backend  # Logs backend
 | `DB_NAME` | `lexsecura` | Nom de la base |
 | `DB_USER` | `lexsecura` | Utilisateur DB |
 | `DB_PASSWORD` | `lexsecura` | Mot de passe DB |
+| `DB_POOL_MAX` | `20` (dev) / `30` (prod) | Taille max pool Hikari |
+| `DB_POOL_MIN` | `5` (dev) / `10` (prod) | Connexions idle minimum |
+| `DB_POOL_CONNECTION_TIMEOUT` | `20000` | Timeout connexion pool (ms) |
 | `KEYCLOAK_ISSUER_URI` | `http://localhost:8180/realms/lexsecura` | Issuer URI Keycloak |
 | `KEYCLOAK_JWK_URI` | `http://localhost:8180/realms/lexsecura/protocol/openid-connect/certs` | JWK Set URI |
 | `S3_ENDPOINT` | `http://localhost:9000` | Endpoint S3/MinIO |
@@ -620,12 +630,67 @@ cd infra && docker compose logs -f backend  # Logs backend
 | `S3_BUCKET` | `evidences` | Nom du bucket S3 |
 | `S3_REGION` | `us-east-1` | Region S3 |
 | `CORS_ORIGINS` | `http://localhost:3000` | Origines CORS autorisees (separees par `,`) |
-| `RATE_LIMIT_ENABLED` | `false` | Activer le rate limiting |
-| `RATE_LIMIT_RPM` | `120` | Requetes par minute |
-| `GITLAB_WEBHOOK_SECRET` | *(vide)* | Secret pour le webhook GitLab |
+| `SERVER_PORT` | `8080` | Port du serveur backend |
+| `APP_NAME` | `srpdesk` | Nom dans les metriques Prometheus |
+| `MAX_FILE_SIZE` | `50MB` | Taille max par fichier uploade |
+| `MAX_REQUEST_SIZE` | `55MB` | Taille max requete multipart |
+
+### Performance (Backend)
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `TOMCAT_MAX_THREADS` | `200` | Threads max Tomcat |
+| `TOMCAT_ACCEPT_COUNT` | `100` | File d'attente Tomcat |
+| `RATE_LIMIT_ENABLED` | `true` | Activer le rate limiting |
+| `RATE_LIMIT_RPM` | `120` (dev) / `60` (prod) | Requetes par minute API generale |
+| `RATE_LIMIT_CVD_RPM` | `5` | Requetes par minute endpoint CVD public |
+| `JAVA_OPTS` | *(vide)* | Options JVM (ex: `-Xms512m -Xmx1g -XX:+UseG1GC`) |
+
+### Email / SMTP
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EMAIL_ENABLED` | `false` | Activer l'envoi d'emails |
+| `EMAIL_FROM` | `noreply@srpdesk.com` | Adresse expediteur |
+| `SMTP_HOST` | *(vide)* | Serveur SMTP |
+| `SMTP_PORT` | `587` | Port SMTP |
+| `SMTP_USERNAME` | *(vide)* | Utilisateur SMTP |
+| `SMTP_PASSWORD` | *(vide)* | Mot de passe SMTP |
+
+### CRA, ENISA & CSIRT
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `CRA_NOTIFICATION_CHECK_MS` | `900000` | Intervalle verif. notifications (15 min) |
+| `CRA_ALERT_EMAIL` | *(vide)* | Email alertes CRA |
+| `CVD_CONTACT_EMAIL` | `security@srpdesk.com` | Email contact securite (security.txt) |
+| `SUPPORT_MONITOR_WARNING_DAYS` | `90` | Jours avant fin de support pour alerter |
+| `ENISA_ENABLED` | `false` | Activer connecteur ENISA SRP |
+| `CSIRT_ENABLED` | `false` | Activer notification CSIRT parallele |
+
+### Integrations & API
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `GITHUB_WEBHOOK_SECRET` | *(vide)* | Secret HMAC-SHA256 webhook GitHub |
+| `GITLAB_WEBHOOK_SECRET` | *(vide)* | Secret webhook GitLab |
 | `OSV_BASE_URL` | `https://api.osv.dev` | URL de l'API OSV |
 | `OSV_BATCH_SIZE` | `100` | Taille des batches OSV |
-| `APP_CRA_NOTIFICATION_CHECK_MS` | `900000` | Intervalle de verification des deadlines CRA (15 min par defaut) |
+| `SBOM_MAX_SIZE_MB` | `10` | Taille max SBOM uploade (MB) |
+
+### Feature flags
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `EXTRAS_REQUIREMENTS_ENABLED` | `false` | Module CRA checklist |
+| `EXTRAS_QUESTIONNAIRE_ENABLED` | `false` | Module questionnaire IA |
+
+### Observabilite
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OTEL_SAMPLING_PROBABILITY` | `0.1` (dev) / `1.0` (prod) | Probabilite sampling traces |
+| `OTEL_EXPORTER_OTLP_ENDPOINT` | `http://localhost:4318/v1/traces` | Endpoint OTLP collector |
 
 ### Variables d'environnement (Frontend)
 
@@ -634,6 +699,22 @@ cd infra && docker compose logs -f backend  # Logs backend
 | `VITE_KEYCLOAK_URL` | `http://localhost:8180` | URL Keycloak |
 | `VITE_KEYCLOAK_REALM` | `lexsecura` | Realm Keycloak |
 | `VITE_KEYCLOAK_CLIENT_ID` | `frontend` | Client ID Keycloak |
+| `VITE_API_URL` | `/api/v1` | URL de base API |
+| `VITE_FEATURE_REQUIREMENTS` | `false` | Module CRA checklist (frontend) |
+| `VITE_FEATURE_AI_QUESTIONNAIRE` | `false` | Module questionnaire IA (frontend) |
+
+### Docker Compose operationnel
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FRONTEND_PORT` | `80` | Port expose frontend |
+| `LANDING_PORT` | `3001` | Port expose site vitrine |
+| `POSTGRES_MEMORY_LIMIT` | `512m` | Limite memoire PostgreSQL |
+| `KEYCLOAK_MEMORY_LIMIT` | `768m` | Limite memoire Keycloak |
+| `MINIO_MEMORY_LIMIT` | `256m` | Limite memoire MinIO |
+| `BACKEND_MEMORY_LIMIT` | `768m` | Limite memoire backend |
+
+> Pour la liste complete des ~75 variables avec descriptions detaillees, consultez le fichier `.env.example` a la racine du projet, ou la [checklist de production](docs/production-checklist.md).
 
 ### Profils Spring Boot
 
@@ -641,6 +722,7 @@ cd infra && docker compose logs -f backend  # Logs backend
 |--------|-------|
 | `local` | Dev local - PostgreSQL sur port 5433, CORS multi-origines, SQL visible |
 | `docker` | Docker Compose - services internes (postgres:5432, keycloak:8180, minio:9000) |
+| `prod` | Production - pool dimensionne, rate limiting strict, OTEL sampling 100% |
 | *(default)* | Config par defaut |
 
 ---

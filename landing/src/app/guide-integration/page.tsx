@@ -13,6 +13,7 @@ import {
   Clock,
   Users,
   FileText,
+  Settings,
 } from "lucide-react";
 import SectionTitle from "@/components/ui/SectionTitle";
 import CtaSection from "@/components/landing/CtaSection";
@@ -33,19 +34,35 @@ const steps: Step[] = [
     number: 1,
     icon: Server,
     title: "Deployer l'infrastructure",
-    duration: "~1 heure",
+    duration: "~30 minutes",
     description:
-      "SRPDesk se deploie via Docker Compose. L'infrastructure comprend la base de donnees, le stockage de fichiers et le serveur d'authentification.",
+      "SRPDesk se deploie via Docker Compose avec un fichier .env unique pour toute la configuration. L'infrastructure comprend la base de donnees, le stockage S3, le serveur d'authentification et le backend.",
     tasks: [
       "Installer Docker et Docker Compose sur votre serveur",
-      "Cloner le repository et lancer docker-compose up -d",
-      "Verifier que PostgreSQL, MinIO (S3) et Keycloak sont operationnels",
-      "Configurer le nom de domaine et le certificat SSL (optionnel en dev)",
+      "Cloner le repository et copier .env.example en .env",
+      "Configurer les 5 secrets obligatoires (mots de passe BDD, Keycloak, S3)",
+      "Lancer docker compose -f docker-compose.prod.yml up -d",
+      "Verifier que tous les services sont healthy avec docker compose ps",
     ],
-    tip: "En developpement, tout fonctionne en local sur un seul poste. En production, nous recommandons un serveur avec 4 vCPU et 8 Go de RAM minimum.",
+    tip: "En developpement, tout fonctionne en local avec les valeurs par defaut. En production, nous recommandons un serveur avec 4 vCPU et 8 Go de RAM minimum. Toutes les limites memoire des conteneurs sont parametrables via .env.",
   },
   {
     number: 2,
+    icon: Settings,
+    title: "Configurer l'environnement",
+    duration: "~20 minutes",
+    description:
+      "Le fichier .env.example contient ~75 variables documentees par categorie. Chaque variable a une valeur par defaut sensible — vous n'avez a modifier que ce qui differe de votre infrastructure.",
+    tasks: [
+      "Configurer le domaine et les origines CORS (CORS_ORIGINS, KC_HOSTNAME)",
+      "Ajuster les limites de performance si besoin (pool BDD, threads Tomcat, JVM)",
+      "Configurer l'email SMTP pour les alertes CRA (SMTP_HOST, EMAIL_ENABLED)",
+      "Activer les modules optionnels (IA, ENISA, CSIRT, feature flags)",
+    ],
+    tip: "Les variables sont organisees par categorie : infrastructure, securite, performance, email, CRA, integrations, IA, observabilite. Seules les 5 variables REQUIRED n'ont pas de defaut sur.",
+  },
+  {
+    number: 3,
     icon: KeyRound,
     title: "Configurer l'authentification",
     duration: "~30 minutes",
@@ -60,7 +77,7 @@ const steps: Step[] = [
     tip: "Le role ADMIN peut tout gerer. Le COMPLIANCE_MANAGER gere les produits et la conformite. Le CONTRIBUTOR peut ajouter des preuves et des composants.",
   },
   {
-    number: 3,
+    number: 4,
     icon: PackagePlus,
     title: "Enregistrer vos produits numeriques",
     duration: "~15 minutes par produit",
@@ -75,7 +92,7 @@ const steps: Step[] = [
     tip: "La majorite des logiciels B2B sont en categorie DEFAULT (auto-evaluation). Les produits d'infrastructure reseau sont souvent CLASS_I ou CLASS_II.",
   },
   {
-    number: 4,
+    number: 5,
     icon: FileCode2,
     title: "Importer votre premier SBOM",
     duration: "~10 minutes",
@@ -90,7 +107,7 @@ const steps: Step[] = [
     tip: "Integrez la generation du SBOM dans votre pipeline CI/CD pour que chaque release ait automatiquement son inventaire a jour.",
   },
   {
-    number: 5,
+    number: 6,
     icon: AlertTriangle,
     title: "Scanner et gerer les vulnerabilites",
     duration: "~20 minutes",
@@ -105,7 +122,7 @@ const steps: Step[] = [
     tip: "Le CRA exige que chaque vulnerabilite exploitee activement soit notifiee a l'ENISA sous 24h. Automatisez le scan pour ne rien rater.",
   },
   {
-    number: 6,
+    number: 7,
     icon: ShieldCheck,
     title: "Completer la checklist CRA Annexe I",
     duration: "~2 heures par produit",
@@ -120,7 +137,7 @@ const steps: Step[] = [
     tip: "Commencez par les 13 exigences de 'Security by Design' (Partie I) puis les 8 exigences de 'Vulnerability Management' (Partie II).",
   },
   {
-    number: 7,
+    number: 8,
     icon: BarChart3,
     title: "Suivre votre score de readiness",
     duration: "Continu",
@@ -135,7 +152,7 @@ const steps: Step[] = [
     tip: "Le score prend en compte 5 dimensions : Security by Design, Vulnerability Management, SBOM Management, Incident Reporting et Documentation.",
   },
   {
-    number: 8,
+    number: 9,
     icon: FileText,
     title: "Preparer les rapports de conformite",
     duration: "~30 minutes par release",
@@ -225,7 +242,7 @@ export default function GuideIntegrationPage() {
           <ScrollReveal>
             <SectionTitle
               badge="Guide d'integration"
-              title="Deployez SRPDesk en 8 etapes simples"
+              title="Deployez SRPDesk en 9 etapes simples"
               subtitle="De l'installation a la conformite CRA complete, suivez ce guide pas a pas pour integrer SRPDesk dans votre organisation."
               dark
             />
@@ -314,7 +331,7 @@ export default function GuideIntegrationPage() {
           <ScrollReveal>
             <SectionTitle
               badge="Pas a pas"
-              title="Les 8 etapes de l'integration"
+              title="Les 9 etapes de l'integration"
               subtitle="Chaque etape est concue pour etre realisable de maniere autonome. Suivez l'ordre recommande pour un deploiement optimal."
               dark
             />
