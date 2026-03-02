@@ -1,4 +1,4 @@
-import { apiClient } from './client';
+import apiClient from './client';
 import type { CiPolicy, CiPolicyRequest } from '../types';
 
 export const ciPolicyApi = {

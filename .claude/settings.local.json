@@ -73,7 +73,10 @@
       "Bash(echo gh CLI not found:*)",
       "Bash(chmod +x:*)",
       "Bash(where mvn:*)",
-      "Bash(./mvnw test:*)"
+      "Bash(./mvnw test:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker port:*)",
+      "Bash(DB_PORT=15432 KEYCLOAK_ISSUER_URI=http://localhost:18180/realms/lexsecura KEYCLOAK_JWK_URI=http://localhost:18180/realms/lexsecura/protocol/openid-connect/certs CORS_ORIGINS=http://localhost:5173 mvn spring-boot:run:*)"
     ]
   }
 }
