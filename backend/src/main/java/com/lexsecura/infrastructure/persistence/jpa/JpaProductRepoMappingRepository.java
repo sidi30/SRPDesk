@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface JpaProductRepoMappingRepository extends JpaRepository<ProductRepoMappingEntity, UUID> {
     Optional<ProductRepoMappingEntity> findByForgeAndProjectId(String forge, long projectId);
+    Optional<ProductRepoMappingEntity> findByForgeAndRepoFullName(String forge, String repoFullName);
 }

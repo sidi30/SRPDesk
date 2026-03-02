@@ -180,8 +180,8 @@ export const FR = {
   } as Record<string, string>,
 
   dashboard: {
-    title: 'Tableau de bord',
-    subtitle: 'Vue d\'ensemble de la conformité CRA',
+    title: 'Centre de contrôle',
+    subtitle: 'Vue d\'ensemble de la conformité CRA et automatisation',
     products: 'Produits',
     releases: 'Releases',
     findings: 'Vulnérabilités',
@@ -190,10 +190,67 @@ export const FR = {
     craEvents: 'Événements CRA',
     activeEvents: 'Événements actifs',
     avgReadiness: 'Score moyen',
-    productReadiness: 'Préparation par produit',
+    productReadiness: 'Produits',
     noProducts: 'Aucun produit. Créez un produit pour commencer.',
     readiness: 'Préparation',
     checklist: 'Checklist',
+    // Control center metrics
+    automationScore: 'Score automatisation',
+    productsCompliant: 'Produits conformes',
+    euDocIssued: 'EU DoC émises',
+    activeVulns: 'Vulnérabilités actives',
+    // Alerts
+    alertsCritical: 'Alertes critiques',
+    alertsHigh: 'Alertes hautes',
+    alertsMedium: 'Alertes moyennes',
+    alertsBanner: 'Alertes actives',
+    noAlerts: 'Aucune alerte',
+    // Sort / filter
+    sortBy: 'Trier par',
+    sortByScore: 'Score (desc)',
+    sortByAlerts: 'Alertes (desc)',
+    sortByName: 'Nom (A-Z)',
+    filterAll: 'Tous',
+    filterWithAlerts: 'Avec alertes',
+    filterCiFailing: 'CI en échec',
+    filterIncomplete: 'Conformité incomplète',
+    // Product card enriched
+    openCount: 'ouvertes',
+    criticalCount: 'critiques',
+    version: 'Version',
+    supportUntil: 'Support jusqu\'au',
+    noRelease: 'Aucune release',
   },
+
+  alertType: {
+    CRITICAL_VULN: 'Vulnérabilité critique',
+    SLA_OVERDUE: 'SLA dépassée',
+    SLA_WARNING: 'SLA critique',
+    EOL_IMMINENT: 'Fin de support imminente',
+    SBOM_OUTDATED: 'SBOM obsolète',
+    CI_FAILING: 'Pipeline CI en échec',
+    NO_RISK_ASSESSMENT: 'Pas d\'analyse de risque',
+    CONFORMITY_BLOCKED: 'Conformité bloquée',
+  } as Record<string, string>,
+
+  conformityStatus: {
+    NOT_STARTED: 'Non démarré',
+    IN_PROGRESS: 'En cours',
+    COMPLETED: 'Terminé',
+    APPROVED: 'Approuvé',
+  } as Record<string, string>,
+
+  riskLevel: {
+    CRITICAL: 'Critique',
+    HIGH: 'Élevé',
+    MEDIUM: 'Moyen',
+    LOW: 'Faible',
+  } as Record<string, string>,
+
+  euDocStatus: {
+    DRAFT: 'Brouillon',
+    SIGNED: 'Signé',
+    PUBLISHED: 'Publié',
+  } as Record<string, string>,
 
 } as const;

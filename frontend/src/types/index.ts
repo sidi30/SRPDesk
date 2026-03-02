@@ -420,6 +420,18 @@ export interface SecurityAdvisoryResponse {
 
 // ── Dashboard ──────────────────────────────────────────────
 
+export type AlertSeverity = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+export type AlertType = 'CRITICAL_VULN' | 'SLA_OVERDUE' | 'SLA_WARNING' | 'EOL_IMMINENT' | 'SBOM_OUTDATED' | 'CI_FAILING' | 'NO_RISK_ASSESSMENT' | 'CONFORMITY_BLOCKED';
+
+export interface DashboardAlert {
+  type: AlertType;
+  severity: AlertSeverity;
+  productId: string;
+  productName: string;
+  message: string;
+  detectedAt: string;
+}
+
 export interface DashboardData {
   totalProducts: number;
   totalReleases: number;
@@ -429,8 +441,19 @@ export interface DashboardData {
   totalCraEvents: number;
   activeCraEvents: number;
   averageReadinessScore: number;
+  totalVulnerabilities: number;
+  productsWithEuDoc: number;
+  productsFullyCompliant: number;
+  automationScore: number;
+  alerts: DashboardAlert[];
+  alertsCritical: number;
+  alertsHigh: number;
+  alertsMedium: number;
   productReadiness: ProductReadiness[];
 }
+
+export type ConformityAssessmentStatus = 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'APPROVED';
+export type RiskAssessmentStatus = 'DRAFT' | 'IN_REVIEW' | 'APPROVED';
 
 export interface ProductReadiness {
   productId: string;
@@ -440,6 +463,39 @@ export interface ProductReadiness {
   readinessScore: number;
   checklistTotal: number;
   checklistCompliant: number;
+  lastCiUploadAt?: string;
+  sbomFreshness?: 'FRESH' | 'STALE' | 'OUTDATED' | 'NONE';
+  lastQualityScore?: number;
+  lastPolicyResult?: 'PASS' | 'WARN' | 'FAIL';
+  openFindingsCount: number;
+  criticalFindingsCount: number;
+  conformityStatus?: ConformityAssessmentStatus;
+  conformityProgress: number;
+  riskLevel?: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW';
+  riskStatus?: RiskAssessmentStatus;
+  euDocStatus?: 'DRAFT' | 'SIGNED' | 'PUBLISHED';
+  supportedUntil?: string;
+  releaseCount: number;
+  latestVersion?: string;
+}
+
+// ── CI Policy ──────────────────────────────────────────────
+
+export interface CiPolicy {
+  id: string;
+  maxCritical: number;
+  maxHigh: number;
+  minQualityScore: number;
+  blockOnFail: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CiPolicyRequest {
+  maxCritical: number;
+  maxHigh: number;
+  minQualityScore: number;
+  blockOnFail: boolean;
 }
 
 // ── CVD Policy (CRA Annexe I §2(5)) ───────────────────

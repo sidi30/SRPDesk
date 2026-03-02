@@ -33,6 +33,11 @@ public class ProductRepoMappingRepositoryAdapter implements ProductRepoMappingRe
     }
 
     @Override
+    public Optional<ProductRepoMapping> findByForgeAndRepoFullName(String forge, String repoFullName) {
+        return jpa.findByForgeAndRepoFullName(forge, repoFullName).map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<ProductRepoMapping> findById(UUID id) {
         return jpa.findById(id).map(mapper::toDomain);
     }

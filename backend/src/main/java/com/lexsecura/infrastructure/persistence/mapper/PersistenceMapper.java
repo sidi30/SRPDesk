@@ -9,6 +9,8 @@ import com.lexsecura.domain.model.vex.VexFormat;
 import com.lexsecura.domain.model.vex.VexJustification;
 import com.lexsecura.domain.model.vex.VexStatement;
 import com.lexsecura.domain.model.vex.VexStatus;
+import com.lexsecura.domain.model.CiPolicy;
+import com.lexsecura.domain.model.CiUploadEvent;
 import com.lexsecura.infrastructure.persistence.entity.*;
 
 import java.util.Arrays;
@@ -1313,6 +1315,7 @@ public class PersistenceMapper {
         m.setForge(e.getForge());
         m.setProjectId(e.getProjectId());
         m.setRepoUrl(e.getRepoUrl());
+        m.setRepoFullName(e.getRepoFullName());
         m.setCreatedAt(e.getCreatedAt());
         return m;
     }
@@ -1325,7 +1328,90 @@ public class PersistenceMapper {
         e.setForge(m.getForge());
         e.setProjectId(m.getProjectId());
         e.setRepoUrl(m.getRepoUrl());
+        e.setRepoFullName(m.getRepoFullName());
         e.setCreatedAt(m.getCreatedAt());
+        return e;
+    }
+
+    // ──────────────────────────────────────────────
+    // CiPolicy mappings
+    // ──────────────────────────────────────────────
+
+    public CiPolicy toDomain(CiPolicyEntity e) {
+        CiPolicy p = new CiPolicy();
+        p.setId(e.getId());
+        p.setOrgId(e.getOrgId());
+        p.setMaxCritical(e.getMaxCritical());
+        p.setMaxHigh(e.getMaxHigh());
+        p.setMinQualityScore(e.getMinQualityScore());
+        p.setBlockOnFail(e.isBlockOnFail());
+        p.setCreatedAt(e.getCreatedAt());
+        p.setUpdatedAt(e.getUpdatedAt());
+        return p;
+    }
+
+    public CiPolicyEntity toEntity(CiPolicy p) {
+        CiPolicyEntity e = new CiPolicyEntity();
+        e.setId(p.getId());
+        e.setOrgId(p.getOrgId());
+        e.setMaxCritical(p.getMaxCritical());
+        e.setMaxHigh(p.getMaxHigh());
+        e.setMinQualityScore(p.getMinQualityScore());
+        e.setBlockOnFail(p.isBlockOnFail());
+        e.setCreatedAt(p.getCreatedAt());
+        e.setUpdatedAt(p.getUpdatedAt());
+        return e;
+    }
+
+    // ──────────────────────────────────────────────
+    // CiUploadEvent mappings
+    // ──────────────────────────────────────────────
+
+    public CiUploadEvent toDomain(CiUploadEventEntity e) {
+        CiUploadEvent ev = new CiUploadEvent();
+        ev.setId(e.getId());
+        ev.setOrgId(e.getOrgId());
+        ev.setProductId(e.getProductId());
+        ev.setReleaseId(e.getReleaseId());
+        ev.setComponentCount(e.getComponentCount());
+        ev.setNewComponents(e.getNewComponents());
+        ev.setRemovedComponents(e.getRemovedComponents());
+        ev.setQualityScore(e.getQualityScore());
+        ev.setQualityGrade(e.getQualityGrade());
+        ev.setVulnCritical(e.getVulnCritical());
+        ev.setVulnHigh(e.getVulnHigh());
+        ev.setVulnMedium(e.getVulnMedium());
+        ev.setVulnLow(e.getVulnLow());
+        ev.setVulnTotal(e.getVulnTotal());
+        ev.setNewVulnerabilities(e.getNewVulnerabilities());
+        ev.setPolicyResult(e.getPolicyResult());
+        ev.setGitRef(e.getGitRef());
+        ev.setSha256(e.getSha256());
+        ev.setCreatedAt(e.getCreatedAt());
+        return ev;
+    }
+
+    public CiUploadEventEntity toEntity(CiUploadEvent ev) {
+        CiUploadEventEntity e = new CiUploadEventEntity();
+        e.setId(ev.getId());
+        e.setOrgId(ev.getOrgId());
+        e.setProductId(ev.getProductId());
+        e.setReleaseId(ev.getReleaseId());
+        e.setComponentCount(ev.getComponentCount());
+        e.setNewComponents(ev.getNewComponents());
+        e.setRemovedComponents(ev.getRemovedComponents());
+        e.setQualityScore(ev.getQualityScore());
+        e.setQualityGrade(ev.getQualityGrade());
+        e.setVulnCritical(ev.getVulnCritical());
+        e.setVulnHigh(ev.getVulnHigh());
+        e.setVulnMedium(ev.getVulnMedium());
+        e.setVulnLow(ev.getVulnLow());
+        e.setVulnTotal(ev.getVulnTotal());
+        e.setNewVulnerabilities(ev.getNewVulnerabilities());
+        e.setPolicyResult(ev.getPolicyResult());
+        e.setGitRef(ev.getGitRef());
+        e.setSha256(ev.getSha256());
+        e.setCreatedAt(ev.getCreatedAt());
         return e;
     }
 

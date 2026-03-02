@@ -1,6 +1,7 @@
 package com.lexsecura.api.controller;
 
-import com.lexsecura.application.dto.CiSbomUploadResponse;
+import com.lexsecura.application.dto.CiSbomEnrichedResponse;
+import com.lexsecura.application.dto.CiScanResponse;
 import com.lexsecura.application.service.CiSbomService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,13 +19,22 @@ public class CiSbomController {
     }
 
     @PostMapping("/sbom")
-    public ResponseEntity<CiSbomUploadResponse> uploadSbom(
+    public ResponseEntity<CiSbomEnrichedResponse> uploadSbom(
             @RequestParam("file") MultipartFile file,
             @RequestParam("productName") String productName,
             @RequestParam("version") String version,
             @RequestParam(value = "gitRef", required = false) String gitRef) {
 
-        CiSbomUploadResponse response = ciSbomService.uploadFromCi(productName, version, gitRef, file);
+        CiSbomEnrichedResponse response = ciSbomService.uploadFromCi(productName, version, gitRef, file);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("/scan")
+    public ResponseEntity<CiScanResponse> scanSbom(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("productName") String productName) {
+
+        CiScanResponse response = ciSbomService.scanFromCi(productName, file);
+        return ResponseEntity.ok(response);
     }
 }

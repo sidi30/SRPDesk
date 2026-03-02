@@ -11,6 +11,8 @@ public interface ProductRepoMappingRepository {
 
     Optional<ProductRepoMapping> findByForgeAndProjectId(String forge, long projectId);
 
+    Optional<ProductRepoMapping> findByForgeAndRepoFullName(String forge, String repoFullName);
+
     Optional<ProductRepoMapping> findById(UUID id);
 
     void deleteById(UUID id);

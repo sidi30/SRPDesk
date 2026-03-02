@@ -57,7 +57,7 @@ public class SbomQualityService {
         }
     }
 
-    SbomQualityScoreResponse evaluate(JsonNode root) {
+    public SbomQualityScoreResponse evaluate(JsonNode root) {
         boolean isCycloneDx = "CycloneDX".equals(root.path("bomFormat").asText(""));
         boolean isSpdx = root.has("spdxVersion");
 

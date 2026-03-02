@@ -27,6 +27,9 @@ public class ProductRepoMappingEntity {
     @Column(name = "repo_url")
     private String repoUrl;
 
+    @Column(name = "repo_full_name")
+    private String repoFullName;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -42,6 +45,8 @@ public class ProductRepoMappingEntity {
     public void setProjectId(long projectId) { this.projectId = projectId; }
     public String getRepoUrl() { return repoUrl; }
     public void setRepoUrl(String repoUrl) { this.repoUrl = repoUrl; }
+    public String getRepoFullName() { return repoFullName; }
+    public void setRepoFullName(String repoFullName) { this.repoFullName = repoFullName; }
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
 

@@ -92,6 +92,11 @@ app:
   jwt:
     issuer-uri: ${KEYCLOAK_ISSUER_URI:http://localhost:8180/realms/lexsecura}
     jwk-set-uri: ${KEYCLOAK_JWK_URI:http://localhost:8180/realms/lexsecura/protocol/openid-connect/certs}
+  ci:
+    default-max-critical: ${CI_DEFAULT_MAX_CRITICAL:0}
+    default-max-high: ${CI_DEFAULT_MAX_HIGH:5}
+    default-min-quality-score: ${CI_DEFAULT_MIN_QUALITY_SCORE:50}
+    details-base-url: ${CI_DETAILS_BASE_URL:}
   api-key:
     prefix: ${API_KEY_PREFIX:srpd_}
     random-bytes: ${API_KEY_LENGTH:20}

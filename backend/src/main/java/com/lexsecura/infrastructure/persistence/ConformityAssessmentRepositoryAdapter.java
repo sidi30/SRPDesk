@@ -5,6 +5,7 @@ import com.lexsecura.domain.repository.ConformityAssessmentRepository;
 import com.lexsecura.infrastructure.persistence.mapper.PersistenceMapper;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,5 +33,10 @@ public class ConformityAssessmentRepositoryAdapter implements ConformityAssessme
     @Override
     public Optional<ConformityAssessment> findByIdAndOrgId(UUID id, UUID orgId) {
         return jpa.findByIdAndOrgId(id, orgId).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<ConformityAssessment> findAllByProductIdAndOrgId(UUID productId, UUID orgId) {
+        return jpa.findAllByProductIdAndOrgId(productId, orgId).stream().map(mapper::toDomain).toList();
     }
 }

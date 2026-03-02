@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useApiKeys, useCreateApiKey, useRevokeApiKey } from '../hooks/useApiKeys';
+import { useCiPolicy, useUpsertCiPolicy } from '../hooks/useCiPolicy';
 import { Modal } from '../components/Modal';
 import { getErrorMessage } from '../types';
+import type { CiPolicyRequest } from '../types';
 
-const CI_TABS = ['GitHub Actions', 'GitLab CI', 'Script'] as const;
+const CI_TABS = ['GitHub Actions', 'GitLab CI', 'Script', 'PR Scan'] as const;
 
 function githubActionsSnippet(apiUrl: string) {
   return `name: SBOM Upload to SRPDesk
@@ -28,12 +30,19 @@ jobs:
 
       - name: Upload SBOM to SRPDesk
         run: |
-          curl -sSf -X POST ${apiUrl}/integrations/ci/sbom \\
+          RESULT=$(curl -sSf -X POST ${apiUrl}/integrations/ci/sbom \\
             -H "X-API-Key: \${{ secrets.SRPDESK_API_KEY }}" \\
             -F "file=@sbom.cdx.json" \\
             -F "productName=\${{ github.event.repository.name }}" \\
             -F "version=\${{ github.ref_name }}" \\
-            -F "gitRef=\${{ github.sha }}"`;
+            -F "gitRef=\${{ github.sha }}")
+          echo "$RESULT" | jq .
+          # Build gating: fail if policy says FAIL
+          POLICY=$(echo "$RESULT" | jq -r '.policyResult')
+          if [ "$POLICY" = "FAIL" ]; then
+            echo "::error::SRPDesk policy check FAILED"
+            exit 1
+          fi`;
 }
 
 function gitlabCiSnippet(apiUrl: string) {
@@ -42,19 +51,25 @@ function gitlabCiSnippet(apiUrl: string) {
   image: curlimages/curl:latest
   script:
     - |
-      curl -sSf -X POST ${apiUrl}/integrations/ci/sbom \\
+      RESULT=$(curl -sSf -X POST ${apiUrl}/integrations/ci/sbom \\
         -H "X-API-Key: $SRPDESK_API_KEY" \\
         -F "file=@sbom.cdx.json" \\
         -F "productName=$CI_PROJECT_NAME" \\
         -F "version=$CI_COMMIT_TAG" \\
-        -F "gitRef=$CI_COMMIT_SHA"
+        -F "gitRef=$CI_COMMIT_SHA")
+      echo "$RESULT" | jq .
+      POLICY=$(echo "$RESULT" | jq -r '.policyResult')
+      if [ "$POLICY" = "FAIL" ]; then
+        echo "SRPDesk policy check FAILED"
+        exit 1
+      fi
   rules:
     - if: $CI_COMMIT_TAG`;
 }
 
 function genericSnippet(apiUrl: string) {
   return `#!/bin/bash
-# Upload SBOM to SRPDesk
+# Upload SBOM to SRPDesk with build gating
 # Required: SRPDESK_API_KEY environment variable
 
 SRPDESK_URL="${apiUrl}"
@@ -62,18 +77,66 @@ PRODUCT_NAME="mon-produit"
 VERSION="1.0.0"
 SBOM_FILE="sbom.cdx.json"
 
-curl -sSf -X POST "\${SRPDESK_URL}/integrations/ci/sbom" \\
+RESULT=$(curl -sSf -X POST "\${SRPDESK_URL}/integrations/ci/sbom" \\
   -H "X-API-Key: \${SRPDESK_API_KEY}" \\
   -F "file=@\${SBOM_FILE}" \\
   -F "productName=\${PRODUCT_NAME}" \\
   -F "version=\${VERSION}" \\
-  -F "gitRef=$(git rev-parse HEAD)"`;
+  -F "gitRef=$(git rev-parse HEAD)")
+
+echo "$RESULT" | jq .
+POLICY=$(echo "$RESULT" | jq -r '.policyResult')
+if [ "$POLICY" = "FAIL" ]; then
+  echo "SRPDesk policy check FAILED" >&2
+  exit 1
+fi`;
+}
+
+function prScanSnippet(apiUrl: string) {
+  return `name: SRPDesk PR Check
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  sbom-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate SBOM
+        uses: CycloneDX/gh-dotnet-generate-sbom@v1
+        with:
+          path: .
+          output: sbom.cdx.json
+
+      - name: SRPDesk Scan (no release created)
+        run: |
+          RESULT=$(curl -sSf -X POST ${apiUrl}/integrations/ci/scan \\
+            -H "X-API-Key: \${{ secrets.SRPDESK_API_KEY }}" \\
+            -F "file=@sbom.cdx.json" \\
+            -F "productName=\${{ github.event.repository.name }}")
+          echo "$RESULT" | jq .
+          POLICY=$(echo "$RESULT" | jq -r '.policyResult')
+          QUALITY=$(echo "$RESULT" | jq -r '.qualityScore')
+          VULNS=$(echo "$RESULT" | jq -r '.vulnerabilities.total')
+          echo "### SRPDesk Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "- Policy: **$POLICY**" >> $GITHUB_STEP_SUMMARY
+          echo "- Quality Score: **$QUALITY/100**" >> $GITHUB_STEP_SUMMARY
+          echo "- Vulnerabilities: **$VULNS**" >> $GITHUB_STEP_SUMMARY
+          if [ "$POLICY" = "FAIL" ]; then
+            echo "::error::SRPDesk policy check FAILED"
+            exit 1
+          fi`;
 }
 
 export function IntegrationsPage() {
   const { data: apiKeys, isLoading } = useApiKeys();
   const createMutation = useCreateApiKey();
   const revokeMutation = useRevokeApiKey();
+  const { data: ciPolicy, isLoading: policyLoading } = useCiPolicy();
+  const upsertPolicyMutation = useUpsertCiPolicy();
 
   const [showCreate, setShowCreate] = useState(false);
   const [keyName, setKeyName] = useState('');
@@ -82,6 +145,26 @@ export function IntegrationsPage() {
   const [activeTab, setActiveTab] = useState<typeof CI_TABS[number]>('GitHub Actions');
   const [copied, setCopied] = useState(false);
   const [confirmRevoke, setConfirmRevoke] = useState<string | null>(null);
+
+  // CI Policy form state
+  const [policyForm, setPolicyForm] = useState<CiPolicyRequest>({
+    maxCritical: 0,
+    maxHigh: 5,
+    minQualityScore: 50,
+    blockOnFail: false,
+  });
+  const [policySaved, setPolicySaved] = useState(false);
+
+  useEffect(() => {
+    if (ciPolicy) {
+      setPolicyForm({
+        maxCritical: ciPolicy.maxCritical,
+        maxHigh: ciPolicy.maxHigh,
+        minQualityScore: ciPolicy.minQualityScore,
+        blockOnFail: ciPolicy.blockOnFail,
+      });
+    }
+  }, [ciPolicy]);
 
   const apiUrl = window.location.origin;
 
@@ -106,6 +189,16 @@ export function IntegrationsPage() {
     }
   };
 
+  const handleSavePolicy = async () => {
+    try {
+      await upsertPolicyMutation.mutateAsync(policyForm);
+      setPolicySaved(true);
+      setTimeout(() => setPolicySaved(false), 2000);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopied(true);
@@ -116,6 +209,7 @@ export function IntegrationsPage() {
     'GitHub Actions': githubActionsSnippet(apiUrl),
     'GitLab CI': gitlabCiSnippet(apiUrl),
     'Script': genericSnippet(apiUrl),
+    'PR Scan': prScanSnippet(apiUrl),
   };
 
   return (
@@ -264,11 +358,94 @@ export function IntegrationsPage() {
         )}
       </section>
 
+      {/* ── CI Policy Section ─────────────────────── */}
+      <section className="mb-10">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Politique CI/CD</h2>
+        <p className="text-sm text-gray-500 mb-4">
+          Definissez les seuils de qualite et de vulnerabilites pour vos pipelines CI/CD.
+          Les uploads et scans seront evalues contre ces seuils (resultat PASS/WARN/FAIL).
+        </p>
+
+        {policyLoading ? (
+          <p className="text-gray-500 text-sm">Chargement...</p>
+        ) : (
+          <div className="bg-white border border-gray-200 rounded-lg p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Max vulnerabilites critiques
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={policyForm.maxCritical}
+                  onChange={e => setPolicyForm(p => ({ ...p, maxCritical: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">Au-dela, le pipeline echoue (FAIL)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Max vulnerabilites hautes
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={policyForm.maxHigh}
+                  onChange={e => setPolicyForm(p => ({ ...p, maxHigh: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">Au-dela, le pipeline echoue (FAIL)</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Score qualite minimum
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="100"
+                  value={policyForm.minQualityScore}
+                  onChange={e => setPolicyForm(p => ({ ...p, minQualityScore: parseInt(e.target.value) || 0 }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-primary-500"
+                />
+                <p className="text-xs text-gray-400 mt-1">En dessous, le pipeline echoue (FAIL)</p>
+              </div>
+              <div className="flex items-center gap-3 pt-6">
+                <input
+                  type="checkbox"
+                  id="blockOnFail"
+                  checked={policyForm.blockOnFail}
+                  onChange={e => setPolicyForm(p => ({ ...p, blockOnFail: e.target.checked }))}
+                  className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                />
+                <label htmlFor="blockOnFail" className="text-sm text-gray-700">
+                  Bloquer le pipeline en cas d'echec (exit code 1)
+                </label>
+              </div>
+            </div>
+            <div className="mt-6 flex items-center gap-3">
+              <button
+                onClick={handleSavePolicy}
+                disabled={upsertPolicyMutation.isPending}
+                className="px-4 py-2 bg-primary-600 text-white text-sm font-medium rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-colors"
+              >
+                {upsertPolicyMutation.isPending ? 'Enregistrement...' : 'Enregistrer'}
+              </button>
+              {policySaved && (
+                <span className="text-sm text-green-600 font-medium">Politique enregistree</span>
+              )}
+            </div>
+          </div>
+        )}
+      </section>
+
       {/* ── CI/CD Snippets Section ────────────────── */}
       <section>
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Configuration CI/CD</h2>
         <p className="text-sm text-gray-500 mb-4">
           Copiez le snippet correspondant a votre CI et ajoutez votre cle API en tant que secret d'environnement.
+          Les snippets incluent le build gating automatique (exit 1 si FAIL).
         </p>
 
         {/* Tabs */}
@@ -287,6 +464,16 @@ export function IntegrationsPage() {
             </button>
           ))}
         </div>
+
+        {/* Tab description */}
+        {activeTab === 'PR Scan' && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <p className="text-sm text-blue-800">
+              <strong>Mode PR Scan :</strong> Scanne le SBOM sans creer de release. Ideal pour les
+              checks de Pull Request — verifie la qualite et les vulnerabilites avant le merge.
+            </p>
+          </div>
+        )}
 
         {/* Snippet */}
         <div className="relative">
